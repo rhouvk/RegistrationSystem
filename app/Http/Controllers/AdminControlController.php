@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\AdminControl;
 use App\Models\BnpcItem;
-
+use App\Models\DisabilityList;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Exception;
 
 class AdminControlController extends Controller
 {
@@ -15,15 +16,19 @@ class AdminControlController extends Controller
      */
     public function index()
     {
-        $control        = AdminControl::first();
-        $bnpcItems      = BnpcItem::orderBy('type')->orderBy('name')->get();
-        $disabilityItems = \App\Models\DisabilityList::orderBy('category')->orderBy('name')->get();
-    
-        return Inertia::render('Admin/AdminControls', [
-            'control'         => $control,
-            'bnpcItems'       => $bnpcItems,
-            'disabilityItems' => $disabilityItems,
-        ]);
+        try {
+            $control         = AdminControl::first();
+            $bnpcItems       = BnpcItem::orderBy('type')->orderBy('name')->get();
+            $disabilityItems = DisabilityList::orderBy('category')->orderBy('name')->get();
+
+            return Inertia::render('Admin/AdminControls', [
+                'control'         => $control,
+                'bnpcItems'       => $bnpcItems,
+                'disabilityItems' => $disabilityItems,
+            ]);
+        } catch (Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Failed to load admin controls. Please try again.']);
+        }
     }
 
     /**
@@ -31,16 +36,25 @@ class AdminControlController extends Controller
      */
     public function update(Request $request)
     {
-        // Validate incoming data
         $validatedData = $request->validate([
             'purchaseLimit'  => 'required|integer',
             'cardExpiration' => 'required|integer',
         ]);
 
-        // Retrieve the first (and only) admin control record
-        $control = AdminControl::first();
-        $control->update($validatedData);
+        try {
+            $control = AdminControl::first();
 
-        return redirect()->back()->with('success', 'Admin controls updated successfully!');
+            if (!$control) {
+                return redirect()->back()->withErrors(['error' => 'Admin control record not found.']);
+            }
+
+            $control->update($validatedData);
+
+            return redirect()->back()->with('success', 'Admin controls updated successfully!');
+        } catch (Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => 'Failed to update admin controls. Please try again.']);
+        }
     }
 }

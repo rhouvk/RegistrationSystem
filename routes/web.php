@@ -26,6 +26,7 @@ use App\Http\Controllers\{
     BusinessSalesLogController,
     PharmacyDashboardController,
     PharmacyPrescriptionController,
+    PharmacyPrescriptionLogController,
     PayMongoController,
     PharmacyUpdateController
 };
@@ -107,8 +108,9 @@ Route::middleware(['auth', 'can:pharmacy'])->group(function () {
 Route::get('/pharmacy/record-prescription', [PharmacyPrescriptionController::class, 'create'])->name('pharmacy.prescriptions.create');
 Route::post('/pharmacy/record-prescription', [PharmacyPrescriptionController::class, 'store'])->name('pharmacy.prescriptions.store');
 
-Route::get('/pharmacy/prescription-log', [PharmacyPrescriptionController::class, 'index'])
-    ->name('pharmacy.prescriptions.log');
+
+Route::get('/pharmacy/prescription-log', [PharmacyPrescriptionLogController::class, 'index'])->name('pharmacy.prescriptions.log');
+
 
 // Update Prescription Filling
 Route::get('/pharmacy/update-prescription', [PharmacyUpdateController::class, 'lookup'])

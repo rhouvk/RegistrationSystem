@@ -151,6 +151,23 @@ export default function PWDDashboard() {
             </div>
           </div>
 
+
+          {/* Account Type */}
+          <div className="bg-white shadow sm:rounded-lg p-6">
+            <h4 className="text-lg text-cyan-950 font-semibold mb-2">Account Type</h4>
+            <div className="flex items-center gap-3">
+              <FaCrown className={`text-xl ${isPremium ? 'text-green-700' : 'text-gray-400'}`} />
+              <span className={`text-base font-semibold ${isPremium ? 'text-green-700' : 'text-gray-600'}`}>
+                {isPremium ? 'Premium Account' : 'Basic Account'}
+              </span>
+              {isPremium && (
+                <span className="ml-2 text-sm text-gray-500">(Expires on {new Date(subscriptionExpiry).toLocaleDateString()})</span>
+              )}
+            </div>
+          </div>
+
+
+
           {/* Registration Info */}
           <div className="bg-white shadow sm:rounded-lg p-6">
             <h4 className="text-lg text-cyan-950 font-semibold mb-2">Registration Info</h4>
@@ -188,20 +205,6 @@ export default function PWDDashboard() {
               <span className="font-medium">Cause:</span>{' '}
               {registration.disability_cause?.name || registration.disabilityCauses?.join(', ') || 'No disability cause provided.'}
             </p>
-          </div>
-
-          {/* Account Type */}
-          <div className="bg-white shadow sm:rounded-lg p-6">
-            <h4 className="text-lg text-cyan-950 font-semibold mb-2">Account Type</h4>
-            <div className="flex items-center gap-3">
-              <FaCrown className={`text-xl ${isPremium ? 'text-green-700' : 'text-gray-400'}`} />
-              <span className={`text-base font-semibold ${isPremium ? 'text-green-700' : 'text-gray-600'}`}>
-                {isPremium ? 'Premium Account' : 'Basic Account'}
-              </span>
-              {isPremium && (
-                <span className="ml-2 text-sm text-gray-500">(Expires on {new Date(subscriptionExpiry).toLocaleDateString()})</span>
-              )}
-            </div>
           </div>
 
           {/* Quick Actions */}

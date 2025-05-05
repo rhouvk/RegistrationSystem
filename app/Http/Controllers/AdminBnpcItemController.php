@@ -1,9 +1,12 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\BnpcItem;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Inertia\Inertia;
+use Exception;
 
 class AdminBnpcItemController extends Controller
 {
@@ -14,11 +17,15 @@ class AdminBnpcItemController extends Controller
             'type' => 'required|in:Basic Necessities,Prime Commodities',
         ]);
 
-        BnpcItem::create($validated);
-
-        // Redirect back to the AdminControls page so Inertia can re-fetch props
-        return redirect()->route('admin.controls.index')
-            ->with('success', 'Item created.');
+        try {
+            BnpcItem::create($validated);
+            return redirect()->route('admin.controls.index')
+                ->with('success', 'Item created successfully.');
+        } catch (Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => 'Failed to create item. Please try again.']);
+        }
     }
 
     public function update(Request $request, $id)
@@ -28,17 +35,36 @@ class AdminBnpcItemController extends Controller
             'type' => 'required|in:Basic Necessities,Prime Commodities',
         ]);
 
-        BnpcItem::findOrFail($id)->update($validated);
+        try {
+            $item = BnpcItem::findOrFail($id);
+            $item->update($validated);
 
-        return redirect()->route('admin.controls.index')
-            ->with('success', 'Item updated.');
+            return redirect()->route('admin.controls.index')
+                ->with('success', 'Item updated successfully.');
+        } catch (ModelNotFoundException $e) {
+            return redirect()->back()
+                ->withErrors(['error' => 'Item not found.']);
+        } catch (Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => 'Failed to update item. Please try again.']);
+        }
     }
 
     public function destroy($id)
     {
-        BnpcItem::destroy($id);
+        try {
+            $item = BnpcItem::findOrFail($id);
+            $item->delete();
 
-        return redirect()->route('admin.controls.index')
-            ->with('success', 'Item deleted.');
+            return redirect()->route('admin.controls.index')
+                ->with('success', 'Item deleted successfully.');
+        } catch (ModelNotFoundException $e) {
+            return redirect()->back()
+                ->withErrors(['error' => 'Item not found.']);
+        } catch (Exception $e) {
+            return redirect()->back()
+                ->withErrors(['error' => 'Failed to delete item. Please try again.']);
+        }
     }
 }
