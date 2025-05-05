@@ -23,10 +23,12 @@ export default function Welcome({ auth }) {
 
               {auth.user ? (() => {
                 const dashRoute =
-                  auth.user.role === 2 ? 'business.dashboard' :
-                  auth.user.role === 1 ? 'admin.dashboard' :
-                  auth.user.role === 0 ? 'pwd.dashboard' :
-                  'dashboard';
+                auth.user.role === 3 ? 'pharmacy.dashboard' :
+                auth.user.role === 2 ? 'business.dashboard' :
+                auth.user.role === 1 ? 'admin.dashboard' :
+                auth.user.role === 0 ? 'pwd.dashboard' :
+                'dashboard';
+
 
                 return (
                   <Link

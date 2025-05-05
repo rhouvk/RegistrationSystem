@@ -58,7 +58,7 @@ export default function PWDUser({ users }) {
     const type = Array.isArray(u.disabilityTypes) ? u.disabilityTypes.join(', ') : u.disabilityTypes;
     const id = u.pwdNumber;
     const t = Date.now();
-    return `/Admin/PWDusers/${u.id}/generate?city=${encodeURIComponent(city)}&name=${encodeURIComponent(fullName)}&type=${encodeURIComponent(type)}&id=${encodeURIComponent(id)}&t=${t}`;
+    return `/admin/PWDusers/${u.id}/generate?city=${encodeURIComponent(city)}&name=${encodeURIComponent(fullName)}&type=${encodeURIComponent(type)}&id=${encodeURIComponent(id)}&t=${t}`;
   };
 
   return (
@@ -134,7 +134,7 @@ export default function PWDUser({ users }) {
 
       {/* Card Preview Modal */}
       {showCardModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={closeCardModal}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-t from-cyan-950/80 to-transparent" onClick={closeCardModal}>
           <div className="bg-white rounded-lg shadow-lg p-4 max-w-lg w-full" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-800">Generated PWD Card</h3>

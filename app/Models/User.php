@@ -52,4 +52,11 @@ class User extends Authenticatable
 {
     return $this->hasOne(\App\Models\PWDRegistration::class, 'user_id');
 }
+
+
+public function subscriptions()
+{
+    return $this->hasMany(Subscription::class);
+}
+
 }

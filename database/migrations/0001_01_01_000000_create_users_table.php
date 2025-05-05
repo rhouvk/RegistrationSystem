@@ -13,38 +13,58 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Create the "users" table with extra columns: phone and role.
+        // Create the "users" table
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('email')->unique()->nullable();
             $table->string('phone')->unique()->nullable();
-            $table->unsignedTinyInteger('role')->default(0);
+            $table->unsignedTinyInteger('role')->default(0); // 0: PWD, 1: Admin, 2: Business, 3: Pharmacy
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
         });
 
-        // Insert an initial admin account into the "users" table.
+        // Insert default users
         DB::table('users')->insert([
-            'name'       => 'Admin',
-            'email'      => 'admin@gmail.com',
-            'phone'      => '09197955234',
-            'role'       => 1, // Admin role
-            'password'   => Hash::make('admin1234'),
-            'created_at' => now(),
-            'updated_at' => now(),
+            [
+                'name'       => 'Admin',
+                'email'      => 'admin@gmail.com',
+                'phone'      => '09197955234',
+                'role'       => 1, // Admin
+                'password'   => Hash::make('admin1234'),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name'       => 'Felcris',
+                'email'      => 'felcris@gmail.com',
+                'phone'      => '09147955234',
+                'role'       => 2, // Business
+                'password'   => Hash::make('admin1234'),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name'       => 'Watsons',
+                'email'      => 'watsons@gmail.com',
+                'phone'      => '09194945234',
+                'role'       => 3, // Pharmacy
+                'password'   => Hash::make('admin1234'),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
 
-        // Create the password_reset_tokens table.
+        // Create the password_reset_tokens table
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
         });
 
-        // Create the sessions table.
+        // Create the sessions table
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
             $table->foreignId('user_id')->nullable()->index();
@@ -60,8 +80,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
+        // Drop child tables before parent to avoid foreign key issues
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('users');
     }
 };

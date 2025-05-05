@@ -9,7 +9,6 @@ export default function BNPCPurchases() {
   const [expandedRow, setExpandedRow] = useState(null);
   const [search, setSearch] = useState('');
 
-  // memoize filtered results
   const filtered = useMemo(() => {
     if (!search.trim()) return bnpcEntries;
     const term = search.toLowerCase();
@@ -42,27 +41,13 @@ export default function BNPCPurchases() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead>
                 <tr className="bg-gradient-to-r from-cyan-600 via-sky-700 to-teal-800 text-white">
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                    Date of Purchase
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">
-                    Total Amount
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">
-                    Remaining Balance
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider hidden sm:table-cell">
-                    Item Name
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider hidden sm:table-cell">
-                    Quantity
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider hidden md:table-cell">
-                    Store / Establishment
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider hidden md:table-cell">
-                    Signature
-                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Date of Purchase</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">Total Amount</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">Remaining Balance</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider hidden sm:table-cell">Item Name</th>
+                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider hidden sm:table-cell">Quantity</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider hidden md:table-cell">Store / Establishment</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider hidden md:table-cell">Signature</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -85,10 +70,10 @@ export default function BNPCPurchases() {
                             {new Date(entry.date_of_purchase).toLocaleDateString()}
                           </td>
                           <td className="px-6 py-4 text-right text-sm font-medium text-gray-800">
-                            ₱{entry.total_amount.toFixed(2)}
+                            {typeof entry.total_amount === 'number' ? `₱${entry.total_amount.toFixed(2)}` : '₱0.00'}
                           </td>
                           <td className="px-6 py-4 text-right text-sm font-medium text-gray-800">
-                            ₱{entry.remaining_balance.toFixed(2)}
+                            {typeof entry.remaining_balance === 'number' ? `₱${entry.remaining_balance.toFixed(2)}` : '₱0.00'}
                           </td>
                           <td className="hidden sm:table-cell px-6 py-4 text-sm text-gray-700">
                             {entry.item_name}
@@ -100,20 +85,32 @@ export default function BNPCPurchases() {
                             {entry.store}
                           </td>
                           <td className="hidden md:table-cell px-6 py-4 text-sm text-gray-700">
-                            {entry.signature || '—'}
+                            {entry.signature ? (
+                              <img
+                                src={entry.signature}
+                                alt="Signature"
+                                className="h-10 max-w-[150px] border rounded"
+                              />
+                            ) : '—'}
                           </td>
                         </tr>
                         {isExpanded && (
                           <tr className="sm:hidden">
                             <td
-                              colSpan={3}
+                              colSpan={7}
                               className="px-6 pb-4 pt-1 text-sm text-gray-700 bg-gray-50 rounded-b-lg"
                             >
                               <div className="space-y-1">
                                 <div><strong>Item Name:</strong> {entry.item_name}</div>
                                 <div><strong>Quantity:</strong> {entry.quantity}</div>
                                 <div><strong>Store:</strong> {entry.store}</div>
-                                <div><strong>Signature:</strong> {entry.signature || '—'}</div>
+                                <div><strong>Signature:</strong> {entry.signature ? (
+                                  <img
+                                    src={entry.signature}
+                                    alt="Signature"
+                                    className="h-10 max-w-[150px] border rounded"
+                                  />
+                                ) : '—'}</div>
                               </div>
                             </td>
                           </tr>

@@ -174,7 +174,7 @@ export default function AdminDisabilityListEditor({ disabilities = [] }) {
 
       {/* Form Modal */}
       {showFormModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-gradient-to-t from-cyan-950/80 to-transparent  flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h2 className="text-lg font-semibold mb-4">
               {editId ? 'Edit Disability' : 'Add Disability'}
@@ -227,7 +227,7 @@ export default function AdminDisabilityListEditor({ disabilities = [] }) {
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-gradient-to-t from-cyan-950/80 to-transparent flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md text-center">
             <h2 className="text-lg font-semibold mb-6">Confirm Delete</h2>
             <p className="mb-6 text-gray-600">Are you sure you want to delete this item?</p>

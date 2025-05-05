@@ -20,14 +20,15 @@ class BusinessSalesLogController extends Controller
             ->get()
             ->map(fn($p) => [
                 'date_of_sale'   => $p->date_of_purchase,
-                'purchased_by'   => $p->buyer?->pwdNumber ?? '—', // now shows PWD’s user_id
-                'total_amount'   => $p->total_amount,
-                'item_name'      => $p->item?->name    ?? '—',
+                'purchased_by'   => $p->buyer?->pwdNumber ?? '—',
+                'total_amount'   => (float) $p->total_amount, // ✅ Ensure it's a number
+                'item_name'      => $p->item?->name ?? '—',
                 'quantity'       => $p->quantity,
                 'signature'      => $p->signature_path
                                      ? asset("storage/{$p->signature_path}")
                                      : null,
             ]);
+            
 
         return Inertia::render('Business/SalesLog', [
             'salesLog' => $sales,

@@ -9,6 +9,7 @@ import {
   FaIdCard,
   FaInfoCircle,
   FaSpinner,
+  FaCrown,
 } from 'react-icons/fa';
 
 export default function PWDDashboard() {
@@ -21,23 +22,24 @@ export default function PWDDashboard() {
     remainingBalance,
     recentPurchase,
     recentDate,
-   // ✅ Top-level prop passed from the controller
+    subscription,
   } = usePage().props;
 
   const user = auth?.user || {};
   const photoUrl = registration?.photoUrl || '/images/person.png';
 
-
-  // modal state
   const [isInfoOpen, setInfoOpen] = useState(false);
   const [isCardOpen, setCardOpen] = useState(false);
   const [cardLoading, setCardLoading] = useState(false);
   const [cardUrl, setCardUrl] = useState(null);
 
-  // compute expiry date
-  const appliedDate = new Date(registration.dateApplied);
-  const expiryDate = new Date(registration.dateApplied);
+  const appliedDate = new Date(registration.updated_at);
+  const expiryDate = new Date(registration.updated_at);
   expiryDate.setFullYear(expiryDate.getFullYear() + parseInt(cardExpiration, 10));
+  const isExpired = new Date() > expiryDate;
+
+  const isPremium = !!subscription;
+  const subscriptionExpiry = subscription?.ends_at;
 
   function getAge(dob) {
     const birth = new Date(dob);
@@ -86,18 +88,18 @@ export default function PWDDashboard() {
       <div className="py-5">
         <div className="mx-auto max-w-3xl sm:px-6 lg:px-8 space-y-5">
 
-        {/* User Photo with Gradient Outline */}
-        <div className="flex justify-center">
-          <div className="p-1 rounded-full bg-gradient-to-r from-cyan-500 via-sky-500 to-teal-500">
-            <img
-              src={photoUrl}
-              alt="PWD Photo"
-              className="w-32 h-32 rounded-full object-cover border-4 border-white"
-            />
+          {/* User Photo */}
+          <div className="flex justify-center">
+            <div className="p-1 rounded-full bg-gradient-to-r from-cyan-500 via-sky-500 to-teal-500">
+              <img
+                src={photoUrl}
+                alt="PWD Photo"
+                className="w-32 h-32 rounded-full object-cover border-4 border-white"
+              />
+            </div>
           </div>
-        </div>
 
-          {/* Welcome Card */}
+          {/* Welcome */}
           <div className="relative bg-gradient-to-bl from-cyan-600 via-sky-700 to-teal-600 sm:rounded-2xl p-6 overflow-hidden">
             <div className="relative z-10">
               <div className="flex items-center gap-3 mb-4">
@@ -152,25 +154,20 @@ export default function PWDDashboard() {
           {/* Registration Info */}
           <div className="bg-white shadow sm:rounded-lg p-6">
             <h4 className="text-lg text-cyan-950 font-semibold mb-2">Registration Info</h4>
+
+            {isExpired && (
+              <div className="mb-4 p-3 bg-red-100 text-red-800 border border-red-300 rounded">
+                ⚠️ This PWD card has <strong>expired</strong>. Please visit your local PDAO to renew.
+              </div>
+            )}
+
             <table className="w-full text-sm text-gray-700">
               <tbody>
-                {[
-                  { label: 'PWD Number', value: registration.pwdNumber },
+                {[{ label: 'PWD Number', value: registration.pwdNumber },
                   { label: 'Date Applied', value: appliedDate.toLocaleDateString() },
                   { label: 'Expires On', value: expiryDate.toLocaleDateString() },
-                  {
-                    label: 'Validity',
-                    value: `${cardExpiration} ${cardExpiration > 1 ? 'years' : 'year'}`,
-                  },
-                  {
-                    label: 'Date of Birth',
-                    value: `${new Date(registration.dob).toLocaleDateString(undefined, {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })} (${getAge(registration.dob)} years old)`,
-                  },
-                ].map(({ label, value }) => (
+                  { label: 'Validity', value: `${cardExpiration} ${cardExpiration > 1 ? 'years' : 'year'}` },
+                  { label: 'Date of Birth', value: `${new Date(registration.dob).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })} (${getAge(registration.dob)} years old)` }].map(({ label, value }) => (
                   <tr className="border-t" key={label}>
                     <td className="py-2 font-medium">{label}</td>
                     <td className="py-2">{value}</td>
@@ -182,28 +179,30 @@ export default function PWDDashboard() {
 
           {/* Disability Summary */}
           <div className="bg-white shadow sm:rounded-lg p-6">
-            <h4 className="text-lg text-cyan-950 font-semibold mb-2">
-              Disability Details
-            </h4>
-
-            {/* Disability Type */}
+            <h4 className="text-lg text-cyan-950 font-semibold mb-2">Disability Details</h4>
             <p className="text-gray-700 mb-2">
               <span className="font-medium">Type:</span>{' '}
-              {registration.disability_type?.name
-                ? registration.disability_type.name
-                : (registration.disabilityTypes?.join(', ') || 'No disability type provided.')}
+              {registration.disability_type?.name || registration.disabilityTypes?.join(', ') || 'No disability type provided.'}
             </p>
-
-            {/* Disability Cause */}
             <p className="text-gray-700">
               <span className="font-medium">Cause:</span>{' '}
-              {registration.disability_cause?.name
-                ? registration.disability_cause.name
-                : (registration.disabilityCauses?.join(', ') || 'No disability cause provided.')}
+              {registration.disability_cause?.name || registration.disabilityCauses?.join(', ') || 'No disability cause provided.'}
             </p>
           </div>
 
-
+          {/* Account Type */}
+          <div className="bg-white shadow sm:rounded-lg p-6">
+            <h4 className="text-lg text-cyan-950 font-semibold mb-2">Account Type</h4>
+            <div className="flex items-center gap-3">
+              <FaCrown className={`text-xl ${isPremium ? 'text-green-700' : 'text-gray-400'}`} />
+              <span className={`text-base font-semibold ${isPremium ? 'text-green-700' : 'text-gray-600'}`}>
+                {isPremium ? 'Premium Account' : 'Basic Account'}
+              </span>
+              {isPremium && (
+                <span className="ml-2 text-sm text-gray-500">(Expires on {new Date(subscriptionExpiry).toLocaleDateString()})</span>
+              )}
+            </div>
+          </div>
 
           {/* Quick Actions */}
           <div className="flex flex-col sm:flex-row gap-4">

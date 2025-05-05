@@ -91,7 +91,7 @@ export default function PWDUserDetailsModal({ selectedUser, closeModal }) {
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={closeModal}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-t from-cyan-950/80 to-transparent" onClick={closeModal}>
       <div className="bg-white rounded-lg shadow-lg w-11/12 md:w-3/4 lg:w-1/2" onClick={e => e.stopPropagation()}>
         <div className="px-6 py-4 border-b flex justify-between items-center">
           <h3 className="text-lg font-semibold text-gray-800">PWD User Details</h3>

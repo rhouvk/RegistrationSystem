@@ -89,11 +89,17 @@ export default function PWDInfoModal({ isOpen, registration, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-t from-cyan-950/80 to-transparent" onClick={onClose}>
-      <div className="bg-white rounded-lg shadow-lg w-11/12 md:w-3/4 lg:w-1/2 overflow-y-auto max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+      <div
+       className="bg-white rounded-lg shadow-lg w-11/12 md:w-3/4 lg:w-1/2 h-[80vh] flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
         <div className="px-6 py-4 border-b flex justify-between items-center">
           <h3 className="text-lg font-semibold text-gray-800">More Information</h3>
         </div>
-        <div className="px-6 py-4 space-y-6">
+  
+        {/* Scrollable content */}
+        <div className="px-6 py-4 space-y-6 overflow-y-auto flex-1">
           {groups.map(group => (
             <div key={group.title}>
               <h4 className="text-md font-semibold text-gray-700 mb-2">{group.title}</h4>
@@ -112,6 +118,8 @@ export default function PWDInfoModal({ isOpen, registration, onClose }) {
             </div>
           ))}
         </div>
+  
+        {/* Fixed footer with Close button */}
         <div className="px-6 py-4 border-t flex justify-end">
           <button onClick={onClose} className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded">
             Close
@@ -120,4 +128,5 @@ export default function PWDInfoModal({ isOpen, registration, onClose }) {
       </div>
     </div>
   );
+  
 }

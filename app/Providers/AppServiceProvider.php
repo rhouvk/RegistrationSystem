@@ -26,6 +26,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('admin', fn(User $user) => $user->role === 1);
         Gate::define('pwd', fn(User $user) => $user->role === 0);
         Gate::define('business', fn(User $user) => $user->role === 2);
+        Gate::define('pharmacy', fn(User $user) => $user->role === 3);
         Vite::prefetch(concurrency: 3);
     }
 }

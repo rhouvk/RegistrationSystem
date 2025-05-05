@@ -1,4 +1,4 @@
-// resources/js/Pages/Business/SalesLog.jsx
+// File: resources/js/Pages/Business/SalesLog.jsx
 
 import React, { useState, useMemo } from 'react';
 import BusinessLayout from '@/Layouts/BusinessLayout';
@@ -8,18 +8,18 @@ export default function SalesLog() {
   const { salesLog = [] } = usePage().props;
   const [expanded, setExpanded] = useState({});
   const [search, setSearch] = useState('');
+  const [perPage, setPerPage] = useState(25);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const toggle = (idx) =>
-    setExpanded((e) => ({ ...e, [idx]: !e[idx] }));
+  const toggle = (idx) => setExpanded((e) => ({ ...e, [idx]: !e[idx] }));
 
-  // filter by date, purchaser or item (case-insensitive)
   const filtered = useMemo(() => {
     if (!search.trim()) return salesLog;
     const term = search.toLowerCase();
     return salesLog.filter((s) => {
-      const date      = new Date(s.date_of_sale).toLocaleDateString();
+      const date = s.date_of_sale ? new Date(s.date_of_sale).toLocaleDateString() : '';
       const purchaser = String(s.purchased_by || '').toLowerCase();
-      const item      = String(s.item_name    || '').toLowerCase();
+      const item = String(s.item_name || '').toLowerCase();
       return (
         date.includes(term) ||
         purchaser.includes(term) ||
@@ -28,6 +28,15 @@ export default function SalesLog() {
     });
   }, [search, salesLog]);
 
+  const paginated = useMemo(() => {
+    const start = (currentPage - 1) * perPage;
+    return filtered.slice(start, start + perPage);
+  }, [filtered, currentPage, perPage]);
+
+  const totalPages = Math.ceil(filtered.length / perPage);
+
+  if (!Array.isArray(salesLog)) return null;
+
   return (
     <BusinessLayout header={<h2 className="text-xl font-semibold leading-tight">Sales Log</h2>}>
       <Head title="Sales Log" />
@@ -35,94 +44,99 @@ export default function SalesLog() {
       <div className="py-12">
         <div className="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-4">
 
-          {/* Search box */}
-          <div className="flex justify-end">
+          {/* Search and PerPage Controls */}
+          <div className="flex flex-col sm:flex-row justify-between gap-4">
             <input
               type="text"
-              placeholder="Search by date, purchaser or item…"
+              placeholder="Search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full sm:w-64 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
+            <select
+              className="w-28 border border-gray-300 rounded px-2 py-1 text-sm"
+              value={perPage}
+              onChange={(e) => {
+                setPerPage(parseInt(e.target.value));
+                setCurrentPage(1);
+              }}
+            >
+              <option value={25}>Show 25</option>
+              <option value={50}>Show 50</option>
+              <option value={100}>Show 100</option>
+            </select>
           </div>
 
-          {/* Table */}
-          <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr className="bg-gradient-to-r from-teal-600 via-sky-700 to-teal-800 text-white">
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                    Date of Sale
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                    Purchased By
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">
-                    Total Amount
-                  </th>
-                  <th className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                    Item Name
-                  </th>
-                  <th className="hidden sm:table-cell px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
-                    Quantity
-                  </th>
-                  <th className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                    Signature
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-
-                {filtered.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
-                      No sales records available.
-                    </td>
+          {/* Card Layout on Mobile, Table on Desktop */}
+          <div className="space-y-3 sm:space-y-0 sm:bg-white sm:shadow sm:overflow-hidden sm:rounded-lg">
+            <div className="hidden sm:block">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead>
+                  <tr className="bg-gradient-to-r from-teal-600 via-sky-700 to-teal-800 text-white">
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Date</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Purchased By</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider">Amount</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Item</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider">Qty</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Signature</th>
                   </tr>
-                ) : (
-                  filtered.map((sale, idx) => {
-                    const isOpen = expanded[idx];
-                    return (
-                      <React.Fragment key={idx}>
-                        <tr
-                          className="hover:bg-gray-50 cursor-pointer sm:cursor-default"
-                          onClick={() => toggle(idx)}
-                        >
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                            {new Date(sale.date_of_sale).toLocaleDateString()}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                            {sale.purchased_by}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">
-                            ₱{sale.total_amount.toFixed(2)}
-                          </td>
-                          <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                            {sale.item_name}
-                          </td>
-                          <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-center text-sm text-gray-700">
-                            {sale.quantity}
-                          </td>
-                          <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                            {sale.signature || '—'}
-                          </td>
-                        </tr>
-                        {/* Mobile-only detail row */}
-                        <tr className={`${isOpen ? '' : 'hidden'} sm:hidden`}>
-                          <td colSpan={6} className="px-6 py-4 text-sm text-gray-700 space-y-1">
-                            <div><strong>Item Name:</strong> {sale.item_name}</div>
-                            <div><strong>Quantity:</strong> {sale.quantity}</div>
-                            <div><strong>Signature:</strong> {sale.signature || '—'}</div>
-                          </td>
-                        </tr>
-                      </React.Fragment>
-                    );
-                  })
-                )}
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {paginated.map((sale, idx) => (
+                    <tr key={idx}>
+                      <td className="px-4 py-4 text-sm text-gray-700">
+                        {sale.date_of_sale ? new Date(sale.date_of_sale).toLocaleDateString() : '—'}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-700">{sale.purchased_by}</td>
+                      <td className="px-4 py-4 text-sm text-right text-gray-800 font-medium">
+                        {typeof sale.total_amount === 'number' ? `₱${sale.total_amount.toFixed(2)}` : '₱0.00'}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-700 truncate max-w-xs" title={sale.item_name}>
+                        {sale.item_name}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-center text-gray-700">{sale.quantity}</td>
+                      <td className="px-4 py-4 text-sm text-gray-700">
+                        {sale.signature ? (
+                          <img src={sale.signature} alt="Signature" className="h-10 max-w-[150px] border rounded" />
+                        ) : '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-              </tbody>
-            </table>
+            {/* Mobile Card Version */}
+            <div className="sm:hidden space-y-2">
+              {paginated.map((sale, idx) => (
+                <div key={idx} className="border rounded-lg p-4 bg-white shadow-sm">
+                  <p className="text-sm text-gray-700"><strong>Date:</strong> {sale.date_of_sale ? new Date(sale.date_of_sale).toLocaleDateString() : '—'}</p>
+                  <p className="text-sm text-gray-700"><strong>Purchased By:</strong> {sale.purchased_by}</p>
+                  <p className="text-sm text-gray-700"><strong>Total:</strong> ₱{typeof sale.total_amount === 'number' ? sale.total_amount.toFixed(2) : '0.00'}</p>
+                  <p className="text-sm text-gray-700"><strong>Item:</strong> {sale.item_name}</p>
+                  <p className="text-sm text-gray-700"><strong>Quantity:</strong> {sale.quantity}</p>
+                  <p className="text-sm text-gray-700"><strong>Signature:</strong>{' '}
+                    {sale.signature ? <img src={sale.signature} alt="Signature" className="h-10 mt-1 rounded border" /> : '—'}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 pt-4">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`px-3 py-1 rounded ${page === currentPage ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
+                >
+                  {page}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </BusinessLayout>

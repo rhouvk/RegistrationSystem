@@ -87,7 +87,7 @@ export default function PWDUserEditModal({ selectedUser, editData, handleEditCha
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={closeModal}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-t from-cyan-950/80 to-transparent" onClick={closeModal}>
       <div className="bg-white rounded-lg shadow-lg w-11/12 md:w-3/4 lg:w-2/3 overflow-y-auto max-h-[90vh]" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center px-6 py-4 border-b">
           <h3 className="text-lg font-semibold text-gray-800">Edit PWD User</h3>

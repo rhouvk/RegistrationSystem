@@ -13,6 +13,10 @@ return [
     | a conventional file to locate the various service credentials.
     |
     */
+    'paymongo' => [
+    'public' => env('PAYMONGO_PUBLIC_KEY'),
+    'secret' => env('PAYMONGO_SECRET_KEY'),
+],
 
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),

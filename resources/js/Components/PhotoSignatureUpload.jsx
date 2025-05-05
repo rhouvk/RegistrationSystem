@@ -192,7 +192,7 @@ export default function PhotoSignatureUpload({ values, handleChangeFile: handleP
 
       {/* Modal for Drawing Signature */}
       {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+        <div className="fixed inset-0 flex items-center justify-center  bg-gradient-to-t from-cyan-950/80 to-transparent z-50">
           <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
             <h2 className="text-xl font-semibold mb-6 text-center">Draw Your Signature</h2>
             <canvas
@@ -231,7 +231,7 @@ export default function PhotoSignatureUpload({ values, handleChangeFile: handleP
               <button
                 type="button"
                 onClick={handleSaveSignature}
-                className="px-5 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700"
+                className="px-5 py-2 text-sm bg-teal-600 text-white rounded-md hover:bg-teal-700"
               >
                 Save
               </button>

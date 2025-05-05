@@ -151,7 +151,7 @@ export default function AdminBNPCItemEditor({ items: initialItems }) {
 
       {/* Modal for Add/Edit (unchanged) */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={() => setShowModal(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-t from-cyan-950/80 to-transparent backdrop-blur-sm" onClick={() => setShowModal(false)}>
           <div className="bg-white rounded-lg shadow-lg w-11/12 sm:w-1/2 lg:w-1/3 p-6" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">
