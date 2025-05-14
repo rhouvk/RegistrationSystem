@@ -31,12 +31,6 @@ export default function AuthenticatedLayout({ header, children }) {
                                 {user && (
                                     <>
                                         <NavLink
-                                            href={route('pwd.scan')}
-                                            active={route().current('pwd.scan')}
-                                        >
-                                            QR Scan
-                                        </NavLink>
-                                        <NavLink
                                             href={route('pwd.pwd-users.index')}
                                             active={route().current('pwd.pwd-users.index')}
                                         >
@@ -48,6 +42,13 @@ export default function AuthenticatedLayout({ header, children }) {
                                         >
                                             Register
                                         </NavLink>
+                                        <NavLink
+    href={route('register.bp.view')}  // ✅ This is the GET route!
+    active={route().current('register.bp.view')}
+>
+    Register B/P
+</NavLink>
+
                                     </>
                                 )}
                             </div>
@@ -130,12 +131,6 @@ export default function AuthenticatedLayout({ header, children }) {
                         </ResponsiveNavLink>
                         {user && (
                             <>
-                                <ResponsiveNavLink
-                                    href={route('pwd.scan')}
-                                    active={route().current('pwd.scan')}
-                                >
-                                    QR Scan
-                                </ResponsiveNavLink>
                                 <ResponsiveNavLink
                                     href={route('pwd.pwd-users.index')}
                                     active={route().current('pwd.pwd-users.index')}

@@ -16,22 +16,38 @@ class BusinessBnpcController extends Controller
     public function create(Request $request)
     {
         try {
-            $purchaseLimit = AdminControl::first()->purchaseLimit ?? 0;
+            $admin = AdminControl::first();
+            $purchaseLimit = $admin->purchaseLimit ?? 0;
+            $cardExpirationYears = $admin->cardExpiration ?? 1;
+            $bnpcDiscount = $admin->BNPCdiscount ?? 5;
+
             $pwdNumber = $request->input('pwd_number', '');
             $pwdUser = null;
+            $userName = null;
+            $isCardExpired = false;
+            $validUntil = null;
 
             if ($pwdNumber !== '') {
-                $pwdUser = PWDRegistration::where('pwdNumber', $pwdNumber)->first();
+                $pwdUser = PWDRegistration::with('user')->where('pwdNumber', $pwdNumber)->first();
 
                 if (! $pwdUser) {
                     Log::warning('PWD lookup failed', ['pwd_number' => $pwdNumber]);
-
                     return Redirect::route('business.bnpc-transactions.create')
-                    ->withErrors(['pwd_number' => 'No PWD found with that number.'])
-                    ->withInput();
+                        ->withErrors(['pwd_number' => 'No PWD found with that number.'])
+                        ->withInput();
                 }
 
-                Log::info('PWD lookup success', ['user_id' => $pwdUser->user_id]);
+                $issuedDate = $pwdUser->updated_at;
+                $expiryDate = $issuedDate->copy()->addYears($cardExpirationYears);
+                $isCardExpired = now()->greaterThan($expiryDate);
+                $validUntil = $expiryDate->toDateString();
+                $userName = $pwdUser->user->name ?? null;
+
+                Log::info('PWD lookup success', [
+                    'user_id' => $pwdUser->user_id,
+                    'expired' => $isCardExpired,
+                    'valid_until' => $validUntil,
+                ]);
             }
 
             $weekTotal = $pwdUser
@@ -46,6 +62,10 @@ class BusinessBnpcController extends Controller
                 'usedSoFar'        => $weekTotal,
                 'remainingBalance' => max(0, $purchaseLimit - $weekTotal),
                 'pwdUser'          => $pwdUser,
+                'userName'         => $userName,
+                'isCardExpired'    => $isCardExpired,
+                'validUntil'       => $validUntil,
+                'BNPCdiscount'     => $bnpcDiscount,
             ]);
         } catch (\Throwable $e) {
             Log::error('Error loading transaction form', [
@@ -53,7 +73,7 @@ class BusinessBnpcController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            abort(500, 'An unexpected error occurred while preparing the form.');
+            abort(500, 'An error occurred while preparing the form.');
         }
     }
 
@@ -70,12 +90,19 @@ class BusinessBnpcController extends Controller
                 'signature'            => 'nullable|image|max:2048',
             ]);
 
-            $pwd = PWDRegistration::where('pwdNumber', $validated['pwd_number'])->firstOrFail();
+            $pwd = PWDRegistration::where('pwdNumber', $validated['pwd_number'])->first();
+            if (! $pwd) {
+                return Redirect::back()->withErrors(['pwd_number' => 'PWD not found.'])->withInput();
+            }
 
-            $purchaseLimit = AdminControl::first()->purchaseLimit ?? 0;
+            $admin = AdminControl::first();
+            $purchaseLimit = $admin->purchaseLimit ?? 0;
+            $discountRate = $admin->BNPCdiscount ?? 0;
+
             $weekTotalBefore = BnpcPurchase::where('bought_by', $pwd->user_id)
                 ->whereBetween('date_of_purchase', [now()->startOfWeek(), now()->endOfWeek()])
                 ->sum('total_amount');
+
             $remaining = max(0, $purchaseLimit - $weekTotalBefore);
 
             $sigPath = null;
@@ -83,16 +110,12 @@ class BusinessBnpcController extends Controller
                 $file = $request->file('signature');
                 $filename = 'sig_' . uniqid() . '.' . $file->getClientOriginalExtension();
                 $sigPath = $file->storeAs('signatures', $filename, 'public');
-
-                Log::info('Signature uploaded', [
-                    'filename' => $filename,
-                    'stored_at' => $sigPath,
-                    'url' => asset("storage/{$sigPath}")
-                ]);
             }
 
             foreach ($validated['items'] as $row) {
-                $lineAmt = $row['line_total'];
+                $lineAmt = (float) $row['line_total'];
+                $discounted = round($lineAmt * (1 - $discountRate / 100), 2);
+
                 $remaining = max(0, $remaining - $lineAmt);
 
                 BnpcPurchase::create([
@@ -102,15 +125,9 @@ class BusinessBnpcController extends Controller
                     'bnpc_item_id'       => $row['bnpc_item_id'],
                     'quantity'           => $row['quantity'],
                     'total_amount'       => $lineAmt,
+                    'discounted_price'   => $discounted,
                     'remaining_balance'  => $remaining,
                     'signature_path'     => $sigPath,
-                ]);
-
-                Log::info('BNPC Purchase recorded', [
-                    'pwd_id'   => $pwd->user_id,
-                    'item_id'  => $row['bnpc_item_id'],
-                    'amount'   => $lineAmt,
-                    'balance'  => $remaining
                 ]);
             }
 
@@ -118,7 +135,7 @@ class BusinessBnpcController extends Controller
                 ->with('success', 'Transaction recorded successfully.');
         } catch (\Throwable $e) {
             Log::error('Failed to store transaction', [
-                'request' => $request->all(),
+                'request' => $request->except('signature'), // omit large file content
                 'error'   => $e->getMessage(),
                 'trace'   => $e->getTraceAsString(),
             ]);

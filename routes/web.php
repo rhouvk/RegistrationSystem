@@ -21,12 +21,15 @@ use App\Http\Controllers\{
     PWDMedicinePurchaseController,
     PWDAnalyticsController,
     PWDScannerController,
+    BusinessEditTransactionController,
     BusinessDashboardController,
     BusinessBnpcController,
     BusinessSalesLogController,
+    BusinessPharmacyRegisterController,
     PharmacyDashboardController,
     PharmacyPrescriptionController,
     PharmacyPrescriptionLogController,
+    PharmacyPrescriptionEditController,
     PayMongoController,
     PharmacyUpdateController
 };
@@ -40,6 +43,7 @@ use App\Models\PWDRegistration;
 */
 
 
+
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin'       => Route::has('login'),
@@ -47,7 +51,8 @@ Route::get('/', function () {
         'laravelVersion' => Application::VERSION,
         'phpVersion'     => PHP_VERSION,
     ]);
-});
+})->name('welcome');
+
 
 Route::get('/dashboard', fn() => Inertia::render('Dashboard'))
     ->middleware(['auth', 'verified'])
@@ -94,6 +99,9 @@ Route::middleware(['auth', 'can:business'])->group(function () {
     Route::get('/business/sales-log', [BusinessSalesLogController::class, 'index'])->name('business.sales-log');
     Route::get('/business/transactions/create', [BusinessBnpcController::class, 'create'])->name('business.bnpc-transactions.create');
     Route::post('/business/transactions', [BusinessBnpcController::class, 'store'])->name('business.bnpc-transactions.store');
+    Route::get('/business/bnpc-transactions/{id}/edit', [BusinessEditTransactionController::class, 'edit'])->name('business.bnpc-transactions.edit');
+    Route::put('/business/bnpc-transactions/{id}', [BusinessEditTransactionController::class, 'update'])->name('business.bnpc-transactions.update');
+
 });
 
 /*
@@ -118,6 +126,9 @@ Route::get('/pharmacy/update-prescription', [PharmacyUpdateController::class, 'l
 
 Route::post('/pharmacy/update-prescription', [PharmacyUpdateController::class, 'update'])
 ->name('pharmacy.prescriptions.update');
+
+ Route::get('/prescriptions/{id}/edit', [PharmacyPrescriptionEditController::class, 'edit'])->name('prescriptions.edit');
+Route::put('/prescriptions/{id}', [PharmacyPrescriptionEditController::class, 'update'])->name('prescriptions.update');
 
 
 
@@ -174,6 +185,12 @@ Route::middleware(['auth', 'can:admin'])->group(function () {
     Route::put('/admin/controls', [AdminControlController::class, 'update'])->name('admin.controls.update');
 
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+
+    Route::post('/admin/register/bp', [BusinessPharmacyRegisterController::class, 'store'])->name('register.bp');
+    Route::get('/admin/register-bp', function () {
+        return Inertia::render('Admin/RegisterBusinessOrPharmacy'); // ✅ match actual path
+    })->name('register.bp.view');
+
 });
 
 /*

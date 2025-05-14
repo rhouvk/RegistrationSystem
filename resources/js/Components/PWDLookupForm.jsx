@@ -17,7 +17,7 @@ export default function PWDLookupForm({
         name="pwd_lookup"
         value={value}
         onChange={e => onChange(e.target.value)}
-        placeholder="02‑1234‑5678‑9012"
+        placeholder="02-1234-5678-9012"
         className="w-full"
       />
       <InputError message={error} />

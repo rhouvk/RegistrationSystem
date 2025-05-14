@@ -23,6 +23,7 @@ class PWDBnpcController extends Controller
             ->orderByDesc('id')
             ->get()
             ->map(fn($p) => [
+                'id'               => $p->id, // ✅ ADD THIS LINE
                 'date_of_purchase'  => Carbon::parse($p->date_of_purchase)->toDateString(),
                 'total_amount'      => (float) $p->total_amount,
                 'remaining_balance' => (float) $p->remaining_balance,

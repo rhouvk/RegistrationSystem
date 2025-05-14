@@ -8,11 +8,13 @@ import {
   FaClipboardCheck,
 } from 'react-icons/fa';
 import {
+  RiMedicineBottleLine,
+} from 'react-icons/ri';
+import {
   HiOutlineHome,
   HiOutlineDocumentText,
   HiOutlineClipboardList,
   HiOutlineUserCircle,
-  HiOutlineLogout,
 } from 'react-icons/hi';
 import { useState } from 'react';
 
@@ -96,12 +98,12 @@ export default function PharmacyLayout({ header, children }) {
       {/* Mobile Top Bar */}
       <div className="sm:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-cyan-600 via-sky-700 to-teal-800 text-white shadow-md py-2 flex items-center justify-center text-lg font-semibold">
         <ApplicationLogoW className="h-6 w-auto mr-2" />
-        <span>PWEDE NA' TO</span>
+        <span>PWD NA 'TO</span>
       </div>
 
       {/* Header (desktop only) */}
       {header && (
-        <header className="hidden sm:block bg-white text-cyan-950 shadow">
+        <header className="hidden sm:block bg-white text-cyan-900 shadow">
           <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{header}</div>
         </header>
       )}
@@ -122,7 +124,7 @@ export default function PharmacyLayout({ header, children }) {
           </Link>
 
           <Link href={route('pharmacy.prescriptions.update.create')} className="flex flex-col items-center text-cyan-800 hover:text-cyan-950">
-            <HiOutlineClipboardList className="h-6 w-6 mb-0.5" />
+            <RiMedicineBottleLine className="h-6 w-6 mb-0.5" />
             <span className="text-xs">Update</span>
           </Link>
 
@@ -136,10 +138,6 @@ export default function PharmacyLayout({ header, children }) {
             <span className="text-xs">Profile</span>
           </Link>
 
-          <Link href={route('logout')} method="post" as="button" className="flex flex-col items-center text-cyan-800 hover:text-cyan-950">
-            <HiOutlineLogout className="h-6 w-6 mb-0.5" />
-            <span className="text-xs">Logout</span>
-          </Link>
         </div>
       </div>
     </div>

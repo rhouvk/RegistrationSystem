@@ -41,9 +41,9 @@ class MedicinePurchase extends Model
     public function getFillingStatusLabelAttribute(): string
     {
         return match ($this->filling_status) {
-            1 => 'First Filing',
-            2 => 'Second Filing',
-            3 => 'Fully Filed',
+            1 => 'First Filling',
+            2 => 'Second Filling',
+            3 => 'Third Filling',
             default => 'Unknown',
         };
     }

@@ -118,11 +118,58 @@ export default function PWDUser({ users }) {
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="mt-4 flex justify-center space-x-2">
-              <button disabled={currentPage===1} onClick={()=>setCurrentPage(p=>p-1)} className="px-3 py-1 rounded bg-teal-800 text-white disabled:bg-gray-300">Previous</button>
-              {[...Array(totalPages)].map((_, i) => (
-                <button key={i} onClick={()=>setCurrentPage(i+1)} className={`px-3 py-1 rounded ${currentPage===i+1?'bg-teal-800 text-white':'bg-gray-200'}`}>{i+1}</button>
-              ))}
-              <button disabled={currentPage===totalPages} onClick={()=>setCurrentPage(p=>p+1)} className="px-3 py-1 rounded bg-teal-800 text-white disabled:bg-gray-300">Next</button>
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(1)}
+                className="px-3 py-1 rounded bg-gray-300 text-gray-700 disabled:bg-gray-100"
+              >
+                First
+              </button>
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+                className="px-3 py-1 rounded bg-teal-800 text-white disabled:bg-gray-300"
+              >
+                Previous
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter((page) => {
+                  const visibleRange = 2;
+                  return (
+                    page === 1 ||
+                    page === totalPages ||
+                    (page >= currentPage - visibleRange && page <= currentPage + visibleRange)
+                  );
+                })
+                .map((page, index, array) => (
+                  <React.Fragment key={page}>
+                    {index > 0 && page - array[index - 1] > 1 && (
+                      <span className="px-3 py-1">...</span>
+                    )}
+                    <button
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-1 rounded ${
+                        currentPage === page ? 'bg-teal-800 text-white' : 'bg-gray-200'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  </React.Fragment>
+                ))}
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((p) => p + 1)}
+                className="px-3 py-1 rounded bg-teal-800 text-white disabled:bg-gray-300"
+              >
+                Next
+              </button>
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(totalPages)}
+                className="px-3 py-1 rounded bg-gray-300 text-gray-700 disabled:bg-gray-100"
+              >
+                Last
+              </button>
             </div>
           )}
         </div>

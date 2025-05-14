@@ -10,5 +10,5 @@ class AdminControl extends Model
     protected $table = 'admin_controls';
 
     // Allow mass assignment for these columns.
-    protected $fillable = ['purchaseLimit', 'cardExpiration'];
+    protected $fillable = ['purchaseLimit', 'cardExpiration', 'BNPCdiscount'];
 }

@@ -2,23 +2,42 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\PrescriptionFilling;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class PharmacyDashboardController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        // Placeholder/dummy data to prevent frontend errors
+        $pharmacyId = Auth::id();
+
+        $fillings = PrescriptionFilling::with('prescription')
+            ->where('drugstore_id', $pharmacyId)
+            ->latest()
+            ->get();
+
+        $totalPrescriptions = $fillings->count();
+
+        $recent = $fillings->first();
+        $recentMedicine = $recent?->prescription?->medicine_purchase ?? '—';
+        $recentDate     = $recent?->created_at ?? null;
+        $pharmacistName = $recent?->pharmacist_name ?? '—';
+
+        $topMedicines = $fillings
+            ->groupBy(fn($f) => $f->prescription->medicine_purchase)
+            ->map(fn($group) => $group->sum('filling_amount'))
+            ->sortDesc()
+            ->take(5)
+            ->map(fn($totalFilled, $name) => ['name' => $name, 'count' => $totalFilled])
+            ->values();
+
         return Inertia::render('Pharmacy/Dashboard', [
-            'auth' => [
-                'user' => $request->user(),
-            ],
-            'totalSales' => 14500.75,
-            'totalTransactions' => 27,
-            'recentSale' => 850.00,
-            'recentDate' => now()->subDays(2)->toDateString(),
-            'pharmacistName' => 'John Reyes, RPh',
+            'totalPrescriptions' => $totalPrescriptions,
+            'recentMedicine'     => $recentMedicine,
+            'recentDate'         => $recentDate,
+            'topMedicines'       => $topMedicines,
+            'pharmacistName'     => $pharmacistName,
         ]);
     }
 }

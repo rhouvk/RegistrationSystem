@@ -12,10 +12,17 @@ class Barangay extends Model
     protected $fillable = [
         'name',
         'municipality_id',
+        'admin_district',
     ];
 
     public function municipality()
     {
         return $this->belongsTo(Municipality::class);
     }
+
+public function pwdRegistrations()
+{
+    return $this->hasMany(PWDRegistration::class);
+}
+
 }

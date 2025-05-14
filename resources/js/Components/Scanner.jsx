@@ -1,6 +1,6 @@
 // File: resources/js/Components/Scanner.jsx
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { BrowserMultiFormatReader, BarcodeFormat } from "@zxing/browser";
 import { scannerFetch } from "@/utils/scannerFetch";
 
@@ -14,15 +14,29 @@ export default function Scanner({ onUserFound }) {
   const [user, setUser] = useState(null);
   const [validUntil, setValidUntil] = useState(null);
 
-  // Compute expiration check
   const isExpired = validUntil && new Date(validUntil) < new Date();
 
-  useEffect(() => {
-    return () => stopScan();
+  const stopScan = useCallback(() => {
+    if (scanningRef.current) {
+      setScanning(false);
+      scanningRef.current = false;
+
+      try {
+        scannerRef.current.reset();
+      } catch (e) {
+        console.warn("Scanner reset error:", e);
+      }
+
+      if (videoRef.current?.srcObject) {
+        videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
+        videoRef.current.srcObject = null;
+      }
+    }
   }, []);
 
-  const startScan = async () => {
+  const startScan = useCallback(async () => {
     if (scanningRef.current) return;
+
     setScanning(true);
     scanningRef.current = true;
     setError(null);
@@ -31,10 +45,18 @@ export default function Scanner({ onUserFound }) {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "environment" },
       });
-      videoRef.current.srcObject = stream;
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current
+            .play()
+            .catch((err) => console.warn("Video play failed:", err));
+        };
+      }
 
       scannerRef.current.decodeFromVideoDevice(
-        undefined,
+        null,
         videoRef.current,
         async (result, err) => {
           if (!scanningRef.current) return;
@@ -44,7 +66,9 @@ export default function Scanner({ onUserFound }) {
             const hashid = result.text.trim();
 
             try {
-              const data = await scannerFetch(`/api/scan-user?hashid=${encodeURIComponent(hashid)}`);
+              const data = await scannerFetch(
+                `/api/scan-user?hashid=${encodeURIComponent(hashid)}`
+              );
               if (data.user) {
                 setUser(data.user);
                 setValidUntil(data.valid_until);
@@ -66,17 +90,21 @@ export default function Scanner({ onUserFound }) {
       setScanning(false);
       scanningRef.current = false;
     }
-  };
+  }, [onUserFound, scannerFetch, stopScan]);
 
-  const stopScan = () => {
-    setScanning(false);
-    scanningRef.current = false;
-    scannerRef.current = new BrowserMultiFormatReader();
-    if (videoRef.current?.srcObject) {
-      videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
-      videoRef.current.srcObject = null;
-    }
-  };
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      stopScan();
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      // Clean up the event listener when the component unmounts normally
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      stopScan();
+    };
+  }, [stopScan]);
 
   const reloadPage = () => {
     stopScan();
@@ -91,12 +119,19 @@ export default function Scanner({ onUserFound }) {
       {/* Instruction Header */}
       <div className="text-center mb-4">
         <h2 className="text-lg font-semibold text-teal-800">Scan PWD Card</h2>
-        <p className="text-sm text-gray-500">Align the barcode within the guides. The scan will start automatically.</p>
+        <p className="text-sm text-gray-500">
+          Align the barcode within the guides. The scan will start automatically.
+        </p>
       </div>
 
-      {/* Camera container with overlay guides */}
+      {/* Camera container */}
       <div className="relative w-full max-w-md aspect-video border-4 border-dashed border-teal-400 rounded-xl overflow-hidden mx-auto bg-black">
-        <video ref={videoRef} className="w-full h-full object-cover"></video>
+        <video
+          ref={videoRef}
+          className="w-full h-full object-cover"
+          playsInline
+          muted
+        ></video>
 
         {/* Overlay Guides */}
         <div className="absolute inset-0 pointer-events-none">
@@ -109,9 +144,12 @@ export default function Scanner({ onUserFound }) {
         </div>
       </div>
 
-      {error && <p className="text-red-500 text-center mt-2">⚠️ {error}</p>}
+      {/* Error Display */}
+      {error && (
+        <p className="text-red-500 text-center mt-2">⚠️ {error}</p>
+      )}
 
-      {/* Action Buttons */}
+      {/* Scan Button */}
       <div className="flex justify-center mt-4 gap-3">
         <button
           onClick={startScan}
@@ -122,11 +160,15 @@ export default function Scanner({ onUserFound }) {
         </button>
       </div>
 
-      {/* Modal Display for Result */}
+      {/* Result Modal */}
       {user && (
         <div className="fixed inset-0 bg-gradient-to-t from-cyan-950/80 to-transparent flex justify-center items-center z-50">
           <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm space-y-4">
-            <h2 className={`text-xl font-bold text-center ${isExpired ? 'text-red-600' : 'text-teal-700'}`}>
+            <h2
+              className={`text-xl font-bold text-center ${
+                isExpired ? "text-red-600" : "text-teal-700"
+              }`}
+            >
               {isExpired ? "PWD Card Expired" : "PWD Card Valid"}
             </h2>
 
@@ -136,16 +178,22 @@ export default function Scanner({ onUserFound }) {
                 alt="PWD"
                 className="w-28 h-28 rounded-full object-cover border-4 border-teal-500 mb-3"
               />
-              <p className="text-sm text-gray-700"><strong>ID:</strong> {user.pwdNumber}</p>
-              <p className="text-sm text-gray-700"><strong>Name:</strong> {user.user?.name}</p>
-              <p className="text-sm text-gray-700"><strong>Disability:</strong> {user.disabilitytype?.name || "—"}</p>
+              <p className="text-sm text-gray-700">
+                <strong>ID:</strong> {user.pwdNumber}
+              </p>
+              <p className="text-sm text-gray-700">
+                <strong>Name:</strong> {user.user?.name}
+              </p>
+              <p className="text-sm text-gray-700">
+                <strong>Disability:</strong>{" "}
+                {user.disabilitytype?.name || "—"}
+              </p>
               <p className="text-sm text-gray-700">
                 <strong>Valid Until:</strong>{" "}
                 <span className={isExpired ? "text-red-600 font-semibold" : ""}>
                   {validUntil}
                 </span>
               </p>
-
               {isExpired && (
                 <p className="text-red-600 text-sm font-bold text-center mt-2">
                   ⚠️ This PWD card has expired.

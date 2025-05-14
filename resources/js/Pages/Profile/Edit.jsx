@@ -30,19 +30,19 @@ export default function Edit({ mustVerifyEmail, status }) {
       <Head title="Profile" />
 
       <div className="py-12">
-        <div className="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">
-          <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8">
+        <div className=" max-w-7xl relative mx-4 sm:mx-auto space-y-6 sm:px-6 lg:px-8">
+          <div className="bg-white p-4 shadow rounded-lg sm:p-8">
             <UpdateProfileInformationForm
               mustVerifyEmail={mustVerifyEmail}
               status={status}
               className="max-w-xl"
             />
           </div>
-          <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8">
+          <div className="bg-white p-4 shadow rounded-lg sm:p-8">
             <UpdatePasswordForm className="max-w-xl" />
           </div>
           {/* ✅ Logout Section Left-Aligned */}
-          <div className="bg-white p-4 shadow sm:rounded-lg sm:p-6">
+          <div className="bg-white p-4 shadow rounded-lg sm:p-6">
   <div className="flex flex-col items-start space-y-2">
     <span className="text-sm text-gray-600">Click below to end your session:</span>
     <Link

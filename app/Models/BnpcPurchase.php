@@ -9,16 +9,17 @@ use App\Models\User;
 
 class BnpcPurchase extends Model
 {
-    protected $fillable = [
-        'date_of_purchase',
-        'bnpc_item_id',
-        'quantity',
-        'total_amount',
-        'remaining_balance',
-        'bought_by',
-        'store_id',         // ← ADD THIS
-        'signature_path',
-    ];
+protected $fillable = [
+    'date_of_purchase',
+    'bnpc_item_id',
+    'quantity',
+    'total_amount',
+    'discounted_price',   // ✅ REQUIRED!
+    'remaining_balance',
+    'bought_by',
+    'store_id',
+    'signature_path',
+];
 
     public function item()
     {

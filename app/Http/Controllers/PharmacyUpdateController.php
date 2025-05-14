@@ -15,43 +15,52 @@ class PharmacyUpdateController extends Controller
         $pwdNumber = $request->input('pwd_number', '');
         $pwdUser = null;
         $result = [];
-
+    
         if ($pwdNumber) {
-            $pwdUser = PWDRegistration::where('pwdNumber', $pwdNumber)->first();
-
+            $pwdUser = PWDRegistration::with('user')->where('pwdNumber', $pwdNumber)->first();
+    
             if (!$pwdUser) {
                 return Redirect::route('pharmacy.prescriptions.update.create')
-                    ->with('lookup_error', 'No PWD found with that number.');
+                    ->withErrors(['pwd_number' => 'No PWD found with that number.'])
+                    ->withInput();
             }
-
+    
             $prescriptions = Prescription::where('buyer_id', $pwdUser->user_id)->get();
-
+    
             foreach ($prescriptions as $prescription) {
                 $fillings = PrescriptionFilling::where('prescription_id', $prescription->id)->get();
-
+    
                 $totalFilled = $fillings->sum('filling_amount');
                 $latestFilling = $fillings->sortByDesc('created_at')->first();
-
+    
                 $remaining = max(0, $prescription->quantity_prescribed - $totalFilled);
                 $status = $remaining === 0 ? 3 : ($latestFilling?->filling_status ?? 1);
-
+    
                 if ($remaining > 0) {
                     $prescription->total_filled = $totalFilled; // attach for frontend
                     $result[] = [
                         'id' => $latestFilling?->id,
                         'filling_status' => $status,
                         'filling_amount' => $remaining,
-                        'prescription' => $prescription,
+                        'prescription' => [
+                            'medicine_purchase'   => $prescription->medicine_purchase,
+                            'quantity_prescribed' => $prescription->quantity_prescribed,
+                            'physician_name'      => $prescription->physician_name,
+                            'physician_address'   => $prescription->physician_address,
+                            'physician_ptr_no'    => $prescription->physician_ptr_no,
+                            'total_filled'        => $totalFilled,
+                        ],
                     ];
                 }
             }
         }
-
+    
         return Inertia::render('Pharmacy/UpdatePrescription', [
             'pwdUser' => $pwdUser,
             'fillings' => $result,
         ]);
     }
+    
 
     public function update(Request $request)
     {

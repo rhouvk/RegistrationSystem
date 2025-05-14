@@ -3,86 +3,136 @@
 namespace App\Http\Controllers;
 
 use App\Models\PWDRegistration;
+use App\Models\AdminControl;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Exception;
+use Carbon\Carbon;
 
 class AdminDashboardController extends Controller
 {
     public function index()
     {
         try {
-            // 1) Pull all PWD registrations with their user relationship
-            $records = PWDRegistration::with('user')->get();
+            $records = PWDRegistration::with(['user', 'disabilityType', 'barangay'])->get();
+            $admin = AdminControl::first();
+            $cardExpirationYears = $admin->cardExpiration ?? 5;
 
-            // 2) Predefine disability types and colors
+            $currentYear = Carbon::now()->year;
             $typeList = collect([
-                ['name'=>'deaf',         'color'=>'#0B3B46'],
-                ['name'=>'intellectual', 'color'=>'#1F5562'],
-                ['name'=>'learning',     'color'=>'#2F7E91'],
-                ['name'=>'mental',       'color'=>'#3EA9BD'],
-                ['name'=>'physical',     'color'=>'#5DC8D9'],
-                ['name'=>'psychosocial', 'color'=>'#84D7E3'],
-                ['name'=>'speech',       'color'=>'#AADFE8'],
-                ['name'=>'visual',       'color'=>'#C5ECF4'],
-                ['name'=>'cancer',       'color'=>'#E0F6FA'],
-                ['name'=>'rare',         'color'=>'#F4FCFD'],
+                ['name' => 'Deaf or Hard of Hearing', 'color' => '#0B3B46'],
+                ['name' => 'Intellectual Disability', 'color' => '#1F5562'],
+                ['name' => 'Learning Disability', 'color' => '#2F7E91'],
+                ['name' => 'Mental Disability', 'color' => '#3EA9BD'],
+                ['name' => 'Physical Disability', 'color' => '#5DC8D9'],
+                ['name' => 'Psychosocial Disability', 'color' => '#84D7E3'],
+                ['name' => 'Speech and Language Impairment', 'color' => '#AADFE8'],
+                ['name' => 'Visual Disability', 'color' => '#C5ECF4'],
+                ['name' => 'Cancer', 'color' => '#E0F6FA'],
+                ['name' => 'Rare Disease', 'color' => '#F4FCFD'],
             ]);
 
-            // 3) Group records by applied year (or 'unknown' for missing dates)
-            $grouped = $records->groupBy(function($pwd) {
-                return optional($pwd->dateApplied)->format('Y') ?? 'unknown';
-            });
-
             $yearData = [];
+            $totalMale = 0;
+            $totalFemale = 0;
+            $adminDistrictData = [];
+            $educationData = [];
+            $employmentData = [];
 
-            foreach ($grouped as $year => $group) {
-                // initialize structure
-                $yearData[$year] = [
-                    'registered'   => ['female'=>0, 'male'=>0, 'total'=>0],
-                    'status'       => ['new'=>0, 'total'=>0],
-                    'disabilities' => $typeList->map(fn($t) => array_merge($t, ['count'=>0]))->toArray(),
-                ];
+            foreach ($records as $pwd) {
+                $dateApplied = optional($pwd->dateApplied);
+                $appliedYear = $dateApplied?->year;
+                if (!$appliedYear) continue;
 
-                foreach ($group as $pwd) {
-                    // count by gender
-                    $genderKey = strtolower($pwd->sex) === 'female' ? 'female' : 'male';
-                    $yearData[$year]['registered'][$genderKey]++;
-                    $yearData[$year]['registered']['total']++;
+                $year = (string) $appliedYear;
 
-                    // mark as new
+                foreach ([$year, 'overall'] as $key) {
+                    if (!isset($yearData[$key])) {
+                        $yearData[$key] = [
+                            'registered' => ['female' => 0, 'male' => 0, 'total' => 0],
+                            'status' => ['new' => 0, 'renewed' => 0, 'expired' => 0, 'total' => 0],
+                            'disabilities' => $typeList->map(fn($t) => array_merge($t, ['count' => 0]))->toArray(),
+                        ];
+                    }
+                }
+
+                // Gender
+                $genderKey = strtolower($pwd->sex) === 'female' ? 'female' : 'male';
+                $yearData[$year]['registered'][$genderKey]++;
+                $yearData[$year]['registered']['total']++;
+                $yearData['overall']['registered'][$genderKey]++;
+                $yearData['overall']['registered']['total']++;
+
+                if ($genderKey === 'female') $totalFemale++;
+                if ($genderKey === 'male') $totalMale++;
+
+                // Status
+                $created = Carbon::parse($pwd->created_at);
+                $updated = Carbon::parse($pwd->updated_at);
+                $expiryDate = $dateApplied->copy()->addYears($cardExpirationYears);
+
+                if ($dateApplied->year === $currentYear) {
                     $yearData[$year]['status']['new']++;
-                    $yearData[$year]['status']['total']++;
+                    $yearData['overall']['status']['new']++;
+                }
 
-                    // tally each disability type, if present and in list
-                    collect($pwd->disabilityTypes ?? [])->each(function($type) use (&$yearData, $year) {
-                        $disabilities = &$yearData[$year]['disabilities'];
-                        foreach ($disabilities as &$entry) {
-                            if ($entry['name'] === $type) {
+                if (
+                    $updated->year === $currentYear &&
+                    $updated->diffInDays($created) >= 3
+                ) {
+                    $yearData[$year]['status']['renewed']++;
+                    $yearData['overall']['status']['renewed']++;
+                }
+
+                if ($expiryDate->lt(Carbon::now())) {
+                    $yearData[$year]['status']['expired']++;
+                    $yearData['overall']['status']['expired']++;
+                }
+
+                $yearData[$year]['status']['total']++;
+                $yearData['overall']['status']['total']++;
+
+                // Disability Types
+                $typeName = $pwd->disabilityType->name ?? null;
+                if ($typeName) {
+                    foreach ([$year, 'overall'] as $key) {
+                        foreach ($yearData[$key]['disabilities'] as &$entry) {
+                            if (strtolower($entry['name']) === strtolower($typeName)) {
                                 $entry['count']++;
                                 break;
                             }
                         }
-                    });
+                    }
                 }
+
+                // Admin District Chart Data
+                $district = optional($pwd->barangay)->admin_district ?? 'Unassigned';
+                if (!isset($adminDistrictData[$district])) {
+                    $adminDistrictData[$district] = 0;
+                }
+                $adminDistrictData[$district]++;
+
+                // Education
+                $edu = $pwd->education ?? 'Unspecified';
+                if (!isset($educationData[$edu])) $educationData[$edu] = 0;
+                $educationData[$edu]++;
+
+                // Employment Status
+                $emp = $pwd->employmentStatus ?? 'Unspecified';
+                if (!isset($employmentData[$emp])) $employmentData[$emp] = 0;
+                $employmentData[$emp]++;
             }
 
-            // 4) Determine latest year for dashboard cards
-            $years = array_filter(array_keys($yearData), fn($y) => $y !== 'unknown');
-            rsort($years);
-            $latest = $years[0] ?? null;
-
-            // If no valid year, default counts to zero
-            $maleCount = $femaleCount = 0;
-            if ($latest && isset($yearData[$latest])) {
-                $maleCount   = $yearData[$latest]['registered']['male'] ?? 0;
-                $femaleCount = $yearData[$latest]['registered']['female'] ?? 0;
-            }
+            $validYears = array_keys($yearData);
+            rsort($validYears);
 
             return Inertia::render('Admin/Dashboard', [
-                'yearData'    => $yearData,
-                'maleCount'   => $maleCount,
-                'femaleCount' => $femaleCount,
+                'yearData' => $yearData,
+                'maleCount' => $totalMale,
+                'femaleCount' => $totalFemale,
+                'adminDistrictData' => $adminDistrictData,
+                'educationData' => $educationData,
+                'employmentData' => $employmentData,
             ]);
         } catch (Exception $e) {
             return redirect()->back()->withErrors(['error' => 'Failed to load dashboard data.']);

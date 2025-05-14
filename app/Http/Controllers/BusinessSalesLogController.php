@@ -1,7 +1,5 @@
 <?php
 
-// app/Http/Controllers/BusinessSalesLogController.php
-
 namespace App\Http\Controllers;
 
 use App\Models\BnpcPurchase;
@@ -14,21 +12,29 @@ class BusinessSalesLogController extends Controller
     {
         $business = Auth::user();
 
-        $sales = BnpcPurchase::with(['item','buyer'])
+        $sales = BnpcPurchase::with(['item', 'buyer'])
             ->where('store_id', $business->id)
             ->orderByDesc('id')
             ->get()
-            ->map(fn($p) => [
-                'date_of_sale'   => $p->date_of_purchase,
-                'purchased_by'   => $p->buyer?->pwdNumber ?? '—',
-                'total_amount'   => (float) $p->total_amount, // ✅ Ensure it's a number
-                'item_name'      => $p->item?->name ?? '—',
-                'quantity'       => $p->quantity,
-                'signature'      => $p->signature_path
-                                     ? asset("storage/{$p->signature_path}")
-                                     : null,
-            ]);
-            
+            ->map(function ($p) {
+                $total = (float) $p->total_amount;
+                $discounted = (float) $p->discounted_price;
+                $discount = $total - $discounted;
+
+                return [
+                    'id'                     => $p->id, // ✅ Include ID for routing
+                    'date_of_sale'           => $p->date_of_purchase,
+                    'purchased_by'           => $p->buyer?->pwdNumber ?? '—',
+                    'item_name'              => $p->item?->name ?? '—',
+                    'quantity'               => $p->quantity,
+                    'total_amount'           => round($total, 2),
+                    'discounted_amount'      => round($discount, 2),
+                    'amount_after_discount'  => round($discounted, 2),
+                    'signature'              => $p->signature_path
+                        ? asset("storage/{$p->signature_path}")
+                        : null,
+                ];
+            });
 
         return Inertia::render('Business/SalesLog', [
             'salesLog' => $sales,

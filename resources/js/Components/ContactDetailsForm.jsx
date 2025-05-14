@@ -1,15 +1,9 @@
 import React from 'react';
 
 export default function ContactDetailsForm({ values, handleChange, duplicateErrors = {} }) {
-  const formatMobile = (val) =>
-    val.replace(/\D/g, '')
-      .slice(0, 11)
-      .replace(/^(\d{4})(\d{3})(\d{4})?/, (_, a, b, c) => [a, b, c].filter(Boolean).join('-'));
-
-  const formatLandline = (val) =>
-    val.replace(/\D/g, '')
-      .slice(0, 9)
-      .replace(/^(\d{2})(\d{7})?/, (_, a, b) => [a, b].filter(Boolean).join('-'));
+  // Keep only digits and limit length
+  const formatMobile = (val) => val.replace(/\D/g, '').slice(0, 11);
+  const formatLandline = (val) => val.replace(/\D/g, '').slice(0, 9);
 
   const handleFormattedChange = (e) => {
     const { name, value } = e.target;
@@ -36,26 +30,32 @@ export default function ContactDetailsForm({ values, handleChange, duplicateErro
 
         {/* Landline */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Landline No.</label>
+          <label htmlFor="landline" className="block text-sm font-medium text-gray-700">
+            Landline No.
+          </label>
           <input
+            id="landline"
             type="text"
             name="landline"
             value={values.landline}
             onChange={handleFormattedChange}
-            placeholder="21-3456789"
+            placeholder="213456789"
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
           />
         </div>
 
         {/* Mobile */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Mobile No.</label>
+          <label htmlFor="mobile" className="block text-sm font-medium text-gray-700">
+            Mobile No.
+          </label>
           <input
+            id="mobile"
             type="text"
             name="mobile"
             value={values.mobile}
             onChange={handleFormattedChange}
-            placeholder="0912-345-6789"
+            placeholder="09123456789"
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
           />
           {duplicateErrors.phone && (
@@ -65,8 +65,11 @@ export default function ContactDetailsForm({ values, handleChange, duplicateErro
 
         {/* Email */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Email Address</label>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            Email Address
+          </label>
           <input
+            id="email"
             type="email"
             name="email"
             value={values.email}
@@ -78,6 +81,7 @@ export default function ContactDetailsForm({ values, handleChange, duplicateErro
             <p className="mt-1 text-sm text-red-600">{duplicateErrors.email}</p>
           )}
         </div>
+
       </div>
     </div>
   );

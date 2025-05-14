@@ -108,15 +108,15 @@ export default function Subscribe() {
           </div>
 
           {/* Annual Plan */}
-          <div className={`flex flex-col justify-between p-6 h-80 border-2 rounded-2xl shadow-lg bg-gradient-to-br from-green-700 to-lime-600 text-white ${duration === 'annual' ? 'border-white' : 'border-transparent'}`}>
+          <div className={`flex flex-col justify-between p-6 h-80 border-2 rounded-2xl shadow-lg bg-gradient-to-br from-teal-700 to-lime-600 text-white ${duration === 'annual' ? 'border-white' : 'border-transparent'}`}>
             <div className="flex flex-col items-center space-y-2">
               <FaCheckCircle className="text-4xl" />
               <h3 className="text-xl font-semibold">1 Year</h3>
               <p className="text-2xl font-bold">₱225</p>
               <span className="text-sm bg-white/20 px-3 py-1 rounded-full mt-1">Save 25%</span>
-              <p className="text-sm text-center text-white/90">Perfect for long-term users who want peace of mind.</p>
+              <p className="text-sm text-center text-white/90">Perfect for long-term users of the platform.</p>
             </div>
-            <button type="submit" onClick={() => setDuration('annual')} className="mt-4 px-4 py-2 bg-white hover:bg-gray-100 text-green-800 font-semibold rounded">
+            <button type="submit" onClick={() => setDuration('annual')} className="mt-4 px-4 py-2 bg-white hover:bg-gray-100 text-teal-800 font-semibold rounded">
               Subscribe
             </button>
           </div>

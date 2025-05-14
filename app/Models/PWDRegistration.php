@@ -44,6 +44,7 @@ class PWDRegistration extends Model
         'guardianName',
         'accomplishedBy',
         'certifyingPhysician',
+        'physicianLicenseNo',
         'encoder',
         'processingOfficer',
         'approvingOfficer',
@@ -51,6 +52,8 @@ class PWDRegistration extends Model
         'controlNo',
         'photo',
         'signature',
+        'created_at',
+        'updated_at',
     ];
     
 

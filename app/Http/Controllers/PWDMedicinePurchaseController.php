@@ -19,8 +19,8 @@ class PWDMedicinePurchaseController extends Controller
             ->map(function ($prescription) {
                 $sorted = $prescription->fillings->sortByDesc('created_at');
                 $latest = $sorted->first();
-                $totalFiled = $prescription->fillings->sum('filling_amount');
-                $balance = max($prescription->quantity_prescribed - $totalFiled, 0);
+                $totalFilled = $prescription->fillings->sum('filling_amount');
+                $balance = max($prescription->quantity_prescribed - $totalFilled, 0);
 
                 return [
                     'prescription_id'      => $prescription->id,

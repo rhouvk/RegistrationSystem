@@ -1,9 +1,3 @@
-// Controller: PWDAnalyticsController.php
-
-// ... (Same as previous backend code above)
-
-// Frontend: resources/js/Pages/PWD/Analytics.jsx
-
 import React, { useState } from 'react';
 import { Line, Bar, Pie } from 'react-chartjs-2';
 import {
@@ -21,7 +15,14 @@ import {
 import PWDLayout from '@/Layouts/PWDLayout';
 import { Head, usePage, router } from '@inertiajs/react';
 import dayjs from 'dayjs';
-import { FaCalendarAlt } from 'react-icons/fa';
+import {
+  FaCalendarAlt,
+  FaShoppingBag,
+  FaMoneyBillWave,
+  FaChartBar,
+  FaPrescriptionBottle,
+  FaStore,
+} from 'react-icons/fa';
 
 ChartJS.register(
   LineElement,
@@ -38,22 +39,25 @@ ChartJS.register(
 export default function Analytics() {
   const {
     hasActiveSubscription,
+    summaryPanels = {},
     bnpMonthlyData = [],
     topMedicines = [],
     spendingByItem = [],
     spendingByCategory = [],
     spendingByStore = [],
+    pharmacySpending = [],
     quantityOverTime = [],
     averagePurchase = [],
     balanceTrend = [],
     purchaseFrequency = []
+
   } = usePage().props;
 
   const [range, setRange] = useState('month');
 
   const handleFilter = (selected) => {
     setRange(selected);
-    router.get(route('pwd.analytics'), { range: selected }, { preserveState: true });
+    router.get(route('pwd.analytics.index'), { range: selected }, { preserveState: true });
   };
 
   const ranges = {
@@ -65,6 +69,39 @@ export default function Analytics() {
   };
 
   const truncate = (label, max = 12) => label.length > max ? label.slice(0, max) + '…' : label;
+
+  const summaryCards = [
+    {
+      label: 'Total BNPC Purchases',
+      value: summaryPanels.totalPurchases ?? 0,
+      icon: <FaShoppingBag className="text-white text-2xl" />,
+      bg: 'bg-green-600',
+    },
+    {
+      label: 'Total Amount Spent',
+      value: `₱${Number(summaryPanels.totalSpent ?? 0).toLocaleString()}`,
+      icon: <FaMoneyBillWave className="text-white text-2xl" />,
+      bg: 'bg-emerald-600',
+    },
+        {
+      label: 'Total Amount Saved',
+      value: `₱${Number(summaryPanels.totalSaved ?? 0).toLocaleString()}`,
+      icon: <FaMoneyBillWave className="text-white text-2xl" />,
+      bg: 'bg-teal-600',
+    },
+    {
+      label: 'Prescriptions Filled',
+      value: summaryPanels.totalPrescriptions ?? 0,
+      icon: <FaPrescriptionBottle className="text-white text-2xl" />,
+      bg: 'bg-cyan-600',
+    },
+    {
+      label: 'Active Stores Visited',
+      value: summaryPanels.activeStores ?? 0,
+      icon: <FaStore className="text-white text-2xl" />,
+      bg: 'bg-sky-600',
+    },
+  ];
 
   const renderChart = (title, ChartComp, chartData) => (
     <div className="relative bg-white p-6 shadow rounded">
@@ -81,10 +118,25 @@ export default function Analytics() {
           </div>
         </div>
       )}
-      <h3 className="text-lg font-semibold text-gray-800 mb-4">{title}</h3>
+      <h3 className="text-lg font-semibold text-gray-800 mb-1">{title}</h3>
+      <p className="text-sm text-gray-500 mb-4">Showing: {ranges[range]}</p>
       <div className="overflow-x-auto">
-        <div className="min-w-[500px] h-[300px]">
-          <ChartComp data={chartData} options={{ responsive: true, maintainAspectRatio: false }} />
+        <div className="w-full h-[300px]">
+          <ChartComp
+            data={chartData}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                x: { ticks: { autoSkip: true, maxTicksLimit: 10 } },
+              },
+              elements: {
+                line: { tension: 0.4 },
+                point: { radius: 3, borderWidth: 1 },
+              },
+              plugins: { legend: { position: 'bottom' } },
+            }}
+          />
         </div>
       </div>
     </div>
@@ -95,15 +147,39 @@ export default function Analytics() {
       <Head title="PWD Analytics" />
 
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {summaryCards.map((card, idx) => (
+            <div key={idx} className={`relative p-4 rounded-xl shadow ${card.bg} text-white overflow-hidden`}>
+              {!hasActiveSubscription && (
+                <div className="absolute inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-10 flex items-center justify-center rounded-xl">
+                  <div className="text-center">
+                    <p className="text-sm font-semibold">Subscribe to view</p>
+                    <a href="/subscribe" className="mt-1 inline-block bg-white text-teal-800 px-3 py-1 rounded font-semibold text-sm">
+                      Subscribe Now
+                    </a>
+                  </div>
+                </div>
+              )}
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-full bg-white bg-opacity-20">{card.icon}</div>
+                <div>
+                  <div className="text-xl font-bold">{card.value}</div>
+                  <div className="text-sm">{card.label}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
         <div className="bg-white border border-gray-200 shadow p-4 rounded-lg flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2">
             <FaCalendarAlt className="text-teal-600 text-xl" />
-            <span className="text-sm sm:text-base font-medium text-gray-700">Select Date Range:</span>
+            <span className="text-sm sm:text-base font-medium text-gray-700">View Data For:</span>
           </div>
           <select
             value={range}
             onChange={(e) => handleFilter(e.target.value)}
-            className="w-full sm:w-auto mt-1 sm:mt-0 bg-white text-cyan-950 font-semibold px-4 py-2 rounded-lg shadow hover:bg-cyan-700 focus:outline-none"
+            className="w-full sm:w-auto mt-1 sm:mt-0 bg-white text-cyan-950 font-semibold px-4 py-2 rounded-lg shadow focus:outline-none"
           >
             {Object.entries(ranges).map(([key, label]) => (
               <option key={key} value={key}>{label}</option>
@@ -112,108 +188,61 @@ export default function Analytics() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {renderChart("Monthly BNPC Purchase Trends", Line, {
-            labels: bnpMonthlyData.map((d) => d.month),
-            datasets: [{
-              label: 'Purchase (₱)',
-              data: bnpMonthlyData.map((d) => d.total_amount),
-              borderColor: 'rgba(14, 165, 233, 1)',
-              backgroundColor: 'rgba(14, 165, 233, 0.2)',
-              tension: 0.4,
-            }],
+
+          {renderChart("BNPC Purchase Count Over Time", Bar, {
+            labels: purchaseFrequency.map(d => d.date),
+            datasets: [{ label: 'Total Purchases', data: purchaseFrequency.map(d => d.count), backgroundColor: '#16a34a' }],
           })}
 
-          {renderChart("Top 5 Medicines Prescribed", Bar, {
+          {renderChart("Most Filled Medicines", Bar, {
             labels: topMedicines.map((m) => truncate(m.medicine)),
-            datasets: [{
-              label: 'Times Prescribed',
-              data: topMedicines.map((m) => m.count),
-              backgroundColor: 'rgba(5, 150, 105, 0.7)',
-            }],
+            datasets: [{ label: 'Times Filled', data: topMedicines.map((m) => m.count), backgroundColor: '#0284c7' }],
           })}
 
-          {renderChart("Spending by Item", Bar, {
+          {renderChart("Spending Per Item", Bar, {
             labels: spendingByItem.map(i => truncate(i.item)),
-            datasets: [{
-              label: 'Total (₱)',
-              data: spendingByItem.map(i => i.total),
-              backgroundColor: 'rgba(255, 99, 132, 0.6)'
-            }],
+            datasets: [{ label: '₱ Total Spent', data: spendingByItem.map(i => i.total), backgroundColor: '#059669' }],
           })}
 
           {renderChart("Spending by Category", Pie, {
             labels: spendingByCategory.map(c => truncate(c.category)),
-            datasets: [{
-              data: spendingByCategory.map(c => c.total),
-              backgroundColor: [
-                'rgba(75, 192, 192, 0.6)',
-                'rgba(153, 102, 255, 0.6)',
-                'rgba(255, 206, 86, 0.6)'
-              ]
-            }],
+            datasets: [{ data: spendingByCategory.map(c => c.total), backgroundColor: ['#059669', '#0284c7', '#059669'] }],
           })}
 
-          {renderChart("Spending by Store", Bar, {
+          {renderChart("BNPC Stores Where You Bought", Bar, {
             labels: spendingByStore.map(s => truncate(s.store)),
-            datasets: [{
-              label: 'Total (₱)',
-              data: spendingByStore.map(s => s.total),
-              backgroundColor: 'rgba(54, 162, 235, 0.6)'
-            }],
+            datasets: [{ label: '₱ Total Spent', data: spendingByStore.map(s => s.total), backgroundColor: '#059669' }],
           })}
 
-          {renderChart("Quantity Purchased Over Time", Line, {
+          {renderChart("Pharmacies/Drugstores Where You Filled Prescriptions", Bar, {
+          labels: pharmacySpending.map(s => truncate(s.store)),
+          datasets: [{
+            label: 'Total Prescriptions Filled',
+            data: pharmacySpending.map(s => s.total),
+            backgroundColor: '#0891b2',
+          }],
+          })}
+
+          {renderChart("Quantity of Items Purchased Over Time", Line, {
             labels: quantityOverTime.map(d => d.date),
-            datasets: [{
-              label: 'Quantity',
-              data: quantityOverTime.map(d => d.total_quantity),
-              borderColor: 'rgba(255, 159, 64, 1)',
-              backgroundColor: 'rgba(255, 159, 64, 0.3)',
-              tension: 0.4
-            }],
+            datasets: [{ label: 'Quantity', data: quantityOverTime.map(d => d.total_quantity), borderColor: '#0d9488', backgroundColor: '#16a34a' }],
           })}
 
-          {renderChart("Average Purchase Value (Monthly)", Line, {
-            labels: averagePurchase.map(a => a.month),
-            datasets: [{
-              label: 'Avg Value (₱)',
-              data: averagePurchase.map(a => a.average),
-              borderColor: 'rgba(153, 102, 255, 1)',
-              backgroundColor: 'rgba(153, 102, 255, 0.3)',
-              tension: 0.3
-            }],
+          {renderChart("Average Purchase Amount Over Time", Line, {
+            labels: averagePurchase.map(a => a.date),
+            datasets: [{ label: '₱ Average', data: averagePurchase.map(a => a.average), borderColor: '#0284c7', backgroundColor: '#0d9488' }],
           })}
 
-          {renderChart("Remaining Balance Trend", Line, {
+          {renderChart("Remaining Discount Balance Over Time", Line, {
             labels: balanceTrend.map(d => d.date_of_purchase),
-            datasets: [{
-              label: 'Remaining (₱)',
-              data: balanceTrend.map(d => d.remaining_balance),
-              borderColor: 'rgba(75, 192, 192, 1)',
-              backgroundColor: 'rgba(75, 192, 192, 0.3)',
-              tension: 0.4
-            }],
+            datasets: [{ label: '₱ Remaining', data: balanceTrend.map(d => d.remaining_balance), borderColor: '#0d9488', backgroundColor: '#16a34a' }],
           })}
 
-          {renderChart("Weekly Purchase Frequency", Bar, {
-            labels: purchaseFrequency.map(d => `Week ${d.week}`),
-            datasets: [{
-              label: 'Count',
-              data: purchaseFrequency.map(d => d.count),
-              backgroundColor: 'rgba(255, 205, 86, 0.7)'
-            }],
+          {renderChart("Spending Trend on BNPC Items", Line, {
+            labels: bnpMonthlyData.map((d) => d.date),
+            datasets: [{ label: '₱ Total Spent', data: bnpMonthlyData.map((d) => d.total_amount), borderColor: '#0284c7', backgroundColor: '#0d9488' }],
           })}
-        </div>
 
-        <div className="mt-8 bg-white rounded-xl shadow px-6 py-4 text-sm leading-relaxed text-gray-700">
-          <h4 className="font-semibold text-base mb-2 text-teal-700">Summary:</h4>
-          <ul className="list-disc pl-5 space-y-1">
-            <li>This dashboard visualizes PWD spending behavior across different items, stores, and dates.</li>
-            <li>Charts show monthly totals, category breakdowns, top medicine purchases, and quantity trends.</li>
-            <li>You can select a date range filter to focus on recent transactions (week, month, etc.).</li>
-            <li>Data is updated automatically when a filter is applied.</li>
-            <li>Only subscribed users can see full charts — consider subscribing to unlock all insights.</li>
-          </ul>
         </div>
       </div>
     </PWDLayout>

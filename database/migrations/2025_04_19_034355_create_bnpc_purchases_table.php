@@ -16,6 +16,7 @@ class CreateBnpcPurchasesTable extends Migration
             $table->date('date_of_purchase');
             $table->decimal('total_amount', 12, 2);
             $table->decimal('remaining_balance', 12, 2);
+            $table->decimal('discounted_price', 12, 2);
             // Reference to bnpc_items table
             $table->foreignId('bnpc_item_id')
                   ->constrained('bnpc_items')

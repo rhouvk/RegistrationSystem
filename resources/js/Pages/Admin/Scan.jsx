@@ -11,7 +11,6 @@ export default function DataMatrixScanner() {
       <Head title="Scanner" />
       <div className="p-6">
         <div className="bg-white shadow-lg rounded-xl p-6 w-full max-w-md mx-auto">
-          <h2 className="text-2xl font-bold text-center text-gray-800 gap-2">Scan PWD ID</h2>
           <Scanner />
         </div>
       </div>
