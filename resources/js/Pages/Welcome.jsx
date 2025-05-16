@@ -15,17 +15,11 @@ export default function Welcome({ auth }) {
         handleResize();
         window.addEventListener('resize', handleResize);
 
-        // Detect install prompt (Android/Chrome)
         const handleBeforeInstallPrompt = (e) => {
             e.preventDefault();
             setDeferredPrompt(e);
         };
         window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-        // Detect iOS Safari (show custom instructions)
-        if (isIOS() && !isInStandaloneMode()) {
-            setShowIOSPrompt(true);
-        }
 
         return () => {
             window.removeEventListener('resize', handleResize);
