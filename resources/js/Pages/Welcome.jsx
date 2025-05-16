@@ -3,19 +3,27 @@ import { useEffect, useState } from 'react';
 
 export default function Welcome({ auth }) {
     const [isMobile, setIsMobile] = useState(false);
+    const [deferredPrompt, setDeferredPrompt] = useState(null);
 
     useEffect(() => {
-        const handleResize = () => {
-            setIsMobile(window.innerWidth < 768); // Adjust breakpoint as needed
-        };
-
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
         handleResize();
         window.addEventListener('resize', handleResize);
 
+        // Listen for install prompt
+        const handleBeforeInstallPrompt = (e) => {
+            e.preventDefault(); // Stop the auto prompt
+            setDeferredPrompt(e); // Save the event so we can trigger later
+        };
+
+        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
         return () => {
             window.removeEventListener('resize', handleResize);
+            window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
         };
     }, []);
+
 
     const getDashboardRoute = (role) => {
         switch (role) {
@@ -99,13 +107,29 @@ export default function Welcome({ auth }) {
                                     </Link>
                                 )}
                                 {!auth.user && (
-                                    <Link
-                                        href={route('register')}
+                                    <button
+                                        onClick={() => {
+                                            if (deferredPrompt) {
+                                                deferredPrompt.prompt();
+                                                deferredPrompt.userChoice.then((choiceResult) => {
+                                                    if (choiceResult.outcome === 'accepted') {
+                                                        console.log('✅ User accepted the install prompt');
+                                                    } else {
+                                                        console.log('❌ User dismissed the install prompt');
+                                                    }
+                                                    setDeferredPrompt(null); // Clear it
+                                                });
+                                            } else {
+                                                // Fallback: Redirect to register if install prompt not available
+                                                window.location.href = route('register');
+                                            }
+                                        }}
                                         className="text-teal-700 font-semibold text-lg hover:scale-105 hover:text-white transition-transform duration-200 inline-flex items-center gap-2"
                                     >
                                         Get Started <span className="text-2xl">→</span>
-                                    </Link>
+                                    </button>
                                 )}
+
                                 {isMobile && auth.user && (
                                     <Link
                                         href={route(getDashboardRoute(auth.user.role))}
