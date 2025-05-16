@@ -15,14 +15,14 @@ class UserAndPwdUserSeeder extends Seeder
         $provinceId = DB::table('provinces')->value('id');
         $municipalityId = DB::table('municipalities')->value('id');
 
-        for ($i = 1; $i <= 500; $i++) {
+        for ($i = 1; $i <= 300; $i++) {
             // Create a user
             $userId = DB::table('users')->insertGetId([
                 'name'       => "PWD User $i",
                 'email'      => "pwduser$i@gmail.com",
                 'phone'      => '0912' . str_pad($i, 7, '0', STR_PAD_LEFT),
                 'role'       => 0,
-                'password'   => Hash::make('pwduser1234'),
+                'password'   => Hash::make('admin1234'),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

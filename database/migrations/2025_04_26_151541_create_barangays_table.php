@@ -12,12 +12,12 @@ class CreateBarangaysTable extends Migration
         Schema::create('barangays', function (Blueprint $table) {
             $table->id();
             $table->foreignId('municipality_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('admin_district_id')->constrained()->cascadeOnDelete();
             $table->string('name');
-            $table->string('admin_district')->nullable();
             $table->timestamps();
         });
 
-                // Barangays grouped by administrative district
+        // Barangays grouped by administrative district
         $districts = [
             'Poblacion' => [
                 '1-A', '2-A', '3-A', '4-A', '5-A', '6-A', '7-A', '8-A', '9-A', '10-A',
@@ -73,12 +73,20 @@ class CreateBarangaysTable extends Migration
             ]
         ];
 
-        foreach ($districts as $district => $barangays) {
-            foreach ($barangays as $barangay) {
+        $districtIdMap = [];
+
+        foreach ($districts as $districtName => $barangayList) {
+            $districtId = DB::table('admin_districts')->insertGetId([
+                'name' => $districtName,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            foreach ($barangayList as $barangay) {
                 DB::table('barangays')->insert([
                     'municipality_id' => 1, // Davao City
+                    'admin_district_id' => $districtId,
                     'name' => $barangay,
-                    'admin_district' => $district,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);

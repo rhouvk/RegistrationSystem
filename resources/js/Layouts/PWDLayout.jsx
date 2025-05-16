@@ -94,7 +94,7 @@ export default function AuthenticatedLayout({ header, children }) {
       {/* Mobile Top Bar */}
       <div className="sm:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-cyan-600 via-sky-700 to-teal-800 text-white shadow-md py-2 flex items-center justify-center text-lg font-semibold">
         <ApplicationLogoW className="h-6 w-auto mr-2" />
-        <span>PWEDE NA 'TO</span>
+        <span>PWD NA 'TO</span>
       </div>
 
       {/* Header (desktop only) */}

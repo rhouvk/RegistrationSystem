@@ -11,6 +11,7 @@ export default function DownloadDashboardPDF({
   femaleCount = 0,
   education = {},
   employmentStatus = {},
+  ageGroups = {},
 }) {
   const generatePDF = () => {
     const doc = new jsPDF();
@@ -20,6 +21,7 @@ export default function DownloadDashboardPDF({
     doc.setFontSize(16);
     doc.setTextColor(33, 37, 41);
     doc.text(`PWD NA 'TO - Dashboard Summary Report`, 14, 16);
+
     doc.setFontSize(10);
     doc.setTextColor(100);
     doc.text(`Generated: ${dateGenerated}`, 14, 22);
@@ -38,41 +40,46 @@ export default function DownloadDashboardPDF({
       startY: 28,
     });
 
-    if (data.disabilities?.length) {
-      autoTable(doc, {
-        head: [['Disability Type', 'Count']],
-        body: data.disabilities.map((d) => [d.name, d.count]),
-        startY: doc.lastAutoTable.finalY + 10,
-        headStyles: { fillColor: [13, 148, 136] },
-      });
-    }
+    const insertTable = (title, headers, rows) => {
+      if (rows.length) {
+        autoTable(doc, {
+          head: [headers],
+          body: rows,
+          startY: doc.lastAutoTable.finalY + 10,
+          headStyles: { fillColor: [13, 148, 136] },
+        });
+      }
+    };
 
-    if (Object.keys(adminDistrictData).length) {
-      autoTable(doc, {
-        head: [['Admin District', 'PWD Count']],
-        body: Object.entries(adminDistrictData).map(([k, v]) => [k, v]),
-        startY: doc.lastAutoTable.finalY + 10,
-        headStyles: { fillColor: [13, 148, 136] },
-      });
-    }
+    insertTable(
+      'Disability Types',
+      ['Disability Type', 'Count'],
+      (data.disabilities || []).map((d) => [d.name, d.count])
+    );
 
-    if (Object.keys(education).length) {
-      autoTable(doc, {
-        head: [['Education Level', 'Count']],
-        body: Object.entries(education).map(([key, val]) => [key, val]),
-        startY: doc.lastAutoTable.finalY + 10,
-        headStyles: { fillColor: [13, 148, 136] },
-      });
-    }
+    insertTable(
+      'Admin Districts',
+      ['Admin District', 'PWD Count'],
+      Object.entries(adminDistrictData)
+    );
 
-    if (Object.keys(employmentStatus).length) {
-      autoTable(doc, {
-        head: [['Employment Status', 'Count']],
-        body: Object.entries(employmentStatus).map(([key, val]) => [key, val]),
-        startY: doc.lastAutoTable.finalY + 10,
-        headStyles: { fillColor: [13, 148, 136] },
-      });
-    }
+    insertTable(
+      'Education Levels',
+      ['Education Level', 'Count'],
+      Object.entries(education)
+    );
+
+    insertTable(
+      'Employment Status',
+      ['Employment Status', 'Count'],
+      Object.entries(employmentStatus)
+    );
+
+    insertTable(
+      'Age Groups',
+      ['Age Range', 'Count'],
+      Object.entries(ageGroups)
+    );
 
     doc.save(`dashboard_report_${selectedYear}.pdf`);
   };

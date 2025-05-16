@@ -25,4 +25,8 @@ public function pwdRegistrations()
     return $this->hasMany(PWDRegistration::class);
 }
 
+public function adminDistrict()
+{
+    return $this->belongsTo(AdminDistrict::class);
+}
 }

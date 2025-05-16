@@ -25,7 +25,7 @@ export default function Login({ status, canResetPassword }) {
         <>
             <Head title="Log in" />
 
-            <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+            <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 flex-grow">
                 {/* Radial Gradient Background */}
                 <div className="absolute inset-0 bg-[radial-gradient(circle,_#E0FFFF_10%,_#0093AF)] z-0" />
 

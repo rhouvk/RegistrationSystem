@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Line, Bar } from 'react-chartjs-2';
+import HoverMap from '@/Components/HoverMap';
+import { Line, Bar, Pie } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -10,10 +11,10 @@ import {
   Title,
   Tooltip,
   Legend,
+  ArcElement,
 } from 'chart.js';
 import AdminLayout from '@/Layouts/AdminLayout';
 import DownloadDashboardPDF from '@/Components/DownloadDashboardPDF';
-
 import { Head } from '@inertiajs/react';
 import {
   FaFemale,
@@ -23,6 +24,12 @@ import {
   FaSyncAlt,
   FaExclamationCircle,
 } from 'react-icons/fa';
+import {
+  teal,
+  cyan,
+  sky,
+  blueGray,
+} from 'tailwindcss/colors';
 
 ChartJS.register(
   CategoryScale,
@@ -32,38 +39,38 @@ ChartJS.register(
   BarElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  ArcElement
 );
 
-export default function AdminDashboard({ yearData = {}, maleCount = 0, femaleCount = 0, adminDistrictData = {}, educationData = {}, employmentData = {} }) {
-  const currentYear = new Date().getFullYear();
+const colorPalette = [teal[500], cyan[500], sky[500], teal[400], cyan[400], sky[400]];
 
+export default function AdminDashboard({ yearData = {}, maleCount = 0, femaleCount = 0, adminDistrictData = {}, educationData = {}, employmentData = {}, ageGroups = {} }) {
+  const currentYear = new Date().getFullYear();
   const allKeys = Object.keys(yearData);
   const allYears = allKeys.filter(y => y !== 'overall').map(Number).sort((a, b) => b - a);
   const [selectedYear, setSelectedYear] = useState(allKeys.includes('overall') ? 'overall' : `${allYears[0]}`);
-
   const last5Years = allYears.filter(y => y >= currentYear - 4).sort((a, b) => a - b);
+
+  const { registered = {}, status = {}, disabilities = [] } = yearData[selectedYear] || {};
+
   const lineData = {
     labels: last5Years.map(String),
     datasets: [{
       label: 'Total Registered PWDs (Last 5 Years)',
       data: last5Years.map(y => yearData[y]?.registered?.total || 0),
-      borderColor: '#0B3B46',
-      backgroundColor: '#2F7E91',
+      borderColor: teal[600],
+      backgroundColor: teal[300],
       fill: false,
     }],
   };
-
-  const lineOptions = { responsive: true, maintainAspectRatio: false };
-
-  const { registered = {}, status = {}, disabilities = [] } = yearData[selectedYear] || {};
 
   const disabilityChartData = {
     labels: disabilities.map(d => d.name),
     datasets: [{
       label: `PWDs in ${selectedYear}`,
       data: disabilities.map(d => d.count),
-      backgroundColor: disabilities.map(d => d.color),
+      backgroundColor: disabilities.map((_, index) => colorPalette[index % colorPalette.length]),
     }],
   };
 
@@ -72,7 +79,7 @@ export default function AdminDashboard({ yearData = {}, maleCount = 0, femaleCou
     datasets: [{
       label: 'PWD Count by Admin District',
       data: Object.values(adminDistrictData),
-      backgroundColor: '#2F7E91',
+      backgroundColor: [teal[600], cyan[600], sky[600], teal[500], cyan[500], sky[500]],
     }],
   };
 
@@ -81,7 +88,7 @@ export default function AdminDashboard({ yearData = {}, maleCount = 0, femaleCou
     datasets: [{
       label: 'PWDs by Education Level',
       data: Object.values(educationData),
-      backgroundColor: '#5DC8D9',
+      backgroundColor: [teal[600], cyan[600], sky[600], teal[500], cyan[500], sky[500]],
     }],
   };
 
@@ -90,7 +97,16 @@ export default function AdminDashboard({ yearData = {}, maleCount = 0, femaleCou
     datasets: [{
       label: 'PWDs by Employment Status',
       data: Object.values(employmentData),
-      backgroundColor: '#84D7E3',
+      backgroundColor: [teal[600], cyan[500], sky[500], teal[500], cyan[500], sky[500]],
+    }],
+  };
+
+  const ageChartData = {
+    labels: Object.keys(ageGroups),
+    datasets: [{
+      label: 'PWDs by Age Group',
+      data: Object.values(ageGroups),
+      backgroundColor: [teal[600], cyan[600], sky[600], teal[500], cyan[500], sky[500]],
     }],
   };
 
@@ -98,8 +114,35 @@ export default function AdminDashboard({ yearData = {}, maleCount = 0, femaleCou
     responsive: true,
     indexAxis: 'y',
     maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'top' },
+    plugins: { legend: { position: 'top' } },
+    scales: {
+      x: {
+        ticks: {
+          color: blueGray[700],
+        },
+      },
+      y: {
+        ticks: {
+          color: blueGray[700],
+        },
+      },
+    },
+  };
+
+  const lineOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        ticks: {
+          color: blueGray[700],
+        },
+      },
+      y: {
+        ticks: {
+          color: blueGray[700],
+        },
+      },
     },
   };
 
@@ -111,66 +154,76 @@ export default function AdminDashboard({ yearData = {}, maleCount = 0, femaleCou
   }, [selectedYear]);
 
   return (
-    <AdminLayout header={<h2 className="text-2xl font-bold">Admin Dashboard</h2>}>
+    <AdminLayout header={<h2 className="text-2xl font-bold text-blueGray-800">Admin Dashboard</h2>}>
       <Head title="Admin Dashboard" />
       <div className="min-h-screen py-8">
         <div className="max-w-7xl mx-auto px-4 space-y-6">
-
           <div className="flex flex-col md:flex-row gap-6">
+            {/* Left: Line Chart */}
             <div className="bg-white rounded p-4 w-full md:w-1/3 min-h-[14rem]">
               <Line data={lineData} options={lineOptions} />
             </div>
 
+            {/* Middle: Gender Stats */}
             <div className="flex flex-col gap-4 w-full md:w-1/3">
               <div className="bg-white rounded p-3 flex flex-col items-center">
-                <FaFemale className="text-4xl mb-1 text-[#0B3B46]" />
-                <h3 className="text-base font-semibold">Females</h3>
-                <p className="text-2xl font-bold text-[#1F5562]">{femaleCount}</p>
+                <FaFemale className="text-4xl mb-1 text-cyan-950" />
+                <h3 className="text-base font-semibold text-blueGray-700">Females</h3>
+                <p className="text-2xl font-bold text-cyan-700">{femaleCount}</p>
               </div>
               <div className="bg-white rounded p-3 flex flex-col items-center">
-                <FaMale className="text-4xl mb-1 text-[#0B3B46]" />
-                <h3 className="text-base font-semibold">Males</h3>
-                <p className="text-2xl font-bold text-[#1F5562]">{maleCount}</p>
+                <FaMale className="text-4xl mb-1 text-cyan-950" />
+                <h3 className="text-base font-semibold text-blueGray-700">Males</h3>
+                <p className="text-2xl font-bold text-cyan-700">{maleCount}</p>
               </div>
               <div className="bg-white rounded p-3 flex flex-col items-center">
-                <FaUsers className="text-4xl mb-1 text-[#0B3B46]" />
-                <h3 className="text-base font-semibold">Total</h3>
-                <p className="text-2xl font-bold text-[#1F5562]">{maleCount + femaleCount}</p>
+                <FaUsers className="text-4xl mb-1 text-cyan-950" />
+                <h3 className="text-base font-semibold text-blueGray-700">Total</h3>
+                <p className="text-2xl font-bold text-cyan-700">{maleCount + femaleCount}</p>
               </div>
+
+              <div className="bg-white rounded p-3 flex flex-col items-center">
+                <h3 className="text-center text-xl font-semibold mb-2 text-cyan-950">
+                  {selectedYear === 'overall' ? 'Overall Status' : `${selectedYear} Status`}
+                </h3>
+                <div className="flex justify-center items-center space-x-8">
+                  <div className="flex flex-col items-center">
+                    <FaClipboardCheck className="text-5xl text-cyan-600" />
+                    <p className="mt-1 text-blueGray-700">New</p>
+                    <p className="font-bold text-blueGray-800">{status.new}</p>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <FaSyncAlt className="text-5xl text-sky-600" />
+                    <p className="mt-1 text-blueGray-700">Renewed</p>
+                    <p className="font-bold text-blueGray-800">{status.renewed}</p>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <FaExclamationCircle className="text-5xl text-teal-500" />
+                    <p className="mt-1 text-blueGray-700">Expired</p>
+                    <p className="font-bold text-blueGray-800">{status.expired}</p>
+                  </div>
+                </div>
+              </div>
+
+
             </div>
 
+            {/* Right: Map */}
             <div className="bg-white rounded p-4 w-full md:w-1/3">
-              <h3 className="text-center text-xl font-semibold mb-2 text-[#0B3B46]">
-                {selectedYear === 'overall' ? 'Overall Status' : `${selectedYear} Status`}
-              </h3>
-              <div className="flex justify-center items-center space-x-8">
-                <div className="flex flex-col items-center">
-                  <FaClipboardCheck className="text-5xl text-[#1F5562]" />
-                  <p className="mt-1">New</p>
-                  <p className="font-bold">{status.new}</p>
-                </div>
-                <div className="flex flex-col items-center">
-                  <FaSyncAlt className="text-5xl text-[#2F7E91]" />
-                  <p className="mt-1">Renewed</p>
-                  <p className="font-bold">{status.renewed}</p>
-                </div>
-                <div className="flex flex-col items-center">
-                  <FaExclamationCircle className="text-5xl text-[#3EA9BD]" />
-                  <p className="mt-1">Expired</p>
-                  <p className="font-bold">{status.expired}</p>
-                </div>
-              </div>
+              <h3 className="text-xl font-bold text-center mb-4 text-cyan-950">Davao District Map</h3>
+              <HoverMap adminDistrictData={adminDistrictData} />
             </div>
           </div>
 
+
           <div className="flex justify-end gap-2">
-            <label htmlFor="yearSelect" className="font-bold text-[#0B3B46]">Sort by Year:</label>
+            <label htmlFor="yearSelect" className="font-bold text-blueGray-700">Sort by Year:</label>
             <select
               id="yearSelect"
               value={selectedYear}
               onChange={(e) => setSelectedYear(e.target.value)}
-              className="bg-white border rounded px-4 py-2 focus:outline-none text-[#0B3B46]"
-              style={{ borderColor: '#0B3B46' }}
+              className="bg-white border rounded px-4 py-2 focus:outline-none text-blueGray-700"
+              style={{ borderColor: teal[600] }}
             >
               {allKeys.includes('overall') && <option value="overall">Overall</option>}
               {allYears.map(yr => (
@@ -188,44 +241,54 @@ export default function AdminDashboard({ yearData = {}, maleCount = 0, femaleCou
               femaleCount={femaleCount}
               education={educationData}
               employmentStatus={employmentData}
+              ageGroups={ageGroups}
             />
           </div>
 
           <div className={`bg-white rounded p-4 transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
-            <h3 className="text-xl font-bold text-center mb-4 text-[#0B3B46]">
-              Types of Disabilities ({selectedYear})
-            </h3>
+            <h3 className="text-xl font-bold text-center mb-4 text-cyan-950">Types of Disabilities ({selectedYear})</h3>
             <div className="h-72">
               <Bar data={disabilityChartData} options={horizontalOptions} />
             </div>
           </div>
 
           <div className={`bg-white rounded p-4 transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
-            <h3 className="text-xl font-bold text-center mb-4 text-[#0B3B46]">
-              PWD Distribution by Admin District
-            </h3>
+            <h3 className="text-xl font-bold text-center mb-4 text-cyan-950">PWD Distribution by Admin District</h3>
             <div className="h-72">
               <Bar data={districtChartData} options={horizontalOptions} />
             </div>
           </div>
 
           <div className={`bg-white rounded p-4 transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
-            <h3 className="text-xl font-bold text-center mb-4 text-[#0B3B46]">
-              PWDs by Education Level
-            </h3>
+            <h3 className="text-xl font-bold text-center mb-4 text-cyan-950">PWDs by Education Level</h3>
             <div className="h-72">
               <Bar data={educationChartData} options={horizontalOptions} />
             </div>
           </div>
+          
+          <div className={`flex flex-col md:flex-row gap-6 transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
+            {/* Employment Pie Chart */}
+            <div className="bg-white rounded p-4 w-full md:w-1/2 flex justify-center items-center">
+              <div className="w-full max-w-xs">
+                <h3 className="text-xl font-bold text-center mb-4 text-cyan-950">PWDs by Employment Status</h3>
+                <div className="aspect-square">
+                  <Pie data={employmentChartData} options={{ responsive: true, maintainAspectRatio: false }} />
+                </div>
+              </div>
+            </div>
 
-          <div className={`bg-white rounded p-4 transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
-            <h3 className="text-xl font-bold text-center mb-4 text-[#0B3B46]">
-              PWDs by Employment Status
-            </h3>
-            <div className="h-72">
-              <Bar data={employmentChartData} options={horizontalOptions} />
+            {/* Age Group Pie Chart */}
+            <div className="bg-white rounded p-4 w-full md:w-1/2 flex justify-center items-center">
+              <div className="w-full max-w-xs">
+                <h3 className="text-xl font-bold text-center mb-4 text-cyan-950">PWDs by Age Group</h3>
+                <div className="aspect-square">
+                  <Pie data={ageChartData} options={{ responsive: true, maintainAspectRatio: false }} />
+                </div>
+              </div>
             </div>
           </div>
+
+
         </div>
       </div>
     </AdminLayout>

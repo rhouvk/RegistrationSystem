@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PWDRegistration;
 use App\Models\AdminControl;
+use App\Models\DisabilityList;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Exception;
@@ -14,23 +15,24 @@ class AdminDashboardController extends Controller
     public function index()
     {
         try {
-            $records = PWDRegistration::with(['user', 'disabilityType', 'barangay'])->get();
+            $records = PWDRegistration::with(['user', 'disabilityType', 'barangay.adminDistrict'])->get();
             $admin = AdminControl::first();
             $cardExpirationYears = $admin->cardExpiration ?? 5;
 
             $currentYear = Carbon::now()->year;
-            $typeList = collect([
-                ['name' => 'Deaf or Hard of Hearing', 'color' => '#0B3B46'],
-                ['name' => 'Intellectual Disability', 'color' => '#1F5562'],
-                ['name' => 'Learning Disability', 'color' => '#2F7E91'],
-                ['name' => 'Mental Disability', 'color' => '#3EA9BD'],
-                ['name' => 'Physical Disability', 'color' => '#5DC8D9'],
-                ['name' => 'Psychosocial Disability', 'color' => '#84D7E3'],
-                ['name' => 'Speech and Language Impairment', 'color' => '#AADFE8'],
-                ['name' => 'Visual Disability', 'color' => '#C5ECF4'],
-                ['name' => 'Cancer', 'color' => '#E0F6FA'],
-                ['name' => 'Rare Disease', 'color' => '#F4FCFD'],
-            ]);
+            $earliestYear = $currentYear - 4; // Only keep last 5 years
+
+            $typeList = DisabilityList::where('category', 'Type')->get()->values();
+            $colors = ['#0B3B46','#1F5562','#2F7E91','#3EA9BD','#5DC8D9','#84D7E3','#AADFE8','#C5ECF4','#E0F6FA','#F4FCFD'];
+
+            $typeMap = [];
+            foreach ($typeList as $index => $type) {
+                $typeMap[$type->name] = [
+                    'name' => $type->name,
+                    'color' => $colors[$index % count($colors)],
+                    'count' => 0
+                ];
+            }
 
             $yearData = [];
             $totalMale = 0;
@@ -38,6 +40,13 @@ class AdminDashboardController extends Controller
             $adminDistrictData = [];
             $educationData = [];
             $employmentData = [];
+            $ageGroups = [
+                '0-16' => 0,
+                '17-30' => 0,
+                '31-45' => 0,
+                '46-59' => 0,
+                '60+' => 0,
+            ];
 
             foreach ($records as $pwd) {
                 $dateApplied = optional($pwd->dateApplied);
@@ -45,13 +54,26 @@ class AdminDashboardController extends Controller
                 if (!$appliedYear) continue;
 
                 $year = (string) $appliedYear;
+                $isWithinLast5Years = $appliedYear >= $earliestYear;
+                $groupYears = $isWithinLast5Years ? [$year, 'overall'] : ['overall'];
 
+                foreach ($groupYears as $key) {
+                    if (!isset($yearData[$key])) {
+                        $yearData[$key] = [
+                            'registered' => ['female' => 0, 'male' => 0, 'total' => 0],
+                            'status' => ['new' => 0, 'renewed' => 0, 'expired' => 0, 'total' => 0],
+                            'disabilities' => collect($typeMap)->map(fn($t) => $t + ['count' => 0])->values()->toArray(),
+                        ];
+                    }
+                }
+
+                $year = (string) $appliedYear;
                 foreach ([$year, 'overall'] as $key) {
                     if (!isset($yearData[$key])) {
                         $yearData[$key] = [
                             'registered' => ['female' => 0, 'male' => 0, 'total' => 0],
                             'status' => ['new' => 0, 'renewed' => 0, 'expired' => 0, 'total' => 0],
-                            'disabilities' => $typeList->map(fn($t) => array_merge($t, ['count' => 0]))->toArray(),
+                            'disabilities' => collect($typeMap)->map(fn($t) => $t + ['count' => 0])->values()->toArray(),
                         ];
                     }
                 }
@@ -92,12 +114,12 @@ class AdminDashboardController extends Controller
                 $yearData[$year]['status']['total']++;
                 $yearData['overall']['status']['total']++;
 
-                // Disability Types
+                // Disability
                 $typeName = $pwd->disabilityType->name ?? null;
                 if ($typeName) {
                     foreach ([$year, 'overall'] as $key) {
                         foreach ($yearData[$key]['disabilities'] as &$entry) {
-                            if (strtolower($entry['name']) === strtolower($typeName)) {
+                            if ($entry['name'] === $typeName) {
                                 $entry['count']++;
                                 break;
                             }
@@ -105,11 +127,9 @@ class AdminDashboardController extends Controller
                     }
                 }
 
-                // Admin District Chart Data
-                $district = optional($pwd->barangay)->admin_district ?? 'Unassigned';
-                if (!isset($adminDistrictData[$district])) {
-                    $adminDistrictData[$district] = 0;
-                }
+                // Admin District
+                $district = optional($pwd->barangay?->adminDistrict)->name ?? 'Unassigned';
+                if (!isset($adminDistrictData[$district])) $adminDistrictData[$district] = 0;
                 $adminDistrictData[$district]++;
 
                 // Education
@@ -117,10 +137,20 @@ class AdminDashboardController extends Controller
                 if (!isset($educationData[$edu])) $educationData[$edu] = 0;
                 $educationData[$edu]++;
 
-                // Employment Status
+                // Employment
                 $emp = $pwd->employmentStatus ?? 'Unspecified';
                 if (!isset($employmentData[$emp])) $employmentData[$emp] = 0;
                 $employmentData[$emp]++;
+
+                // Age Group
+                if ($pwd->dob) {
+                    $age = Carbon::parse($pwd->dob)->age;
+                    if ($age <= 16) $ageGroups['0-16']++;
+                    elseif ($age <= 30) $ageGroups['17-30']++;
+                    elseif ($age <= 45) $ageGroups['31-45']++;
+                    elseif ($age <= 59) $ageGroups['46-59']++;
+                    else $ageGroups['60+']++;
+                }
             }
 
             $validYears = array_keys($yearData);
@@ -133,6 +163,7 @@ class AdminDashboardController extends Controller
                 'adminDistrictData' => $adminDistrictData,
                 'educationData' => $educationData,
                 'employmentData' => $employmentData,
+                'ageGroups' => $ageGroups,
             ]);
         } catch (Exception $e) {
             return redirect()->back()->withErrors(['error' => 'Failed to load dashboard data.']);
