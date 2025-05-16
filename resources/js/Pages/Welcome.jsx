@@ -4,6 +4,14 @@ import { useEffect, useState } from 'react';
 export default function Welcome({ auth }) {
     const [isMobile, setIsMobile] = useState(false);
     const [deferredPrompt, setDeferredPrompt] = useState(null);
+    const isIOS = () => {
+        return /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+        };
+
+        const isInStandaloneMode = () => {
+        return ('standalone' in window.navigator) && (window.navigator.standalone);
+        };
+
 
     useEffect(() => {
         const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -108,22 +116,24 @@ export default function Welcome({ auth }) {
                                 )}
                                 {!auth.user && (
                                     <button
-                                        onClick={() => {
-                                            if (deferredPrompt) {
-                                                deferredPrompt.prompt();
-                                                deferredPrompt.userChoice.then((choiceResult) => {
-                                                    if (choiceResult.outcome === 'accepted') {
-                                                        console.log('✅ User accepted the install prompt');
-                                                    } else {
-                                                        console.log('❌ User dismissed the install prompt');
-                                                    }
-                                                    setDeferredPrompt(null); // Clear it
-                                                });
-                                            } else {
-                                                // Fallback: Redirect to register if install prompt not available
-                                                window.location.href = route('register');
-                                            }
-                                        }}
+                                    onClick={() => {
+                                        if (deferredPrompt) {
+                                            deferredPrompt.prompt();
+                                            deferredPrompt.userChoice.then((choiceResult) => {
+                                                if (choiceResult.outcome === 'accepted') {
+                                                    console.log('✅ User accepted the install prompt');
+                                                } else {
+                                                    console.log('❌ User dismissed the install prompt');
+                                                }
+                                                setDeferredPrompt(null);
+                                            });
+                                        } else if (isIOS() && !isInStandaloneMode()) {
+                                            alert("📱 On iOS, tap the Share icon in Safari and select 'Add to Home Screen' to install the app.");
+                                        } else {
+                                            // Fallback (e.g., no support, already installed)
+                                            window.location.href = route('register');
+                                        }
+                                    }}
                                         className="text-teal-700 font-semibold text-lg hover:scale-105 hover:text-white transition-transform duration-200 inline-flex items-center gap-2"
                                     >
                                         Get Started <span className="text-2xl">→</span>
