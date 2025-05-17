@@ -3,6 +3,7 @@ const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
+  '/offline.html',
   '/images/icons/icon-192x192.png',
   '/images/icons/icon-512x512.png',
   // Welcome page assets
@@ -27,23 +28,30 @@ self.addEventListener('install', (event) => {
       caches.open(DYNAMIC_CACHE)
     ])
   );
+  self.skipWaiting(); // Ensure new service worker takes over immediately
 });
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames
-          .filter((name) => ![CACHE_NAME, PWD_DATA_CACHE, DYNAMIC_CACHE].includes(name))
-          .map((name) => caches.delete(name))
-      );
-    })
+    Promise.all([
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames
+            .filter((name) => ![CACHE_NAME, PWD_DATA_CACHE, DYNAMIC_CACHE].includes(name))
+            .map((name) => caches.delete(name))
+        );
+      }),
+      self.clients.claim() // Take control of all clients immediately
+    ])
   );
 });
 
 // Fetch event - serve from cache, fall back to network
 self.addEventListener('fetch', (event) => {
+  // Skip non-GET requests
+  if (event.request.method !== 'GET') return;
+
   // Handle PWD verification API requests
   if (event.request.url.includes('/api/pwd/verify')) {
     event.respondWith(handlePWDVerification(event.request));
@@ -53,47 +61,72 @@ self.addEventListener('fetch', (event) => {
   // Handle navigation requests (HTML pages)
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request)
-        .catch(() => {
-          return caches.match(event.request) || caches.match('/');
-        })
+      (async () => {
+        try {
+          // Try network first for navigation
+          const networkResponse = await fetch(event.request);
+          // Cache successful navigation responses
+          const cache = await caches.open(DYNAMIC_CACHE);
+          cache.put(event.request, networkResponse.clone());
+          return networkResponse;
+        } catch (error) {
+          // If network fails, try cache
+          const cachedResponse = await caches.match(event.request);
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          // If no cached version, try the root page
+          const rootResponse = await caches.match('/');
+          if (rootResponse) {
+            return rootResponse;
+          }
+          // Last resort: offline page
+          return caches.match('/offline.html');
+        }
+      })()
     );
     return;
   }
 
-  // Handle other requests with cache-first strategy
+  // Handle static assets and other requests
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
+    (async () => {
+      // Try cache first
+      const cachedResponse = await caches.match(event.request);
       if (cachedResponse) {
-        // Return cached response and update cache in background
+        // Update cache in background
         updateCache(event.request);
         return cachedResponse;
       }
 
-      return fetch(event.request)
-        .then((response) => {
-          // Cache successful responses
-          if (response.ok && response.type === 'basic') {
-            const responseToCache = response.clone();
-            caches.open(DYNAMIC_CACHE).then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
-          }
-          return response;
-        })
-        .catch(() => {
-          // For images, return a fallback if available
-          if (event.request.destination === 'image') {
-            return caches.match('/images/offline-placeholder.png');
-          }
-          return new Response('Offline content not available');
+      try {
+        // If not in cache, try network
+        const networkResponse = await fetch(event.request);
+        // Cache successful responses
+        if (networkResponse.ok && networkResponse.type === 'basic') {
+          const cache = await caches.open(DYNAMIC_CACHE);
+          cache.put(event.request, networkResponse.clone());
+        }
+        return networkResponse;
+      } catch (error) {
+        // Handle failed requests
+        if (event.request.destination === 'image') {
+          return caches.match('/images/offline-placeholder.png');
+        }
+        // For other resources, return a simple offline response
+        return new Response('', {
+          status: 499,
+          statusText: 'offline'
         });
-    })
+      }
+    })()
   );
 });
 
 // Update cache in background
 async function updateCache(request) {
+  if (!navigator.onLine) return;
+  
   const cache = await caches.open(DYNAMIC_CACHE);
   try {
     const response = await fetch(request);
@@ -108,7 +141,7 @@ async function updateCache(request) {
 // Handle PWD verification requests
 async function handlePWDVerification(request) {
   try {
-    // Try to fetch from network first
+    // Try network first
     const response = await fetch(request);
     if (response.ok) {
       const pwdData = await response.clone().json();
