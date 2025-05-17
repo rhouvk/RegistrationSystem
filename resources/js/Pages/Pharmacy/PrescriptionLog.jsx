@@ -1,17 +1,35 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Head, usePage, Link, router } from '@inertiajs/react';
 import PharmacyLayout from '@/Layouts/PharmacyLayout';
 import DownloadPrescriptionLogCSV from '@/Components/DownloadPrescriptionLogCSV';
 import DownloadPrescriptionLogPDF from '@/Components/DownloadPrescriptionLogPDF';
 import { FaEdit } from 'react-icons/fa';
 
-export default function PrescriptionLog() {
-    const { prescriptions = [], auth } = usePage().props;
+export default function PrescriptionLog({ prescriptions, filters }) {
+    const { auth } = usePage().props;
+    const [search, setSearch] = useState(filters.search || '');
+    const [entriesPerPage, setEntriesPerPage] = useState(filters.perPage || 12);
+    const [expandedRow, setExpandedRow] = useState(null);
 
-    const [search, setSearch] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
-    const [expandedRow, setExpandedRow] = useState(null); // State to track expanded row
-    const perPage = 12;
+    const handleSearchChange = (e) => {
+        const val = e.target.value;
+        setSearch(val);
+        router.get(route('pharmacy.prescriptions.log'), { search: val, perPage: entriesPerPage }, { preserveState: true, replace: true });
+    };
+
+    const handlePerPageChange = (e) => {
+        const val = parseInt(e.target.value);
+        setEntriesPerPage(val);
+        router.get(route('pharmacy.prescriptions.log'), { search, perPage: val }, { preserveState: true, replace: true });
+    };
+
+    const changePage = (page) => {
+        router.get(route('pharmacy.prescriptions.log'), { search, perPage: entriesPerPage, page }, { preserveState: true, replace: true });
+    };
+
+    const toggleRow = (index) => {
+        setExpandedRow(expandedRow === index ? null : index);
+    };
 
     const renderFilingStatus = (status) => {
         let label = '';
@@ -42,52 +60,35 @@ export default function PrescriptionLog() {
         );
     };
 
-    const filtered = useMemo(() => {
-        return prescriptions.filter((p) =>
-            [p.pwd_number, p.medicine_purchase]
-                .join(' ')
-                .toLowerCase()
-                .includes(search.toLowerCase())
-        );
-    }, [search, prescriptions]);
-
-    const paginated = useMemo(() => {
-        const start = (currentPage - 1) * perPage;
-        return filtered.slice(start, start + perPage);
-    }, [filtered, currentPage]);
-
-    const totalPages = Math.ceil(filtered.length / perPage);
-
-    const handlePageChange = (page) => {
-        setCurrentPage(page);
-        setExpandedRow(null); // Collapse expanded row on page change
-    };
-
-    const toggleRow = (index) => {
-        setExpandedRow(expandedRow === index ? null : index);
-    };
-
     return (
         <PharmacyLayout header={<h2 className="text-xl font-semibold leading-tight">Prescription Log</h2>}>
             <Head title="Prescription Log" />
 
             <div className="py-8">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-                    {/* Search */}
+                    {/* Search and Controls */}
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <input
-                            type="text"
-                            placeholder="Search by PWD number or medicine..."
-                            value={search}
-                            onChange={(e) => {
-                                setSearch(e.target.value);
-                                setCurrentPage(1);
-                            }}
-                            className="w-full sm:w-1/2 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-cyan-500 focus:border-cyan-500"
-                        />
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <input
+                                type="text"
+                                placeholder="Search by PWD number or medicine..."
+                                value={search}
+                                onChange={handleSearchChange}
+                                className="w-full sm:w-64 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-cyan-500 focus:border-cyan-500"
+                            />
+                            <select
+                                value={entriesPerPage}
+                                onChange={handlePerPageChange}
+                                className="w-full sm:w-auto border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                            >
+                                <option value={12}>12 entries</option>
+                                <option value={24}>24 entries</option>
+                                <option value={100}>100 entries</option>
+                            </select>
+                        </div>
                         <div className="flex flex-wrap gap-2">
-                            <DownloadPrescriptionLogPDF data={filtered} drugstoreName={auth?.user?.name || 'Your Drugstore'} />
-                            <DownloadPrescriptionLogCSV data={filtered} />
+                            <DownloadPrescriptionLogPDF data={prescriptions.data} drugstoreName={auth?.user?.name || 'Your Drugstore'} />
+                            <DownloadPrescriptionLogCSV data={prescriptions.data} />
                         </div>
                     </div>
 
@@ -107,8 +108,8 @@ export default function PrescriptionLog() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 bg-white">
-                                {paginated.length > 0 ? (
-                                    paginated.map((p, idx) => (
+                                {prescriptions.data.length > 0 ? (
+                                    prescriptions.data.map((p, idx) => (
                                         <React.Fragment key={idx}>
                                             <tr
                                                 className={`hover:bg-gray-50 transition cursor-pointer ${expandedRow === idx ? 'bg-gray-100' : ''}`}
@@ -123,7 +124,10 @@ export default function PrescriptionLog() {
                                                 <td className="px-4 py-2 text-center">{renderFilingStatus(p.filling_status_label)}</td>
                                                 <td className="px-4 py-2 text-right">
                                                     <button
-                                                          onClick={() => router.get(route('prescriptions.edit', p.id))}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            router.get(route('prescriptions.edit', p.id));
+                                                        }}
                                                         className="inline-flex items-center gap-2 px-4 py-1 text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
                                                     >
                                                         <FaEdit />
@@ -139,7 +143,6 @@ export default function PrescriptionLog() {
                                                             <div><strong>PTR No.:</strong> {p.physician_ptr_no || '—'}</div>
                                                             <div><strong>Pharmacist:</strong> {p.pharmacist_name || '—'}</div>
                                                             <div><strong>Physician Address:</strong> {p.physician_address || '—'}</div>
-                                                            {/* Add more details here based on what you want to reveal */}
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -155,10 +158,10 @@ export default function PrescriptionLog() {
                         </table>
                     </div>
 
-                    {/* Mobile Card View with Dropdown */}
+                    {/* Mobile Card View */}
                     <div className="block md:hidden space-y-4">
-                        {paginated.length > 0 ? (
-                            paginated.map((p, idx) => (
+                        {prescriptions.data.length > 0 ? (
+                            prescriptions.data.map((p, idx) => (
                                 <div key={idx} className={`border border-gray-200 rounded-lg shadow p-4 bg-white ${expandedRow === idx ? 'bg-gray-100' : ''}`}>
                                     <div
                                         className="cursor-pointer"
@@ -206,21 +209,51 @@ export default function PrescriptionLog() {
                     </div>
 
                     {/* Pagination */}
-                    {filtered.length > 0 && totalPages > 1 && (
-                        <div className="flex justify-center mt-6 space-x-2">
-                            {Array.from({ length: totalPages }).map((_, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => handlePageChange(i + 1)}
-                                    className={`px-3 py-1 rounded-md text-sm font-medium focus:outline-none ${
-                                        currentPage === i + 1
-                                            ? 'bg-cyan-600 text-white'
-                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                    }`}
-                                >
-                                    {i + 1}
-                                </button>
-                            ))}
+                    {prescriptions.last_page > 1 && (
+                        <div className="mt-4 flex justify-center items-center gap-2">
+                            <button 
+                                onClick={() => changePage(1)} 
+                                disabled={prescriptions.current_page === 1}
+                                className={`px-3 py-1 rounded ${prescriptions.current_page === 1 
+                                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                                    : 'bg-cyan-600 text-white hover:bg-cyan-700'}`}
+                            >
+                                First
+                            </button>
+                            <button 
+                                onClick={() => changePage(prescriptions.current_page - 1)} 
+                                disabled={prescriptions.current_page === 1}
+                                className={`px-3 py-1 rounded ${prescriptions.current_page === 1 
+                                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                                    : 'bg-cyan-600 text-white hover:bg-cyan-700'}`}
+                            >
+                                Prev
+                            </button>
+                            
+                            <div className="flex items-center gap-1">
+                                <span className="px-3 py-1 bg-gray-100 rounded">
+                                    Page {prescriptions.current_page} of {prescriptions.last_page}
+                                </span>
+                            </div>
+
+                            <button 
+                                onClick={() => changePage(prescriptions.current_page + 1)} 
+                                disabled={prescriptions.current_page === prescriptions.last_page}
+                                className={`px-3 py-1 rounded ${prescriptions.current_page === prescriptions.last_page 
+                                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                                    : 'bg-cyan-600 text-white hover:bg-cyan-700'}`}
+                            >
+                                Next
+                            </button>
+                            <button 
+                                onClick={() => changePage(prescriptions.last_page)} 
+                                disabled={prescriptions.current_page === prescriptions.last_page}
+                                className={`px-3 py-1 rounded ${prescriptions.current_page === prescriptions.last_page 
+                                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                                    : 'bg-cyan-600 text-white hover:bg-cyan-700'}`}
+                            >
+                                Last
+                            </button>
                         </div>
                     )}
                 </div>

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback, Suspense, useState } from 'react';
 import {
     FaVolumeUp,
     FaVolumeDown,
@@ -8,55 +8,101 @@ import {
     FaTimes,
 } from 'react-icons/fa';
 
-export default function ConfirmBNPCModal({
+function ConfirmBNPCModal({
   show,
   onCancel,
   onConfirm,
   processing = false,
   totalAmount,
   remainingBalance,
-  discount = 0, // ← Add this line
+  discount = 0,
 }) {
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [speechSupported, setSpeechSupported] = useState(false);
+
+  const formatAmount = useCallback((amt) => parseFloat(amt).toFixed(2), []);
+
+  const formatPesosAndCentavos = useCallback((amount) => {
+    const [pesos, centavos] = formatAmount(amount).split('.');
+    return {
+      pesos: parseInt(pesos).toString(),
+      centavos: centavos || '00'
+    };
+  }, [formatAmount]);
+
+  const stopSpeech = useCallback(() => {
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
+  }, []);
+
+  const speakMessage = useCallback((message, lang = 'en-US') => {
+    if (!window.speechSynthesis) return;
+
+    stopSpeech();
+    const utterance = new SpeechSynthesisUtterance(message);
+    utterance.lang = lang;
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+    setIsSpeaking(true);
+    window.speechSynthesis.speak(utterance);
+  }, [stopSpeech]);
+
+  const speakEnglish = useCallback(() => {
+    const total = formatPesosAndCentavos(totalAmount);
+    const balance = formatPesosAndCentavos(remainingBalance);
+    
+    const message = `Please confirm this transaction. The total amount is ${total.pesos} pesos and ${total.centavos} centavos. ` +
+      `The discount is ${discount} percent. ` +
+      `The remaining balance will be ${balance.pesos} pesos and ${balance.centavos} centavos.`;
+    speakMessage(message, 'en-US');
+  }, [totalAmount, discount, remainingBalance, formatPesosAndCentavos, speakMessage]);
+
+  const speakFilipino = useCallback(() => {
+    const total = formatPesosAndCentavos(totalAmount);
+    const balance = formatPesosAndCentavos(remainingBalance);
+    
+    const message = `Paki kumpirma ang transaksiyon. Ang kabuuang halaga ay ${total.pesos} piso at ${total.centavos} sentimo. ` +
+      `Ang diskwento ay ${discount} porsyento. ` +
+      `Ang natitirang balanse ay ${balance.pesos} piso at ${balance.centavos} sentimo.`;
+    speakMessage(message, 'fil-PH');
+  }, [totalAmount, discount, remainingBalance, formatPesosAndCentavos, speakMessage]);
+
+  const handleCancel = useCallback(() => {
+    stopSpeech();
+    onCancel();
+  }, [stopSpeech, onCancel]);
+
+  const handleConfirm = useCallback(() => {
+    stopSpeech();
+    onConfirm();
+  }, [stopSpeech, onConfirm]);
+
+  useEffect(() => {
+    // Check if speech synthesis is supported
+    if ('speechSynthesis' in window) {
+      setSpeechSupported(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!show && isSpeaking) {
+      stopSpeech();
+    }
+    return () => {
+      if (isSpeaking) {
+        stopSpeech();
+      }
+    };
+  }, [show, isSpeaking, stopSpeech]);
+
   if (!show) return null;
 
- const discountedAmount = parseFloat(totalAmount) * (1 - parseFloat(discount) / 100);
+  const discountedAmount = parseFloat(totalAmount) * (1 - parseFloat(discount) / 100);
   const discountedAmountFixed = discountedAmount.toFixed(2);
 
-    const stopSpeech = () => {
-        if (speechSynthesis.speaking || speechSynthesis.pending) {
-            speechSynthesis.cancel();
-        }
-    };
-
-    const formatAmount = (amt) => parseFloat(amt).toFixed(2);
-
-    const speak = (message, lang) => {
-        stopSpeech();
-        const utterance = new SpeechSynthesisUtterance(message);
-        utterance.lang = lang;
-        speechSynthesis.speak(utterance);
-    };
-
-    const speakEnglish = () => {
-        const message = `Please confirm this transaction. The total amount is ${formatAmount(
-            totalAmount
-        )} pesos. The discount is ${discount} percent. The remaining balance will be ${formatAmount(remainingBalance)} pesos.`;
-        speak(message, 'en-US');
-    };
-
-    const speakFilipino = () => {
-        const message = `Paki kumpirma ang transaksiyon. Ang kabuuang halaga ay ${formatAmount(
-            totalAmount
-        )} pesos. Ang diskwento ay ${discount} porsyento. Ang natitirang balanse ay ${formatAmount(remainingBalance)} pesos.`;
-        speak(message, 'fil-PH');
-    };
-
-    // Automatically stop speech on modal close
-    useEffect(() => {
-        if (!show) stopSpeech();
-    }, [show]);
-
- return (
+  return (
     <div className="fixed inset-0 bg-gradient-to-t from-cyan-950/80 to-transparent z-50 flex items-center justify-center">
       <div className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full space-y-6 relative border">
         <div className="bg-gradient-to-r from-teal-500 via-cyan-600 to-sky-500 rounded-md px-4 py-3 text-white text-lg font-bold shadow flex items-center gap-3">
@@ -70,33 +116,50 @@ export default function ConfirmBNPCModal({
           <p><strong>Remaining Balance After Purchase:</strong> ₱{parseFloat(remainingBalance).toFixed(2)}</p>
         </div>
 
-        <div className="flex flex-col sm:flex-row justify-between gap-3">
-          <button onClick={speakEnglish} className="flex-1 flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-800 rounded hover:bg-blue-200">
-            <FaVolumeUp /> English
-          </button>
-          <button onClick={speakFilipino} className="flex-1 flex items-center gap-2 px-4 py-2 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200">
-            <FaVolumeDown /> Filipino
-          </button>
-          <button onClick={stopSpeech} className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-800 rounded hover:bg-gray-200">
-            <FaStop /> Stop
-          </button>
-        </div>
+        {speechSupported ? (
+          <div className="flex flex-col sm:flex-row justify-between gap-3">
+            <button 
+              type="button"
+              onClick={speakEnglish} 
+              disabled={isSpeaking}
+              className="flex-1 flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 disabled:opacity-50"
+            >
+              <FaVolumeUp /> English
+            </button>
+            <button 
+              type="button"
+              onClick={speakFilipino}
+              disabled={isSpeaking}
+              className="flex-1 flex items-center gap-2 px-4 py-2 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200 disabled:opacity-50"
+            >
+              <FaVolumeDown /> Filipino
+            </button>
+            <button 
+              type="button"
+              onClick={stopSpeech}
+              disabled={!isSpeaking}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-800 rounded hover:bg-gray-200 disabled:opacity-50"
+            >
+              <FaStop /> Stop
+            </button>
+          </div>
+        ) : (
+          <div className="text-sm text-gray-500 text-center py-2">
+            Text-to-speech is not supported in your browser
+          </div>
+        )}
 
         <div className="flex justify-end gap-4 pt-4 border-t">
           <button
-            onClick={() => {
-              stopSpeech();
-              onCancel();
-            }}
+            type="button"
+            onClick={handleCancel}
             className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
           >
             <FaTimes /> Cancel
           </button>
           <button
-            onClick={() => {
-              stopSpeech();
-              onConfirm();
-            }}
+            type="button"
+            onClick={handleConfirm}
             disabled={processing}
             className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700 disabled:opacity-50"
           >
@@ -107,5 +170,20 @@ export default function ConfirmBNPCModal({
     </div>
   );
 }
+
+// Create a wrapper component that uses Suspense
+function ConfirmBNPCModalWrapper(props) {
+  return (
+    <Suspense fallback={null}>
+      <ConfirmBNPCModal {...props} />
+    </Suspense>
+  );
+}
+
+// Set display names for both components
+ConfirmBNPCModal.displayName = 'ConfirmBNPCModal';
+ConfirmBNPCModalWrapper.displayName = 'ConfirmBNPCModalWrapper';
+
+export default ConfirmBNPCModalWrapper;
 
 

@@ -1,11 +1,34 @@
 {
+  "id": "pwd-na-to-app",
   "name": "PWD NA TO",
   "short_name": "PWDApp",
+  "description": "PWD NA TO Application for streamlined services and assistance",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#0093AF",
   "orientation": "portrait",
+  "dir": "ltr",
+  "lang": "en",
+  "scope": "/",
+  "categories": ["government", "utilities", "productivity"],
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
+  "prefer_related_applications": false,
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://pwd-na-to.web.app",
+      "id": "pwd-na-to-web"
+    }
+  ],
+  "scope_extensions": [
+    {
+      "origin": "https://pwd-na-to.web.app"
+    }
+  ],
+  "launch_handler": {
+    "client_mode": ["navigate-existing", "auto"]
+  },
   "icons": [
     {
       "src": "/images/icons/icon-192x192.png",

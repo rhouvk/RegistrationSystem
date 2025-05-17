@@ -1,36 +1,26 @@
-import React, { useState, useMemo } from 'react';
-import { Head, usePage } from '@inertiajs/react';
+import React, { useState } from 'react';
+import { Head, usePage, router } from '@inertiajs/react';
 import PWDLayout from '@/Layouts/PWDLayout';
 
-const ITEMS_PER_PAGE = 12;
-
-export default function MedicinePurchase() {
-    const { mpEntries = [] } = usePage().props;
+export default function MedicinePurchase({ mpEntries, filters }) {
     const [expandedRow, setExpandedRow] = useState(null);
-    const [search, setSearch] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
+    const [search, setSearch] = useState(filters.search || '');
+    const [entriesPerPage, setEntriesPerPage] = useState(filters.perPage || 12);
 
-    const filteredEntries = useMemo(() => {
-        if (!search.trim()) return mpEntries;
-        const term = search.toLowerCase();
-        return mpEntries.filter((e) =>
-            e.medicine_purchase.toLowerCase().includes(term) ||
-            e.physician_name.toLowerCase().includes(term) ||
-            new Date(e.date).toLocaleDateString().includes(term)
-        );
-    }, [mpEntries, search]);
+    const handleSearchChange = (e) => {
+        const val = e.target.value;
+        setSearch(val);
+        router.get(route('pwd.medicine-purchases.index'), { search: val, perPage: entriesPerPage }, { preserveState: true, replace: true });
+    };
 
-    const paginatedEntries = useMemo(() => {
-        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-        const endIndex = startIndex + ITEMS_PER_PAGE;
-        return filteredEntries.slice(startIndex, endIndex);
-    }, [filteredEntries, currentPage]);
+    const handlePerPageChange = (e) => {
+        const val = parseInt(e.target.value);
+        setEntriesPerPage(val);
+        router.get(route('pwd.medicine-purchases.index'), { search, perPage: val }, { preserveState: true, replace: true });
+    };
 
-    const totalPages = Math.ceil(filteredEntries.length / ITEMS_PER_PAGE);
-
-    const handlePageChange = (page) => {
-        setCurrentPage(page);
-        setExpandedRow(null);
+    const changePage = (page) => {
+        router.get(route('pwd.medicine-purchases.index'), { search, perPage: entriesPerPage, page }, { preserveState: true, replace: true });
     };
 
     const getStatusLabel = (status) => {
@@ -45,17 +35,28 @@ export default function MedicinePurchase() {
     return (
         <PWDLayout header={<h2 className="text-xl font-semibold leading-tight">Medicine Purchases</h2>}>
             <Head title="Medicine Purchases" />
-            <div className="py-12 px-4 sm:px-6 lg:px-8"> {/* Added left and right padding to the main div */}
+            <div className="py-12 px-4 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-7xl space-y-4">
-                    {/* Search */}
-                    <div className="flex justify-end">
-                        <input
-                            type="text"
-                            placeholder="Search by medicine, doctor, or date…"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="w-full sm:w-64 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
-                        />
+                    {/* Search and Controls */}
+                    <div className="flex flex-col sm:flex-row justify-between">
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <input
+                                type="text"
+                                placeholder="Search by medicine, doctor, or date…"
+                                value={search}
+                                onChange={handleSearchChange}
+                                className="w-full sm:w-64 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                            />
+                            <select
+                                value={entriesPerPage}
+                                onChange={handlePerPageChange}
+                                className="w-full sm:w-auto border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                            >
+                                <option value={12}>12 entries</option>
+                                <option value={24}>24 entries</option>
+                                <option value={100}>100 entries</option>
+                            </select>
+                        </div>
                     </div>
 
                     {/* Table Wrapper */}
@@ -73,14 +74,14 @@ export default function MedicinePurchase() {
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                                {paginatedEntries.length === 0 ? (
+                                {mpEntries.data.length === 0 ? (
                                     <tr>
                                         <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
                                             No medicine purchase records available.
                                         </td>
                                     </tr>
                                 ) : (
-                                    paginatedEntries.map((entry, idx) => {
+                                    mpEntries.data.map((entry, idx) => {
                                         const isExpanded = expandedRow === idx;
                                         return (
                                             <React.Fragment key={idx}>
@@ -123,10 +124,10 @@ export default function MedicinePurchase() {
 
                         {/* Mobile Version */}
                         <div className="sm:hidden divide-y divide-gray-200">
-                            {paginatedEntries.length === 0 ? (
+                            {mpEntries.data.length === 0 ? (
                                 <div className="px-6 py-4 text-center text-gray-500">No medicine purchase records available.</div>
                             ) : (
-                                paginatedEntries.map((entry, idx) => {
+                                mpEntries.data.map((entry, idx) => {
                                     const isExpanded = expandedRow === idx;
                                     return (
                                         <div key={idx} className="p-4" onClick={() => setExpandedRow(isExpanded ? null : idx)}>
@@ -177,21 +178,51 @@ export default function MedicinePurchase() {
                     </div>
 
                     {/* Pagination */}
-                    {filteredEntries.length > ITEMS_PER_PAGE && (
-                        <div className="flex justify-center mt-4">
-                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                <button
-                                    key={page}
-                                    onClick={() => handlePageChange(page)}
-                                    className={`mx-1 px-3 py-1 rounded-md text-sm focus:outline-none ${
-                                        currentPage === page
-                                            ? 'bg-teal-500 text-white'
-                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                    }`}
-                                >
-                                    {page}
-                                </button>
-                            ))}
+                    {mpEntries.last_page > 1 && (
+                        <div className="mt-4 flex justify-center items-center gap-2">
+                            <button 
+                                onClick={() => changePage(1)} 
+                                disabled={mpEntries.current_page === 1}
+                                className={`px-3 py-1 rounded ${mpEntries.current_page === 1 
+                                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                                    : 'bg-teal-600 text-white hover:bg-teal-700'}`}
+                            >
+                                First
+                            </button>
+                            <button 
+                                onClick={() => changePage(mpEntries.current_page - 1)} 
+                                disabled={mpEntries.current_page === 1}
+                                className={`px-3 py-1 rounded ${mpEntries.current_page === 1 
+                                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                                    : 'bg-teal-600 text-white hover:bg-teal-700'}`}
+                            >
+                                Prev
+                            </button>
+                            
+                            <div className="flex items-center gap-1">
+                                <span className="px-3 py-1 bg-gray-100 rounded">
+                                    Page {mpEntries.current_page} of {mpEntries.last_page}
+                                </span>
+                            </div>
+
+                            <button 
+                                onClick={() => changePage(mpEntries.current_page + 1)} 
+                                disabled={mpEntries.current_page === mpEntries.last_page}
+                                className={`px-3 py-1 rounded ${mpEntries.current_page === mpEntries.last_page 
+                                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                                    : 'bg-teal-600 text-white hover:bg-teal-700'}`}
+                            >
+                                Next
+                            </button>
+                            <button 
+                                onClick={() => changePage(mpEntries.last_page)} 
+                                disabled={mpEntries.current_page === mpEntries.last_page}
+                                className={`px-3 py-1 rounded ${mpEntries.current_page === mpEntries.last_page 
+                                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                                    : 'bg-teal-600 text-white hover:bg-teal-700'}`}
+                            >
+                                Last
+                            </button>
                         </div>
                     )}
                 </div>

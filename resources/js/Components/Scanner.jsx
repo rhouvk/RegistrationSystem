@@ -10,8 +10,9 @@ export default function Scanner({ onUserFound }) {
   const scanningRef = useRef(false);
 
   const [scanning, setScanning] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [user, setUser] = useState(null);
+  const [userData, setUserData] = useState(null);
   const [validUntil, setValidUntil] = useState(null);
 
   const isExpired = validUntil && new Date(validUntil) < new Date();
@@ -64,20 +65,30 @@ export default function Scanner({ onUserFound }) {
           if (result) {
             stopScan();
             const hashid = result.text.trim();
+            setLoading(true);
 
             try {
               const data = await scannerFetch(
                 `/api/scan-user?hashid=${encodeURIComponent(hashid)}`
               );
+              console.log('Received API Response:', JSON.stringify(data, null, 2));
               if (data.user) {
-                setUser(data.user);
+                console.log('User Data:', JSON.stringify(data.user, null, 2));
+                console.log('Disability Type:', JSON.stringify(data.user.disabilityType, null, 2));
+                console.log('PWD Number:', data.user.pwdNumber);
+                console.log('User Name:', data.user.user?.name);
+                setUserData(data.user);
                 setValidUntil(data.valid_until);
                 onUserFound?.(data.user);
               } else {
+                console.error('No user data in response');
                 setError("No user found for this ID.");
               }
             } catch (e) {
+              console.error('Scan Error:', e);
               setError(e.message || "Scan failed.");
+            } finally {
+              setLoading(false);
             }
           }
 
@@ -90,7 +101,7 @@ export default function Scanner({ onUserFound }) {
       setScanning(false);
       scanningRef.current = false;
     }
-  }, [onUserFound, scannerFetch, stopScan]);
+  }, [onUserFound, stopScan]);
 
   useEffect(() => {
     const handleBeforeUnload = () => {
@@ -108,7 +119,7 @@ export default function Scanner({ onUserFound }) {
 
   const reloadPage = () => {
     stopScan();
-    setUser(null);
+    setUserData(null);
     setValidUntil(null);
     setError(null);
     window.location.reload();
@@ -153,15 +164,15 @@ export default function Scanner({ onUserFound }) {
       <div className="flex justify-center mt-4 gap-3">
         <button
           onClick={startScan}
-          disabled={scanning}
+          disabled={scanning || loading}
           className="max-w-md w-full py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 shadow"
         >
-          {scanning ? "🔍 Scanning..." : "Start Scan"}
+          {loading ? "Processing..." : scanning ? "🔍 Scanning..." : "Start Scan"}
         </button>
       </div>
 
       {/* Result Modal */}
-      {user && (
+      {userData && (
         <div className="fixed inset-0 bg-gradient-to-t from-cyan-950/80 to-transparent flex justify-center items-center z-50">
           <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm space-y-4">
             <h2
@@ -174,19 +185,20 @@ export default function Scanner({ onUserFound }) {
 
             <div className="flex flex-col items-center text-center">
               <img
-                src={user.photo ? `/storage/${user.photo}` : "/images/person.png"}
+                src={userData.photo ? `/storage/${userData.photo}` : "/images/person.png"}
                 alt="PWD"
                 className="w-28 h-28 rounded-full object-cover border-4 border-teal-500 mb-3"
               />
               <p className="text-sm text-gray-700">
-                <strong>ID:</strong> {user.pwdNumber}
+                <strong>ID:</strong> {userData.pwdNumber}
               </p>
               <p className="text-sm text-gray-700">
-                <strong>Name:</strong> {user.user?.name}
+                <strong>Name:</strong> {userData.user?.name}
               </p>
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-gray-700 debug-info">
                 <strong>Disability:</strong>{" "}
-                {user.disabilitytype?.name || "—"}
+                {userData.disability_type?.name || userData.disabilityType?.name || "—"}
+                {process.env.NODE_ENV === 'development'}
               </p>
               <p className="text-sm text-gray-700">
                 <strong>Valid Until:</strong>{" "}

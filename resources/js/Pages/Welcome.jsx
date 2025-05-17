@@ -57,32 +57,33 @@ export default function Welcome({ auth }) {
         <>
             <Head title="Welcome to PWD NA 'TO" />
             <div className="relative min-h-screen text-white overflow-hidden">
-                {/* Background Layers */}
+                {/* Radial Gradient Background */}
                 <div className="absolute inset-0 bg-[radial-gradient(circle,_#E0FFFF_10%,_#0093AF)] z-0" />
+
+                {/* Pattern Overlay */}
                 <div className="absolute inset-0 bg-[url('/images/wppattern.png')] bg-cover bg-center opacity-30 pointer-events-none z-0" />
 
                 {/* Main Content */}
                 <div className="relative z-10 min-h-screen flex flex-col items-center justify-start px-4 py-8">
-                    <div className="w-full max-w-7xl flex flex-col items-center mb-10">
-
+                    <div className="w-full max-w-7xl relative flex flex-col items-center mb-10">
                         {/* Header */}
-                        <div className="w-full flex justify-between items-center px-4 relative">
-                            <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 mb-2">
+                        <div className="w-full flex justify-between items-center relative px-4">
+                            <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 mb-2"> {/* Added mb-4 here */}
                                 <img src="/images/logow1.png" alt="PWD NA'TO Logo" className="w-16 h-16" />
                             </div>
                             {!isMobile && (
-                                <div className="flex space-x-4 ml-auto">
+                                <div className="flex space-x-4 ml-auto flex-nowrap">
                                     {auth.user ? (
                                         <Link
                                             href={route(getDashboardRoute(auth.user.role))}
-                                            className="bg-white text-teal-700 font-semibold px-4 py-2 rounded-lg shadow hover:bg-teal-100 transition"
+                                            className="bg-white text-teal-700 font-semibold px-4 py-2 rounded-lg shadow hover:bg-teal-100 transition flex-shrink-0"
                                         >
                                             Dashboard
                                         </Link>
                                     ) : (
                                         <Link
                                             href={route('login')}
-                                            className="bg-white text-teal-700 font-semibold px-4 py-2 rounded-lg shadow hover:bg-teal-100 transition"
+                                            className="bg-white text-teal-700 font-semibold px-4 py-2 rounded-lg shadow hover:bg-teal-100 transition 2xl:relative 2xl:left-24 flex-shrink-0"
                                         >
                                             Log in
                                         </Link>
@@ -158,7 +159,7 @@ export default function Welcome({ auth }) {
                             <img
                                 src="/images/wppeople.png"
                                 alt="PWD People Illustration"
-                                className="w-full h-auto object-contain md:h-[50vh] md:max-h-[350px] lg:h-[60vh] lg:max-h-[400px] xl:h-[calc(100vh-150px)] xl:max-h-[500px] md:w-auto"
+                                className="w-full h-auto object-contain md:h-[50vh] md:max-h-[350px] lg:h-[60vh] lg:max-h-[400px] xl:h-[calc(100vh-150px)] xl:max-h-[500px] md:w-auto lg:w-auto xl:w-auto"
                             />
                         </div>
                     </div>

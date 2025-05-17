@@ -1,38 +1,28 @@
 // resources/js/Pages/PWD/BNPCPurchases.jsx
 
-import React, { useState, useMemo } from 'react';
-import { Head, usePage } from '@inertiajs/react';
+import React, { useState } from 'react';
+import { Head, usePage, router } from '@inertiajs/react';
 import PWDLayout from '@/Layouts/PWDLayout';
 
-const ITEMS_PER_PAGE = 12;
-
-export default function BNPCPurchases() {
-    const { bnpcEntries = [] } = usePage().props;
+export default function BNPCPurchases({ bnpcEntries, filters }) {
     const [expandedRow, setExpandedRow] = useState(null);
-    const [search, setSearch] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
+    const [search, setSearch] = useState(filters.search || '');
+    const [entriesPerPage, setEntriesPerPage] = useState(filters.perPage || 12);
 
-    const filteredEntries = useMemo(() => {
-        if (!search.trim()) return bnpcEntries;
-        const term = search.toLowerCase();
-        return bnpcEntries.filter((e) =>
-            e.item_name.toLowerCase().includes(term) ||
-            e.store.toLowerCase().includes(term) ||
-            new Date(e.date_of_purchase).toLocaleDateString().includes(term)
-        );
-    }, [bnpcEntries, search]);
+    const handleSearchChange = (e) => {
+        const val = e.target.value;
+        setSearch(val);
+        router.get(route('pwd.bnpc-purchases.index'), { search: val, perPage: entriesPerPage }, { preserveState: true, replace: true });
+    };
 
-    const paginatedEntries = useMemo(() => {
-        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-        const endIndex = startIndex + ITEMS_PER_PAGE;
-        return filteredEntries.slice(startIndex, endIndex);
-    }, [filteredEntries, currentPage]);
+    const handlePerPageChange = (e) => {
+        const val = parseInt(e.target.value);
+        setEntriesPerPage(val);
+        router.get(route('pwd.bnpc-purchases.index'), { search, perPage: val }, { preserveState: true, replace: true });
+    };
 
-    const totalPages = Math.ceil(filteredEntries.length / ITEMS_PER_PAGE);
-
-    const handlePageChange = (page) => {
-        setCurrentPage(page);
-        setExpandedRow(null); // Collapse any expanded rows on page change
+    const changePage = (page) => {
+        router.get(route('pwd.bnpc-purchases.index'), { search, perPage: entriesPerPage, page }, { preserveState: true, replace: true });
     };
 
     return (
@@ -41,16 +31,26 @@ export default function BNPCPurchases() {
 
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-4">
-
-                    {/* Search */}
-                    <div className="flex justify-end mb-4 px-4 sm:px-0">
-                        <input
-                            type="text"
-                            placeholder="Search by item, store or date…"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="w-full sm:w-64 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
-                        />
+                    {/* Search and Controls */}
+                    <div className="flex flex-col sm:flex-row justify-between mb-4 px-4 sm:px-0">
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <input
+                                type="text"
+                                placeholder="Search by item, store or date…"
+                                value={search}
+                                onChange={handleSearchChange}
+                                className="w-full sm:w-64 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                            />
+                            <select
+                                value={entriesPerPage}
+                                onChange={handlePerPageChange}
+                                className="w-full sm:w-auto border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                            >
+                                <option value={12}>12 entries</option>
+                                <option value={24}>24 entries</option>
+                                <option value={100}>100 entries</option>
+                            </select>
+                        </div>
                     </div>
 
                     {/* Table for Desktop */}
@@ -69,20 +69,14 @@ export default function BNPCPurchases() {
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                                {paginatedEntries.length === 0 && filteredEntries.length > 0 ? (
-                                    <tr>
-                                        <td colSpan={8} className="px-6 py-4 text-center text-gray-500">
-                                            No BNPC purchase records found matching your search.
-                                        </td>
-                                    </tr>
-                                ) : paginatedEntries.length === 0 && filteredEntries.length === 0 ? (
+                                {bnpcEntries.data.length === 0 ? (
                                     <tr>
                                         <td colSpan={8} className="px-6 py-4 text-center text-gray-500">
                                             No BNPC purchase records available.
                                         </td>
                                     </tr>
                                 ) : (
-                                    paginatedEntries.map((entry) => (
+                                    bnpcEntries.data.map((entry) => (
                                         <tr key={entry.id}>
                                             <td className="px-6 py-4 text-sm text-gray-700">
                                                 {new Date(entry.date_of_purchase).toLocaleDateString()}
@@ -117,24 +111,20 @@ export default function BNPCPurchases() {
 
                     {/* Mobile View */}
                     <div className="sm:hidden space-y-2 px-4">
-                        {paginatedEntries.length === 0 && filteredEntries.length > 0 ? (
-                            <div className="px-4 py-2 text-center text-gray-500 bg-white shadow rounded-md">
-                                No BNPC purchase records found matching your search.
-                            </div>
-                        ) : paginatedEntries.length === 0 && filteredEntries.length === 0 ? (
+                        {bnpcEntries.data.length === 0 ? (
                             <div className="px-4 py-2 text-center text-gray-500 bg-white shadow rounded-md">
                                 No BNPC purchase records available.
                             </div>
                         ) : (
-                            paginatedEntries.map((entry) => (
+                            bnpcEntries.data.map((entry) => (
                                 <div key={entry.id} className="bg-white shadow rounded-md mb-2">
                                     <button
-                                        onClick={() => setExpandedRow(expandedRow === entry.id ? null : entry.id)} // Use entry.id for comparison
+                                        onClick={() => setExpandedRow(expandedRow === entry.id ? null : entry.id)}
                                         className="w-full flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-t-md"
                                     >
                                         <span>{new Date(entry.date_of_purchase).toLocaleDateString()} - ₱{typeof entry.total_amount === 'number' ? entry.total_amount.toFixed(2) : '0.00'}</span>
                                         <svg
-                                            className={`w-5 h-5 transition-transform ${expandedRow === entry.id ? 'rotate-180' : ''}`} // Use entry.id for comparison
+                                            className={`w-5 h-5 transition-transform ${expandedRow === entry.id ? 'rotate-180' : ''}`}
                                             fill="none"
                                             viewBox="0 0 24 24"
                                             stroke="currentColor"
@@ -142,7 +132,7 @@ export default function BNPCPurchases() {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                         </svg>
                                     </button>
-                                    {expandedRow === entry.id && ( // Use entry.id for comparison
+                                    {expandedRow === entry.id && (
                                         <div className="px-4 py-2 text-sm text-gray-700 border-t border-gray-200">
                                             <div className="mb-1"><strong>Item Name:</strong> {entry.item_name}</div>
                                             <div className="mb-1"><strong>Quantity:</strong> {entry.quantity}</div>
@@ -165,21 +155,51 @@ export default function BNPCPurchases() {
                     </div>
 
                     {/* Pagination */}
-                    {filteredEntries.length > ITEMS_PER_PAGE && (
-                        <div className="flex justify-center mt-4 px-4 sm:px-0">
-                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                <button
-                                    key={page}
-                                    onClick={() => handlePageChange(page)}
-                                    className={`mx-1 px-3 py-1 rounded-md text-sm focus:outline-none ${
-                                        currentPage === page
-                                            ? 'bg-teal-500 text-white'
-                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                    }`}
-                                >
-                                    {page}
-                                </button>
-                            ))}
+                    {bnpcEntries.last_page > 1 && (
+                        <div className="mt-4 flex justify-center items-center gap-2">
+                            <button 
+                                onClick={() => changePage(1)} 
+                                disabled={bnpcEntries.current_page === 1}
+                                className={`px-3 py-1 rounded ${bnpcEntries.current_page === 1 
+                                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                                    : 'bg-teal-600 text-white hover:bg-teal-700'}`}
+                            >
+                                First
+                            </button>
+                            <button 
+                                onClick={() => changePage(bnpcEntries.current_page - 1)} 
+                                disabled={bnpcEntries.current_page === 1}
+                                className={`px-3 py-1 rounded ${bnpcEntries.current_page === 1 
+                                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                                    : 'bg-teal-600 text-white hover:bg-teal-700'}`}
+                            >
+                                Prev
+                            </button>
+                            
+                            <div className="flex items-center gap-1">
+                                <span className="px-3 py-1 bg-gray-100 rounded">
+                                    Page {bnpcEntries.current_page} of {bnpcEntries.last_page}
+                                </span>
+                            </div>
+
+                            <button 
+                                onClick={() => changePage(bnpcEntries.current_page + 1)} 
+                                disabled={bnpcEntries.current_page === bnpcEntries.last_page}
+                                className={`px-3 py-1 rounded ${bnpcEntries.current_page === bnpcEntries.last_page 
+                                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                                    : 'bg-teal-600 text-white hover:bg-teal-700'}`}
+                            >
+                                Next
+                            </button>
+                            <button 
+                                onClick={() => changePage(bnpcEntries.last_page)} 
+                                disabled={bnpcEntries.current_page === bnpcEntries.last_page}
+                                className={`px-3 py-1 rounded ${bnpcEntries.current_page === bnpcEntries.last_page 
+                                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                                    : 'bg-teal-600 text-white hover:bg-teal-700'}`}
+                            >
+                                Last
+                            </button>
                         </div>
                     )}
                 </div>

@@ -31,7 +31,8 @@ use App\Http\Controllers\{
     PharmacyPrescriptionLogController,
     PharmacyPrescriptionEditController,
     PayMongoController,
-    PharmacyUpdateController
+    PharmacyUpdateController,
+    LocationController,
 };
 
 use App\Models\PWDRegistration;
@@ -169,6 +170,7 @@ Route::middleware(['auth', 'can:admin'])->group(function () {
     Route::get('/admin/scan', fn() => Inertia::render('Admin/Scan'))->name('pwd.scan');
 
     Route::get('/admin/PWDusers', [PWDUserController::class, 'index'])->name('pwd.pwd-users.index');
+    Route::get('/admin/PWDusers/{id}/edit', [PWDUserController::class, 'edit'])->name('pwd.pwd-users.edit');
     Route::put('/admin/PWDusers/{id}', [PWDUserController::class, 'update'])->name('pwd.pwd-users.update');
     Route::get('/admin/PWDusers/{id}/generate', [PWDBarcodeController::class, 'generate'])->name('pwd.pwd-users.generate');
 
@@ -206,5 +208,17 @@ Route::get('/pwdusers', function (Request $request) {
         ->first();
     return response()->json(['user' => $user]);
 })->name('pwd.users.get');
+
+/*
+|--------------------------------------------------------------------------
+| Location API Routes
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/api/provinces', [LocationController::class, 'provinces']);
+    Route::get('/api/municipalities', [LocationController::class, 'municipalities']);
+    Route::get('/api/barangays', [LocationController::class, 'barangays']);
+});
 
 require __DIR__ . '/auth.php';

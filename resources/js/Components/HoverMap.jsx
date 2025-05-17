@@ -51,7 +51,7 @@ export default function CanvasHoverMap({ adminDistrictData = {} }) {
 
   // Load images once
   useEffect(() => {
-    const ctx = canvasRef.current?.getContext('2d');
+    const ctx = canvasRef.current?.getContext('2d', { willReadFrequently: true });
     const loadedImages = [];
     let loadCount = 0;
 
@@ -84,7 +84,7 @@ export default function CanvasHoverMap({ adminDistrictData = {} }) {
         const tempCanvas = document.createElement('canvas');
         tempCanvas.width = ctx.canvas.width;
         tempCanvas.height = ctx.canvas.height;
-        const tempCtx = tempCanvas.getContext('2d');
+        const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
 
         tempCtx.drawImage(hovered.image, 0, 0, tempCanvas.width, tempCanvas.height);
         tempCtx.globalCompositeOperation = 'source-in';

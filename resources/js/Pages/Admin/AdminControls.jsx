@@ -32,7 +32,7 @@ export default function AdminControls({ control, bnpcItems = [], disabilityItems
   };
 
   return (
-    <AdminLayout header={<h2 className="font-semibold text-xl">Admin Controls</h2>}>
+    <AdminLayout header={<h2 className="text-xl font-semibold leading-tight">Admin Controls</h2>}>
       <Head title="Admin Controls" />
       <div className="py-12">
         <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">

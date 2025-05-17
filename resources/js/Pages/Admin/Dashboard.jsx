@@ -28,7 +28,7 @@ import {
   teal,
   cyan,
   sky,
-  blueGray,
+  slate,
 } from 'tailwindcss/colors';
 
 ChartJS.register(
@@ -118,12 +118,12 @@ export default function AdminDashboard({ yearData = {}, maleCount = 0, femaleCou
     scales: {
       x: {
         ticks: {
-          color: blueGray[700],
+          color: slate[700],
         },
       },
       y: {
         ticks: {
-          color: blueGray[700],
+          color: slate[700],
         },
       },
     },
@@ -135,12 +135,12 @@ export default function AdminDashboard({ yearData = {}, maleCount = 0, femaleCou
     scales: {
       x: {
         ticks: {
-          color: blueGray[700],
+          color: slate[700],
         },
       },
       y: {
         ticks: {
-          color: blueGray[700],
+          color: slate[700],
         },
       },
     },
@@ -154,7 +154,7 @@ export default function AdminDashboard({ yearData = {}, maleCount = 0, femaleCou
   }, [selectedYear]);
 
   return (
-    <AdminLayout header={<h2 className="text-2xl font-bold text-blueGray-800">Admin Dashboard</h2>}>
+    <AdminLayout header={<h2 className="text-xl font-semibold leading-tight">Admin Dashboard</h2>}>
       <Head title="Admin Dashboard" />
       <div className="min-h-screen py-8">
         <div className="max-w-7xl mx-auto px-4 space-y-6">
@@ -168,17 +168,17 @@ export default function AdminDashboard({ yearData = {}, maleCount = 0, femaleCou
             <div className="flex flex-col gap-4 w-full md:w-1/3">
               <div className="bg-white rounded p-3 flex flex-col items-center">
                 <FaFemale className="text-4xl mb-1 text-cyan-950" />
-                <h3 className="text-base font-semibold text-blueGray-700">Females</h3>
+                <h3 className="text-base font-semibold text-slate-700">Females</h3>
                 <p className="text-2xl font-bold text-cyan-700">{femaleCount}</p>
               </div>
               <div className="bg-white rounded p-3 flex flex-col items-center">
                 <FaMale className="text-4xl mb-1 text-cyan-950" />
-                <h3 className="text-base font-semibold text-blueGray-700">Males</h3>
+                <h3 className="text-base font-semibold text-slate-700">Males</h3>
                 <p className="text-2xl font-bold text-cyan-700">{maleCount}</p>
               </div>
               <div className="bg-white rounded p-3 flex flex-col items-center">
                 <FaUsers className="text-4xl mb-1 text-cyan-950" />
-                <h3 className="text-base font-semibold text-blueGray-700">Total</h3>
+                <h3 className="text-base font-semibold text-slate-700">Total</h3>
                 <p className="text-2xl font-bold text-cyan-700">{maleCount + femaleCount}</p>
               </div>
 
@@ -189,18 +189,18 @@ export default function AdminDashboard({ yearData = {}, maleCount = 0, femaleCou
                 <div className="flex justify-center items-center space-x-8">
                   <div className="flex flex-col items-center">
                     <FaClipboardCheck className="text-5xl text-cyan-600" />
-                    <p className="mt-1 text-blueGray-700">New</p>
-                    <p className="font-bold text-blueGray-800">{status.new}</p>
+                    <p className="mt-1 text-slate-700">New</p>
+                    <p className="font-bold text-slate-800">{status.new}</p>
                   </div>
                   <div className="flex flex-col items-center">
                     <FaSyncAlt className="text-5xl text-sky-600" />
-                    <p className="mt-1 text-blueGray-700">Renewed</p>
-                    <p className="font-bold text-blueGray-800">{status.renewed}</p>
+                    <p className="mt-1 text-slate-700">Renewed</p>
+                    <p className="font-bold text-slate-800">{status.renewed}</p>
                   </div>
                   <div className="flex flex-col items-center">
                     <FaExclamationCircle className="text-5xl text-teal-500" />
-                    <p className="mt-1 text-blueGray-700">Expired</p>
-                    <p className="font-bold text-blueGray-800">{status.expired}</p>
+                    <p className="mt-1 text-slate-700">Expired</p>
+                    <p className="font-bold text-slate-800">{status.expired}</p>
                   </div>
                 </div>
               </div>
@@ -217,12 +217,12 @@ export default function AdminDashboard({ yearData = {}, maleCount = 0, femaleCou
 
 
           <div className="flex justify-end gap-2">
-            <label htmlFor="yearSelect" className="font-bold text-blueGray-700">Sort by Year:</label>
+            <label htmlFor="yearSelect" className="font-bold text-slate-700">Sort by Year:</label>
             <select
               id="yearSelect"
               value={selectedYear}
               onChange={(e) => setSelectedYear(e.target.value)}
-              className="bg-white border rounded px-4 py-2 focus:outline-none text-blueGray-700"
+              className="bg-white border rounded px-4 py-2 focus:outline-none text-slate-700"
               style={{ borderColor: teal[600] }}
             >
               {allKeys.includes('overall') && <option value="overall">Overall</option>}

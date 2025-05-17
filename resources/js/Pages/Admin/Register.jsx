@@ -209,7 +209,7 @@ export default function Register(props) {
 
   return (
     <AdminLayout
-      header={<h2 className="text-xl font-semibold leading-tight text-gray-800">PWD Registration</h2>}
+      header={<h2 className="text-xl font-semibold leading-tight">PWD Registration</h2>}
     >
       <Head title="PWD Registration" />
       

@@ -73,12 +73,14 @@ class PWDRegistration extends Model
     }
     
     public function disabilityType() {
-        return $this->belongsTo(DisabilityList::class, 'disability_type_id');
+        return $this->belongsTo(DisabilityList::class, 'disability_type_id')
+                    ->where('category', 'Type');
     }
 
     public function disabilityCause()
     {
-        return $this->belongsTo(DisabilityList::class, 'disability_cause_id');
+        return $this->belongsTo(DisabilityList::class, 'disability_cause_id')
+                    ->where('category', 'Cause');
     }
     
     public function region()

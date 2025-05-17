@@ -41,15 +41,12 @@ class AuthenticatedSessionController extends Controller
             case 2:
                 // Business
                 return redirect()->intended(route('business.dashboard'));
-
             case 1:
                 // Admin
                 return redirect()->intended(route('admin.dashboard'));
-    
             case 0:
                 // PWD
                 return redirect()->intended(route('pwd.dashboard'));
-    
             default:
                 // Fallback for unknown roles
                 return redirect()->intended(route('dashboard'));
