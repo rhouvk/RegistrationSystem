@@ -81,4 +81,49 @@ class PWDScannerController extends Controller
         return response()->json($response);
     }
     
+    public function syncData()
+    {
+        try {
+            // Get all PWD registrations with essential verification data
+            $pwdData = PWDRegistration::select([
+                'id',
+                'user_id',
+                'pwdNumber',
+                'photo',
+                'updated_at',
+                'disability_type_id'
+            ])->with([
+                'user' => function($query) {
+                    $query->select('id', 'name');
+                },
+                'disabilityType' => function($query) {
+                    $query->select('id', 'name')
+                          ->where('category', 'Type');
+                }
+            ])->get();
+
+            // Get expiration settings
+            $controls = AdminControl::first();
+            $years = $controls?->cardExpiration ?? 3;
+
+            // Format data for offline storage
+            $formattedData = $pwdData->map(function($pwd) use ($years) {
+                $validUntil = Carbon::parse($pwd->updated_at)->addYears($years)->toDateString();
+                
+                return [
+                    'hashid' => Hashids::encode($pwd->id),
+                    'user' => $pwd->user,
+                    'pwdNumber' => $pwd->pwdNumber,
+                    'photo' => $pwd->photo,
+                    'disability_type' => $pwd->disabilityType,
+                    'valid_until' => $validUntil
+                ];
+            });
+
+            return response()->json($formattedData);
+        } catch (\Exception $e) {
+            Log::error('PWD data sync failed:', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Failed to sync PWD data'], 500);
+        }
+    }
 }

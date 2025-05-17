@@ -61,6 +61,7 @@ Route::get('/dashboard', fn() => Inertia::render('Dashboard'))
 
 Route::get('/scan', fn() => Inertia::render('Scan'))->name('public.scan');
 Route::get('/api/scan-user', [PWDScannerController::class, 'findByHashId']);
+Route::get('/api/pwd/sync-data', [PWDScannerController::class, 'syncData'])->name('pwd.sync-data');
 
 
 Route::middleware(['auth'])->group(function () {

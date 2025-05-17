@@ -1,7 +1,52 @@
 import { Head, Link } from '@inertiajs/react';
-import Scanner from '@/Components/Scanner'; // Reuse your existing scanner component
+import Scanner from '@/Components/Scanner';
+import { useState, useEffect } from 'react';
 
 export default function ScanPage() {
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [lastSync, setLastSync] = useState(null);
+
+  useEffect(() => {
+    // Update online status
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    // Check last sync time
+    const checkLastSync = async () => {
+      const db = await openDB();
+      const tx = db.transaction('pwdVerificationData', 'readonly');
+      const store = tx.objectStore('pwdVerificationData');
+      const lastSyncTime = await store.get('lastSyncTime');
+      setLastSync(lastSyncTime?.timestamp);
+    };
+
+    checkLastSync();
+
+    // Trigger sync when online
+    if (navigator.onLine && 'serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.ready.then(registration => {
+        registration.sync.register('sync-pwd-data');
+      });
+    }
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  // Helper function to open IndexedDB
+  const openDB = () => {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open('PWDOfflineDB', 1);
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve(request.result);
+    });
+  };
+
   return (
     <>
       <Head title="Scan PWD Card" />
@@ -16,17 +61,26 @@ export default function ScanPage() {
         {/* Foreground Content */}
         <div className="relative min-h-screen flex items-center justify-center px-4 py-10 z-10">
           <div className="bg-white shadow rounded-xl w-full max-w-xl p-6">
+            {/* Connection Status */}
+            <div className={`mb-4 p-2 rounded text-center ${isOnline ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+              {isOnline ? 'Online Mode' : 'Offline Mode'}
+              {!isOnline && lastSync && (
+                <div className="text-sm mt-1">
+                  Last synced: {new Date(lastSync).toLocaleString()}
+                </div>
+              )}
+            </div>
+
             <Scanner />
 
             {/* Back Button */}
             <div className="mt-3 text-center">
-                        <Link
-              href={route('welcome')}
-              className="block w-full sm:w-auto max-w-md mx-auto px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-center transition-colors duration-200"
-            >
-              Back to Welcome
-            </Link>
-
+              <Link
+                href={route('welcome')}
+                className="block w-full sm:w-auto max-w-md mx-auto px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-center transition-colors duration-200"
+              >
+                Back to Welcome
+              </Link>
             </div>
           </div>
         </div>
