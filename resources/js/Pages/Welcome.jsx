@@ -5,8 +5,6 @@ export default function Welcome({ auth }) {
     const [isMobile, setIsMobile] = useState(false);
     const [deferredPrompt, setDeferredPrompt] = useState(null);
     const [showIOSPrompt, setShowIOSPrompt] = useState(false);
-    const [isOnline, setIsOnline] = useState(navigator.onLine);
-    const [showOfflineWarning, setShowOfflineWarning] = useState(false);
 
     // Platform detection
     const isIOS = () => /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
@@ -21,31 +19,11 @@ export default function Welcome({ auth }) {
             e.preventDefault();
             setDeferredPrompt(e);
         };
-
-        const handleOnline = () => {
-            setIsOnline(true);
-            setShowOfflineWarning(false);
-        };
-
-        const handleOffline = () => {
-            setIsOnline(false);
-            // Only show warning if offline for more than 2 seconds
-            setTimeout(() => {
-                if (!navigator.onLine) {
-                    setShowOfflineWarning(true);
-                }
-            }, 2000);
-        };
-
         window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-        window.addEventListener('online', handleOnline);
-        window.addEventListener('offline', handleOffline);
 
         return () => {
             window.removeEventListener('resize', handleResize);
             window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-            window.removeEventListener('online', handleOnline);
-            window.removeEventListener('offline', handleOffline);
         };
     }, []);
 
@@ -85,25 +63,12 @@ export default function Welcome({ auth }) {
                 {/* Pattern Overlay */}
                 <div className="absolute inset-0 bg-[url('/images/wppattern.png')] bg-cover bg-center opacity-30 pointer-events-none z-0" />
 
-                {/* Offline Warning */}
-                {showOfflineWarning && (
-                    <div className="fixed top-0 left-0 right-0 bg-yellow-100 text-yellow-800 px-4 py-2 text-center z-50">
-                        You're offline. Some features may be limited.
-                        <button 
-                            onClick={() => setShowOfflineWarning(false)}
-                            className="ml-4 text-yellow-600 hover:text-yellow-800"
-                        >
-                            Dismiss
-                        </button>
-                    </div>
-                )}
-
                 {/* Main Content */}
-                <div className={`relative z-10 min-h-screen flex flex-col items-center justify-start px-4 py-8 ${showOfflineWarning ? 'mt-12' : ''}`}>
+                <div className="relative z-10 min-h-screen flex flex-col items-center justify-start px-4 py-8">
                     <div className="w-full max-w-7xl relative flex flex-col items-center mb-10">
                         {/* Header */}
                         <div className="w-full flex justify-between items-center relative px-4">
-                            <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 mb-2"> {/* Added mb-4 here */}
+                            <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 mb-2">
                                 <img src="/images/logow1.png" alt="PWD NA'TO Logo" className="w-16 h-16" />
                             </div>
                             {!isMobile && (
