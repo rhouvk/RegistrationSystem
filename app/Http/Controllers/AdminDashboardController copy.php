@@ -74,31 +74,31 @@ class AdminDashboardController extends Controller
                 if ($genderKey === 'female') $totalFemale++;
                 if ($genderKey === 'male') $totalMale++;
 
-                // Status
+                // Status - Now calculated without year restrictions
                 $created = Carbon::parse($pwd->created_at);
                 $updated = Carbon::parse($pwd->updated_at);
                 $expiryDate = $dateApplied->copy()->addYears($cardExpirationYears);
 
-                if ($dateApplied->year === $currentYear) {
+                // For yearly data
+                if ($created->year === $appliedYear) {
                     $yearData[$year]['status']['new']++;
-                    $yearData['overall']['status']['new']++;
-                }
-
-                if (
-                    $updated->year === $currentYear &&
-                    $updated->diffInDays($created) >= 3
-                ) {
+                } elseif ($updated->diffInDays($created) >= 3) {
                     $yearData[$year]['status']['renewed']++;
-                    $yearData['overall']['status']['renewed']++;
                 }
-
                 if ($expiryDate->lt(Carbon::now())) {
                     $yearData[$year]['status']['expired']++;
+                }
+                $yearData[$year]['status']['total']++;
+
+                // For overall data - count all statuses
+                if ($created->eq($dateApplied)) {
+                    $yearData['overall']['status']['new']++;
+                } elseif ($updated->diffInDays($created) >= 3) {
+                    $yearData['overall']['status']['renewed']++;
+                }
+                if ($expiryDate->lt(Carbon::now())) {
                     $yearData['overall']['status']['expired']++;
                 }
-
-                // Increment status.total once per record
-                $yearData[$year]['status']['total']++;
                 $yearData['overall']['status']['total']++;
 
                 // Disability Types

@@ -157,8 +157,8 @@ export default function EditPWDUser({ user, disabilityTypes, disabilityCauses, r
                                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500"
                                             >
                                                 <option value="">Select Sex</option>
-                                                <option value="Male">Male</option>
                                                 <option value="Female">Female</option>
+                                                <option value="Male">Male</option>
                                             </select>
                                             {errors.sex && <div className="text-red-500 text-sm mt-1">{errors.sex}</div>}
                                         </div>
@@ -365,7 +365,7 @@ export default function EditPWDUser({ user, disabilityTypes, disabilityCauses, r
                                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500"
                                             >
                                                 <option value="">Select Category</option>
-                                                <option value="Government">Government</option>
+                                                <option value="Public">Public</option>
                                                 <option value="Private">Private</option>
                                             </select>
                                             {errors.employmentCategory && <div className="text-red-500 text-sm mt-1">{errors.employmentCategory}</div>}
@@ -388,12 +388,24 @@ export default function EditPWDUser({ user, disabilityTypes, disabilityCauses, r
 
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700">Occupation</label>
-                                            <input
-                                                type="text"
+                                            <select
                                                 value={data.occupation}
                                                 onChange={e => setData('occupation', e.target.value)}
                                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500"
-                                            />
+                                            >
+                                                <option value="">Select Occupation</option>
+                                                <option value="Managers">Managers</option>
+                                                <option value="Professionals">Professionals</option>
+                                                <option value="Technicians and Associate Professionals">Technicians and Associate Professionals</option>
+                                                <option value="Clerical Support Workers">Clerical Support Workers</option>
+                                                <option value="Service and Sales Workers">Service and Sales Workers</option>
+                                                <option value="Skilled Agricultural, Forestry and Fishery Workers">Skilled Agricultural, Forestry and Fishery Workers</option>
+                                                <option value="Craft and Related Trade Workers">Craft and Related Trade Workers</option>
+                                                <option value="Plant and Machine Operators and Assemblers">Plant and Machine Operators and Assemblers</option>
+                                                <option value="Elementary Occupations">Elementary Occupations</option>
+                                                <option value="Armed Forces Occupations">Armed Forces Occupations</option>
+                                                <option value="Others">Others</option>
+                                            </select>
                                             {errors.occupation && <div className="text-red-500 text-sm mt-1">{errors.occupation}</div>}
                                         </div>
 

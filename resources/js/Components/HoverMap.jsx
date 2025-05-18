@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import DistrictDetailsModal from './DistrictDetailsModal';
 
 const districts = [
   { name: 'Agdao', src: '/images/agdao.png' },
@@ -22,6 +23,34 @@ export default function CanvasHoverMap({ adminDistrictData = {} }) {
   const [images, setImages] = useState([]);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [canvasSize, setCanvasSize] = useState({ width: 300, height: 500 });
+  
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDistrict, setSelectedDistrict] = useState(null);
+  const [districtData, setDistrictData] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch district details
+  const fetchDistrictDetails = async (districtName) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/admin/district/${districtName}/details`);
+      if (!response.ok) throw new Error('Failed to fetch district details');
+      const data = await response.json();
+      setDistrictData(data);
+    } catch (error) {
+      console.error('Error fetching district details:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle district click
+  const handleDistrictClick = async (districtName) => {
+    setSelectedDistrict(districtName);
+    setIsModalOpen(true);
+    await fetchDistrictDetails(districtName);
+  };
 
   // Resize canvas based on container
   useEffect(() => {
@@ -124,31 +153,44 @@ export default function CanvasHoverMap({ adminDistrictData = {} }) {
   };
 
   return (
-    <div ref={containerRef} className="relative w-full max-w-md aspect-[3/4] mx-auto bg-white">
-      <canvas
-        ref={canvasRef}
-        className="w-full h-full"
-        onMouseMove={handleMouseMove}
-        onMouseLeave={() => {
-          setHoveredDistrict(null);
-          if (imgLoaded) {
-            const ctx = canvasRef.current.getContext('2d');
-            drawAll(ctx, images);
-          }
-        }}
-      />
+    <>
+      <div ref={containerRef} className="relative w-full max-w-md aspect-[3/4] mx-auto bg-white">
+        <canvas
+          ref={canvasRef}
+          className="w-full h-full cursor-pointer"
+          onMouseMove={handleMouseMove}
+          onClick={() => hoveredDistrict && handleDistrictClick(hoveredDistrict)}
+          onMouseLeave={() => {
+            setHoveredDistrict(null);
+            if (imgLoaded) {
+              const ctx = canvasRef.current.getContext('2d');
+              drawAll(ctx, images);
+            }
+          }}
+        />
 
-      {hoveredDistrict && (
-        <div
-          className="absolute bg-black text-white text-xs px-3 py-2 rounded shadow pointer-events-none z-50"
-          style={{ top: labelPos.y + 10, left: labelPos.x + 10 }}
-        >
-          <div className="font-bold">{hoveredDistrict.toUpperCase()}</div>
-          <div>
-            Registered: <span className="font-semibold">{adminDistrictData[hoveredDistrict] ?? 0}</span>
+        {hoveredDistrict && (
+          <div
+            className="absolute bg-black text-white text-xs px-3 py-2 rounded shadow pointer-events-none z-50"
+            style={{ top: labelPos.y + 10, left: labelPos.x + 10 }}
+          >
+            <div className="font-bold">{hoveredDistrict.toUpperCase()}</div>
+            <div>
+              Registered: <span className="font-semibold">{adminDistrictData[hoveredDistrict] ?? 0}</span>
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+
+      <DistrictDetailsModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setDistrictData(null);
+        }}
+        districtData={districtData}
+        isLoading={isLoading}
+      />
+    </>
   );
 }

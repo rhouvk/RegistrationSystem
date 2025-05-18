@@ -45,106 +45,45 @@ ChartJS.register(
 
 const colorPalette = [teal[500], cyan[500], sky[500], teal[400], cyan[400], sky[400]];
 
-export default function AdminDashboard({ yearData = {}, maleCount = 0, femaleCount = 0, adminDistrictData = {}, educationData = {}, employmentData = {}, ageGroups = {} }) {
+const chartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  indexAxis: 'y',
+  plugins: {
+    legend: { position: 'top' },
+    tooltip: {
+      callbacks: {
+        label: (context) => {
+          const value = context.parsed.x || context.parsed || 0;
+          const total = context.dataset.data.reduce((a, b) => a + b, 0);
+          const percentage = ((value / total) * 100).toFixed(1);
+          return `${context.label || ''}: ${value} (${percentage}%)`;
+        }
+      }
+    }
+  },
+  scales: {
+    x: { ticks: { color: slate[700] }, grid: { color: slate[200] } },
+    y: { ticks: { color: slate[700] }, grid: { color: slate[200] } },
+  },
+};
+
+export default function AdminDashboard({ 
+  yearData = {}, 
+  maleCount = 0, 
+  femaleCount = 0, 
+  adminDistrictData = {}, 
+  educationData = {}, 
+  employmentData = {}, 
+  ageGroups = {} 
+}) {
   const currentYear = new Date().getFullYear();
   const allKeys = Object.keys(yearData);
   const allYears = allKeys.filter(y => y !== 'overall').map(Number).sort((a, b) => b - a);
-  const [selectedYear, setSelectedYear] = useState(allKeys.includes('overall') ? 'overall' : `${allYears[0]}`);
+  const [selectedYear, setSelectedYear] = useState(allKeys.includes('overall') ? 'overall' : `${allYears[0] || currentYear}`);
   const last5Years = allYears.filter(y => y >= currentYear - 4).sort((a, b) => a - b);
 
   const { registered = {}, status = {}, disabilities = [] } = yearData[selectedYear] || {};
-
-  const lineData = {
-    labels: last5Years.map(String),
-    datasets: [{
-      label: 'Total Registered PWDs (Last 5 Years)',
-      data: last5Years.map(y => yearData[y]?.registered?.total || 0),
-      borderColor: teal[600],
-      backgroundColor: teal[300],
-      fill: false,
-    }],
-  };
-
-  const disabilityChartData = {
-    labels: disabilities.map(d => d.name),
-    datasets: [{
-      label: `PWDs in ${selectedYear}`,
-      data: disabilities.map(d => d.count),
-      backgroundColor: disabilities.map((_, index) => colorPalette[index % colorPalette.length]),
-    }],
-  };
-
-  const districtChartData = {
-    labels: Object.keys(adminDistrictData),
-    datasets: [{
-      label: 'PWD Count by Admin District',
-      data: Object.values(adminDistrictData),
-      backgroundColor: [teal[600], cyan[600], sky[600], teal[500], cyan[500], sky[500]],
-    }],
-  };
-
-  const educationChartData = {
-    labels: Object.keys(educationData),
-    datasets: [{
-      label: 'PWDs by Education Level',
-      data: Object.values(educationData),
-      backgroundColor: [teal[600], cyan[600], sky[600], teal[500], cyan[500], sky[500]],
-    }],
-  };
-
-  const employmentChartData = {
-    labels: Object.keys(employmentData),
-    datasets: [{
-      label: 'PWDs by Employment Status',
-      data: Object.values(employmentData),
-      backgroundColor: [teal[600], cyan[500], sky[500], teal[500], cyan[500], sky[500]],
-    }],
-  };
-
-  const ageChartData = {
-    labels: Object.keys(ageGroups),
-    datasets: [{
-      label: 'PWDs by Age Group',
-      data: Object.values(ageGroups),
-      backgroundColor: [teal[600], cyan[600], sky[600], teal[500], cyan[500], sky[500]],
-    }],
-  };
-
-  const horizontalOptions = {
-    responsive: true,
-    indexAxis: 'y',
-    maintainAspectRatio: false,
-    plugins: { legend: { position: 'top' } },
-    scales: {
-      x: {
-        ticks: {
-          color: slate[700],
-        },
-      },
-      y: {
-        ticks: {
-          color: slate[700],
-        },
-      },
-    },
-  };
-
-  const lineOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        ticks: {
-          color: slate[700],
-        },
-      },
-      y: {
-        ticks: {
-          color: slate[700],
-        },
-      },
-    },
-  };
 
   const [fadeIn, setFadeIn] = useState(false);
   useEffect(() => {
@@ -152,6 +91,60 @@ export default function AdminDashboard({ yearData = {}, maleCount = 0, femaleCou
     const t = setTimeout(() => setFadeIn(true), 100);
     return () => clearTimeout(t);
   }, [selectedYear]);
+
+  // Chart Data
+  const chartData = {
+    line: {
+      labels: last5Years.map(String),
+      datasets: [{
+        label: 'Total Registered PWDs (Last 5 Years)',
+        data: last5Years.map(y => yearData[y]?.registered?.total || 0),
+        borderColor: teal[600],
+        backgroundColor: teal[300],
+        fill: false,
+      }],
+    },
+    disability: {
+      labels: disabilities.map(d => d.name),
+      datasets: [{
+        label: `PWDs in ${selectedYear}`,
+        data: disabilities.map(d => d.count),
+        backgroundColor: disabilities.map((_, index) => colorPalette[index % colorPalette.length]),
+      }],
+    },
+    district: {
+      labels: Object.keys(adminDistrictData),
+      datasets: [{
+        label: 'PWD Count by Admin District',
+        data: Object.values(adminDistrictData),
+        backgroundColor: colorPalette,
+      }],
+    },
+    education: {
+      labels: Object.keys(educationData),
+      datasets: [{
+        label: 'PWDs by Education Level',
+        data: Object.values(educationData),
+        backgroundColor: colorPalette,
+      }],
+    },
+    employment: {
+      labels: Object.keys(employmentData),
+      datasets: [{
+        label: 'PWDs by Employment Status',
+        data: Object.values(employmentData),
+        backgroundColor: colorPalette,
+      }],
+    },
+    age: {
+      labels: Object.keys(ageGroups),
+      datasets: [{
+        label: 'PWDs by Age Group',
+        data: Object.values(ageGroups),
+        backgroundColor: colorPalette,
+      }],
+    },
+  };
 
   return (
     <AdminLayout header={<h2 className="text-xl font-semibold leading-tight">Admin Dashboard</h2>}>
@@ -161,7 +154,7 @@ export default function AdminDashboard({ yearData = {}, maleCount = 0, femaleCou
           <div className="flex flex-col md:flex-row gap-6">
             {/* Left: Line Chart */}
             <div className="bg-white rounded p-4 w-full md:w-1/3 min-h-[14rem]">
-              <Line data={lineData} options={lineOptions} />
+              <Line data={chartData.line} options={{ ...chartOptions, indexAxis: 'x' }} />
             </div>
 
             {/* Middle: Gender Stats */}
@@ -190,22 +183,20 @@ export default function AdminDashboard({ yearData = {}, maleCount = 0, femaleCou
                   <div className="flex flex-col items-center">
                     <FaClipboardCheck className="text-5xl text-cyan-600" />
                     <p className="mt-1 text-slate-700">New</p>
-                    <p className="font-bold text-slate-800">{status.new}</p>
+                    <p className="font-bold text-slate-800">{status.new || 0}</p>
                   </div>
                   <div className="flex flex-col items-center">
                     <FaSyncAlt className="text-5xl text-sky-600" />
                     <p className="mt-1 text-slate-700">Renewed</p>
-                    <p className="font-bold text-slate-800">{status.renewed}</p>
+                    <p className="font-bold text-slate-800">{status.renewed || 0}</p>
                   </div>
                   <div className="flex flex-col items-center">
                     <FaExclamationCircle className="text-5xl text-teal-500" />
                     <p className="mt-1 text-slate-700">Expired</p>
-                    <p className="font-bold text-slate-800">{status.expired}</p>
+                    <p className="font-bold text-slate-800">{status.expired || 0}</p>
                   </div>
                 </div>
               </div>
-
-
             </div>
 
             {/* Right: Map */}
@@ -214,7 +205,6 @@ export default function AdminDashboard({ yearData = {}, maleCount = 0, femaleCou
               <HoverMap adminDistrictData={adminDistrictData} />
             </div>
           </div>
-
 
           <div className="flex justify-end gap-2">
             <label htmlFor="yearSelect" className="font-bold text-slate-700">Sort by Year:</label>
@@ -245,24 +235,30 @@ export default function AdminDashboard({ yearData = {}, maleCount = 0, femaleCou
             />
           </div>
 
-          <div className={`bg-white rounded p-4 transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
-            <h3 className="text-xl font-bold text-center mb-4 text-cyan-950">Types of Disabilities ({selectedYear})</h3>
-            <div className="h-72">
-              <Bar data={disabilityChartData} options={horizontalOptions} />
+          <div className={`transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
+            <div className="bg-white rounded p-4">
+              <h3 className="text-xl font-bold text-center mb-4 text-cyan-950">Types of Disabilities ({selectedYear})</h3>
+              <div className="h-72">
+                <Bar data={chartData.disability} options={chartOptions} />
+              </div>
             </div>
           </div>
 
-          <div className={`bg-white rounded p-4 transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
-            <h3 className="text-xl font-bold text-center mb-4 text-cyan-950">PWD Distribution by Admin District</h3>
-            <div className="h-72">
-              <Bar data={districtChartData} options={horizontalOptions} />
+          <div className={`transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
+            <div className="bg-white rounded p-4">
+              <h3 className="text-xl font-bold text-center mb-4 text-cyan-950">PWD Distribution by Admin District</h3>
+              <div className="h-72">
+                <Bar data={chartData.district} options={chartOptions} />
+              </div>
             </div>
           </div>
 
-          <div className={`bg-white rounded p-4 transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
-            <h3 className="text-xl font-bold text-center mb-4 text-cyan-950">PWDs by Education Level</h3>
-            <div className="h-72">
-              <Bar data={educationChartData} options={horizontalOptions} />
+          <div className={`transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
+            <div className="bg-white rounded p-4">
+              <h3 className="text-xl font-bold text-center mb-4 text-cyan-950">PWDs by Education Level</h3>
+              <div className="h-72">
+                <Bar data={chartData.education} options={chartOptions} />
+              </div>
             </div>
           </div>
           
@@ -272,7 +268,7 @@ export default function AdminDashboard({ yearData = {}, maleCount = 0, femaleCou
               <div className="w-full max-w-xs">
                 <h3 className="text-xl font-bold text-center mb-4 text-cyan-950">PWDs by Employment Status</h3>
                 <div className="aspect-square">
-                  <Pie data={employmentChartData} options={{ responsive: true, maintainAspectRatio: false }} />
+                  <Pie data={chartData.employment} options={chartOptions} />
                 </div>
               </div>
             </div>
@@ -282,13 +278,11 @@ export default function AdminDashboard({ yearData = {}, maleCount = 0, femaleCou
               <div className="w-full max-w-xs">
                 <h3 className="text-xl font-bold text-center mb-4 text-cyan-950">PWDs by Age Group</h3>
                 <div className="aspect-square">
-                  <Pie data={ageChartData} options={{ responsive: true, maintainAspectRatio: false }} />
+                  <Pie data={chartData.age} options={chartOptions} />
                 </div>
               </div>
             </div>
           </div>
-
-
         </div>
       </div>
     </AdminLayout>

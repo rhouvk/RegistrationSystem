@@ -33,6 +33,7 @@ use App\Http\Controllers\{
     PayMongoController,
     PharmacyUpdateController,
     LocationController,
+    AdminDistrictDetailsController,
 };
 
 use App\Models\PWDRegistration;
@@ -188,9 +189,11 @@ Route::middleware(['auth', 'can:admin'])->group(function () {
 
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
+    Route::get('/admin/district/{districtName}/details', [AdminDistrictDetailsController::class, 'getDistrictDetails'])->name('admin.district.details');
+
     Route::post('/admin/register/bp', [BusinessPharmacyRegisterController::class, 'store'])->name('register.bp');
     Route::get('/admin/register-bp', function () {
-        return Inertia::render('Admin/RegisterBusinessOrPharmacy'); // ✅ match actual path
+        return Inertia::render('Admin/RegisterBusinessOrPharmacy');
     })->name('register.bp.view');
 
 });

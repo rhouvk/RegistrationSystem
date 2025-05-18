@@ -84,7 +84,7 @@ export default function PersonalInfoForm({ values, handleChange, duplicateErrors
         <div>
           <label className="block text-sm font-medium text-gray-700">5. Sex</label>
           <div className="flex space-x-4 mt-2">
-            {['female', 'male'].map((gender) => (
+            {['Female', 'Male'].map((gender) => (
               <label key={gender} className="inline-flex items-center">
                 <input
                   type="radio"
@@ -95,7 +95,7 @@ export default function PersonalInfoForm({ values, handleChange, duplicateErrors
                   required
                   className="form-radio"
                 />
-                <span className="ml-2 capitalize">{gender}</span>
+                <span className="ml-2">{gender}</span>
               </label>
             ))}
           </div>
@@ -106,7 +106,7 @@ export default function PersonalInfoForm({ values, handleChange, duplicateErrors
       <div className="mt-8">
         <label className="block text-sm font-medium text-gray-700">6. Civil Status</label>
         <div className="flex flex-wrap gap-4 mt-2">
-          {['single', 'separated', 'cohabitation', 'married', 'widow'].map((status) => (
+          {['Single', 'Married', 'Widowed', 'Separated', 'Cohabitation'].map((status) => (
             <label key={status} className="inline-flex items-center">
               <input
                 type="radio"
@@ -117,7 +117,7 @@ export default function PersonalInfoForm({ values, handleChange, duplicateErrors
                 required
                 className="form-radio"
               />
-              <span className="ml-2 capitalize">{status}</span>
+              <span className="ml-2">{status}</span>
             </label>
           ))}
         </div>
