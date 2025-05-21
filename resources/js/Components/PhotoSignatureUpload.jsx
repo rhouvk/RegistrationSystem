@@ -87,10 +87,26 @@ export default function PhotoSignatureUpload({ values, handleChangeFile: handleP
 
     if (name === 'photo') {
       resizeImage(file, 250, 250, (resized) => {
-        handleParentChangeFile({ target: { name, files: [resized] } });
+        // Create a new event object with the resized file
+        const newEvent = {
+          target: {
+            name,
+            files: [resized],
+            type: 'file'
+          }
+        };
+        handleParentChangeFile(newEvent);
       });
     } else {
-      handleParentChangeFile({ target: { name, files: [file] } });
+      // Create a new event object with the file
+      const newEvent = {
+        target: {
+          name,
+          files: [file],
+          type: 'file'
+        }
+      };
+      handleParentChangeFile(newEvent);
     }
   };
 
@@ -142,6 +158,15 @@ export default function PhotoSignatureUpload({ values, handleChangeFile: handleP
     setIsDrawing(false);
   };
 
+  // Get photo URL based on whether it's a File object or path string
+  const getPhotoUrl = () => {
+    if (!values.photo) return null;
+    if (values.photo instanceof File) {
+      return URL.createObjectURL(values.photo);
+    }
+    return `/storage/${values.photo}`;
+  };
+
   return (
     <div className="mt-8">
       <h3 className="text-lg font-medium text-gray-900 mb-4">Upload Photo and Draw Signature</h3>
@@ -162,7 +187,7 @@ export default function PhotoSignatureUpload({ values, handleChangeFile: handleP
           </label>
           {values.photo && (
             <img
-              src={URL.createObjectURL(values.photo)}
+              src={getPhotoUrl()}
               alt="Photo Preview"
               className="mt-2 w-[250px] h-[250px] rounded object-cover border"
             />

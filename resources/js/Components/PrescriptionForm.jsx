@@ -37,7 +37,10 @@ export default function PrescriptionForm({
       (entry) =>
         !entry.medicine_purchase ||
         entry.quantity_prescribed === '' ||
-        entry.quantity_filled === ''
+        entry.quantity_filled === '' ||
+        parseInt(entry.quantity_prescribed) <= 0 ||
+        parseInt(entry.quantity_filled) <= 0 ||
+        parseInt(entry.quantity_filled) > parseInt(entry.quantity_prescribed)
     );
 
   return (
@@ -107,22 +110,29 @@ export default function PrescriptionForm({
                     <label className="block text-sm">Prescribed</label>
                     <input
                       type="number"
-                      min="0"
+                      min="1"
                       value={entry.quantity_prescribed}
-                      onChange={(e) => handleChange(idx, 'quantity_prescribed', Math.max(0, parseInt(e.target.value || 0)))}
+                      onChange={(e) => handleChange(idx, 'quantity_prescribed', Math.max(1, parseInt(e.target.value || 1)))}
                       className="w-full border rounded px-3 py-2"
                     />
+                    {parseInt(entry.quantity_prescribed) <= 0 && (
+                      <p className="text-sm text-red-500">Quantity must be greater than 0</p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm">Filled Now</label>
                     <input
                       type="number"
-                      min="0"
+                      min="1"
                       value={entry.quantity_filled}
-                      onChange={(e) => handleChange(idx, 'quantity_filled', Math.max(0, parseInt(e.target.value || 0)))}
+                      onChange={(e) => handleChange(idx, 'quantity_filled', Math.max(1, parseInt(e.target.value || 1)))}
                       className={`w-full border rounded px-3 py-2 ${isOver ? 'border-red-500' : ''}`}
                     />
-                    {isOver && <p className="text-sm text-red-500">Cannot file more than prescribed.</p>}
+                    {parseInt(entry.quantity_filled) <= 0 ? (
+                      <p className="text-sm text-red-500">Quantity must be greater than 0</p>
+                    ) : isOver && (
+                      <p className="text-sm text-red-500">Cannot fill more than prescribed.</p>
+                    )}
                   </div>
                 </div>
                 {entry.quantity_prescribed && entry.quantity_filled ? (

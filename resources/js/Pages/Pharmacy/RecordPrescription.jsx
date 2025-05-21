@@ -59,7 +59,7 @@ export default function RecordPrescription() {
     e.preventDefault();
     post(route('pharmacy.prescriptions.store'), {
       onSuccess: () => {
-        reset('entries', 'physician_name', 'physician_address', 'physician_ptr_no', 'pharmacist_name');
+        router.visit(route('pharmacy.prescriptions.log'));
       },
     });
   };

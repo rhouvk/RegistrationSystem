@@ -46,8 +46,8 @@ class PharmacyPrescriptionController extends Controller
             $control = AdminControl::first(); // assuming there's only one row
             $years = $control?->cardExpiration ?? 4;
     
-            $updatedAt = $pwdUser->updated_at;
-            $expiryDate = \Carbon\Carbon::parse($updatedAt)->addYears($years)->format('Y-m-d');
+            $issuedDate = $pwdUser->dateApplied;
+            $expiryDate = \Carbon\Carbon::parse($issuedDate)->addYears($years)->format('Y-m-d');
             $isExpired = \Carbon\Carbon::now()->greaterThan($expiryDate);
         }
     
@@ -55,7 +55,7 @@ class PharmacyPrescriptionController extends Controller
             'pwd_number' => $pwdNumber,
             'user_found' => $pwdUser ? true : false,
             'user_id' => $pwdUser?->user_id,
-            'updated_at' => $pwdUser?->updated_at,
+            'date_applied' => $pwdUser?->dateApplied,
             'card_expiration_years' => $years,
             'calculated_expiry' => $expiryDate,
             'is_expired' => $isExpired,
@@ -82,7 +82,18 @@ class PharmacyPrescriptionController extends Controller
             'entries'            => 'required|array|min:1',
             'entries.*.medicine_purchase'   => 'required|string',
             'entries.*.quantity_prescribed' => 'required|integer|min:1',
-            'entries.*.quantity_filled'      => 'required|integer|min:0',
+            'entries.*.quantity_filled'     => [
+                'required',
+                'integer',
+                'min:1',
+                function ($attribute, $value, $fail) use ($request) {
+                    $index = explode('.', $attribute)[1];
+                    $prescribed = $request->input("entries.{$index}.quantity_prescribed");
+                    if ($value > $prescribed) {
+                        $fail('The filled quantity cannot be greater than the prescribed quantity.');
+                    }
+                },
+            ],
         ]);
 
         foreach ($validated['entries'] as $entry) {
@@ -125,7 +136,7 @@ class PharmacyPrescriptionController extends Controller
             }
         }
 
-        return Redirect::route('pharmacy.prescriptions.create')
+        return Redirect::route('pharmacy.prescriptions.log')
             ->with('success', 'Prescription(s) recorded successfully.');
     }
 }

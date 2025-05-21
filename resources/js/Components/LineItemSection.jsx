@@ -13,6 +13,11 @@ export default function LineItemSection({ data, setData, bnpcItems, errors, line
   };
 
   const updateRow = (index, field, value) => {
+    // Prevent negative values for quantity and line_total
+    if ((field === 'quantity' || field === 'line_total') && parseFloat(value) < 0) {
+      return;
+    }
+    
     const updated = [...data.items];
     updated[index][field] = value;
     setData('items', updated);
@@ -49,6 +54,7 @@ export default function LineItemSection({ data, setData, bnpcItems, errors, line
               <TextInput
                 id={`qty_${i}`}
                 type="number"
+                min="0"
                 value={row.quantity}
                 onChange={e => updateRow(i, 'quantity', e.target.value)}
                 className="mt-1 block w-full"
@@ -61,6 +67,7 @@ export default function LineItemSection({ data, setData, bnpcItems, errors, line
               <TextInput
                 id={`total_${i}`}
                 type="number"
+                min="0"
                 step="0.01"
                 value={row.line_total}
                 onChange={e => updateRow(i, 'line_total', e.target.value)}

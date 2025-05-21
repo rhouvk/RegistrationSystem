@@ -34,6 +34,8 @@ use App\Http\Controllers\{
     PharmacyUpdateController,
     LocationController,
     AdminDistrictDetailsController,
+    PwdRenewalController,
+    PwdRenewalApprovalController,
 };
 
 use App\Models\PWDRegistration;
@@ -155,6 +157,12 @@ Route::middleware(['auth', 'can:pwd'])->group(function () {
         ->name('pwd.analytics.index'); // ✅ Add this line
 
     Route::get('/pwd/card', [PWDUserBarcodeController::class, 'generate'])->name('pwd.pwd-users.dashboard.generate');
+        Route::get('/pwd/renewal/{registration}', [PwdRenewalController::class, 'create'])->name('pwd.renewal.create');
+
+        Route::post('/pwd/renewal', [PwdRenewalController::class, 'store'])->name('pwd.renewals.store');
+        Route::get('/pwd/renewal/{registration}', [PwdRenewalController::class, 'create'])->name('pwd.renewal.create');
+        Route::get('/pwd/renewals/{renewal}/edit', [PwdRenewalController::class, 'edit'])->name('pwd.renewal.edit');
+        Route::put('/pwd/renewals/{renewal}', [PwdRenewalController::class, 'update'])->name('pwd.renewals.update');
 });
 
 /*
@@ -222,6 +230,19 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/provinces', [LocationController::class, 'provinces']);
     Route::get('/api/municipalities', [LocationController::class, 'municipalities']);
     Route::get('/api/barangays', [LocationController::class, 'barangays']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Admin PWD Renewal Approval Routes
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'can:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/pwd/renewals', [PwdRenewalApprovalController::class, 'index'])->name('pwd.renewals.index');
+    Route::get('/pwd/renewals/{renewal}', [PwdRenewalApprovalController::class, 'show'])->name('pwd.renewals.show');
+    Route::post('/pwd/renewals/{renewal}/approve', [PwdRenewalApprovalController::class, 'approve'])->name('pwd.renewals.approve');
+    Route::post('/pwd/renewals/{renewal}/reject', [PwdRenewalApprovalController::class, 'reject'])->name('pwd.renewals.reject');
 });
 
 require __DIR__ . '/auth.php';

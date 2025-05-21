@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, usePage, Link, router } from '@inertiajs/react';
 import PWDCardModal from '@/Components/PWDCardModal';
 import PWDInfoModal from '@/Components/PWDInfoModal';
 import PWDLayout from '@/Layouts/PWDLayout';
@@ -23,6 +23,9 @@ export default function PWDDashboard() {
         recentPurchase,
         recentDate,
         subscription,
+        registrations = [],
+        hasPendingRenewal,
+        lastApprovedRenewal,
     } = usePage().props;
 
     const user = auth?.user || {};
@@ -33,8 +36,8 @@ export default function PWDDashboard() {
     const [cardLoading, setCardLoading] = useState(false);
     const [cardUrl, setCardUrl] = useState(null);
 
-    const appliedDate = new Date(registration.updated_at);
-    const expiryDate = new Date(registration.updated_at);
+    const appliedDate = new Date(registration.dateApplied);
+    const expiryDate = new Date(registration.dateApplied);
     expiryDate.setFullYear(expiryDate.getFullYear() + parseInt(cardExpiration, 10));
     const isExpired = new Date() > expiryDate;
 
@@ -81,6 +84,38 @@ export default function PWDDashboard() {
         const diffWeeks = Math.floor(diffDays / 7);
         return diffWeeks === 1 ? 'a week ago' : `${diffWeeks} weeks ago`;
     }
+
+    const handleRenewal = (registration) => {
+        // Check if there's already a pending renewal request
+        const existingRenewal = registrations.find(reg => 
+            reg.registration_type === 2 // 2 for renewal
+        );
+
+        if (existingRenewal) {
+            // If there's a pending renewal, redirect to edit it
+            router.visit(route('pwd.renewal.edit', existingRenewal.id));
+            return;
+        }
+
+        // Get the most recent approved renewal
+        const lastApprovedRenewal = registrations
+            .filter(reg => reg.registration_type === 3) // 3 for approved
+            .sort((a, b) => new Date(b.dateApplied) - new Date(a.dateApplied))[0];
+
+        if (lastApprovedRenewal) {
+            // Create a new renewal request based on the last approved one
+            router.visit(route('pwd.renewal.create', {
+                registration: registration.id,
+                based_on: lastApprovedRenewal.id
+            }));
+            return;
+        }
+
+        // If no existing renewal and no previous approved renewal, create new
+        router.visit(route('pwd.renewal.create', registration.id));
+    };
+
+    console.log('Registration data:', registration);
 
     return (
         <PWDLayout header={<h2 className="text-xl font-semibold leading-tight">Dashboard</h2>}>
@@ -174,7 +209,7 @@ export default function PWDDashboard() {
 
                         {isExpired && (
                             <div className="mb-4 p-3 bg-red-100 text-red-800 border border-red-300 rounded">
-                                ⚠️ This PWD card has <strong>expired</strong>. Please visit your local PDAO to renew.
+                                ⚠️ This PWD card has <strong>expired</strong>. Please request a renewal below.
                             </div>
                         )}
 
@@ -193,6 +228,74 @@ export default function PWDDashboard() {
                             </tbody>
                         </table>
                     </div>
+
+                    {/* Renewal Panel - Only shows when card is expired or has pending renewals */}
+                    {(isExpired || (registration.renewals && registration.renewals.length > 0)) && (
+                        <div className="bg-white shadow rounded-md p-6">
+                            <h4 className="text-lg text-cyan-950 font-semibold mb-4">Renewal History</h4>
+                            
+                            {registration.renewals && registration.renewals.length > 0 ? (
+                                <div className="space-y-4">
+                                    {registration.renewals.map((renewal) => {
+                                        const renewalDate = new Date(renewal.dateApplied);
+                                        const renewalExpiry = new Date(renewal.dateApplied);
+                                        renewalExpiry.setFullYear(renewalExpiry.getFullYear() + cardExpiration);
+                                        const isRenewalExpired = new Date() > renewalExpiry;
+
+                                        return (
+                                            <div key={renewal.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                                <div>
+                                                    <p className="text-sm text-gray-600">
+                                                        Applied on {renewalDate.toLocaleDateString()}
+                                                    </p>
+                                                    <p className="text-sm text-gray-600">
+                                                        Expires on {renewalExpiry.toLocaleDateString()}
+                                                    </p>
+                                                    <p className="text-sm font-medium">
+                                                        {renewal.registration_type === 2 ? (
+                                                            <span className="text-yellow-600">Pending Renewal</span>
+                                                        ) : renewal.registration_type === 3 ? (
+                                                            <span className={isRenewalExpired ? "text-red-600" : "text-green-600"}>
+                                                                {isRenewalExpired ? "Approved (Expired)" : "Approved"}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-red-600">Rejected</span>
+                                                        )}
+                                                    </p>
+                                                </div>
+                                                {renewal.registration_type === 2 && (
+                                                    <button
+                                                        onClick={() => router.visit(route('pwd.renewal.edit', renewal.id))}
+                                                        className="inline-flex items-center justify-center gap-2 bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-md transition"
+                                                    >
+                                                        Edit Renewal
+                                                    </button>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ) : null}
+
+                            {isExpired && !hasPendingRenewal && (
+                                <div className="mt-4 text-center py-4">
+                                    <p className="text-gray-600 mb-4">
+                                        Your PWD card has expired. You can request a renewal by clicking the button below.
+                                        We'll use your existing information to process your renewal request.
+                                    </p>
+                                    <a
+                                        href={route('pwd.renewal.create', { 
+                                            registration: registration.id,
+                                            based_on: lastApprovedRenewal?.id 
+                                        })}
+                                        className="inline-flex items-center justify-center gap-2 bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-md transition"
+                                    >
+                                        Request Renewal
+                                    </a>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {/* Disability Summary */}
                     <div className="bg-white shadow rounded-md p-6"> {/* Slightly less rounded */}

@@ -37,7 +37,7 @@ class BusinessBnpcController extends Controller
                         ->withInput();
                 }
 
-                $issuedDate = $pwdUser->updated_at;
+                $issuedDate = $pwdUser->dateApplied;
                 $expiryDate = $issuedDate->copy()->addYears($cardExpirationYears);
                 $isCardExpired = now()->greaterThan($expiryDate);
                 $validUntil = $expiryDate->toDateString();
@@ -131,7 +131,7 @@ class BusinessBnpcController extends Controller
                 ]);
             }
 
-            return Redirect::route('business.bnpc-transactions.create')
+            return Redirect::route('business.sales-log')
                 ->with('success', 'Transaction recorded successfully.');
         } catch (\Throwable $e) {
             Log::error('Failed to store transaction', [

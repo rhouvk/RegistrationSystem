@@ -9,7 +9,10 @@ use App\Models\Region;
 use App\Models\Province;
 use App\Models\Municipality;
 use App\Models\Barangay;
+use App\Models\User;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class PWDUserController extends Controller
 {
@@ -32,17 +35,19 @@ class PWDUserController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('pwdNumber', 'like', "%{$search}%")
                 ->orWhereHas('user', function ($q2) use ($search) {
-                    $q2->where('name', 'like', "%{$search}%");
+                    $q2->where('name', 'like', "%{$search}%")
+                       ->orWhere('email', 'like', "%{$search}%")
+                       ->orWhere('phone', 'like', "%{$search}%");
                 });
             });
         }
 
         $users = $query->orderBy('id', 'desc')->paginate($perPage)->appends(['search' => $search]);
 
-            return Inertia::render('Admin/PWDusers', [
-                'users' => $users,
-                'filters' => $request->only('search', 'perPage'), // ✅ important!
-            ]);
+        return Inertia::render('Admin/PWDusers', [
+            'users' => $users,
+            'filters' => $request->only('search', 'perPage'),
+        ]);
     }
 
     public function edit($id)
@@ -82,49 +87,184 @@ class PWDUserController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'dateApplied' => 'required|date',
-            'dob' => 'required|date',
-            'sex' => 'required|in:Male,Female',
-            'civilStatus' => 'required|in:Single,Married,Widowed,Separated,Cohabitation',
-            'disability_type_id' => 'required|exists:disability_lists,id',
-            'disability_cause_id' => 'required|exists:disability_lists,id',
-            'region_id' => 'required|exists:regions,id',
-            'province_id' => 'required|exists:provinces,id',
-            'municipality_id' => 'required|exists:municipalities,id',
-            'barangay_id' => 'required|exists:barangays,id',
-            'house' => 'required|string',
-            'education' => 'required|string',
-            'employmentStatus' => 'required|string',
-            'employmentCategory' => 'nullable|string',
-            'employmentType' => 'nullable|string',
-            'occupation' => 'nullable|string',
-            'occupationOther' => 'nullable|string',
-            'organizationAffiliated' => 'nullable|string',
-            'organizationContact' => 'nullable|string',
-            'organizationAddress' => 'nullable|string',
-            'organizationTel' => 'nullable|string',
-            'sssNo' => 'nullable|string',
-            'gsisNo' => 'nullable|string',
-            'pagIbigNo' => 'nullable|string',
-            'psnNo' => 'nullable|string',
-            'philhealthNo' => 'nullable|string',
-            'fatherName' => 'nullable|string',
-            'motherName' => 'nullable|string',
-            'guardianName' => 'nullable|string',
-            'accomplishedBy' => 'required|string',
-            'certifyingPhysician' => 'required|string',
-            'physicianLicenseNo' => 'required|string',
-            'encoder' => 'required|string',
-            'processingOfficer' => 'required|string',
-            'approvingOfficer' => 'required|string',
-            'reportingUnit' => 'required|string',
-        ]);
+        try {
+            \Log::info('PWD User Update Request Data:', $request->all());
+            \Log::info('Files in request:', $request->allFiles());
+            \Log::info('Request headers:', $request->headers->all());
 
-        $pwdUser = PWDRegistration::findOrFail($id);
-        $pwdUser->update($request->all());
+            // Get the PWD user first to access the user relationship
+            $pwdUser = PWDRegistration::with('user')->findOrFail($id);
+            $user = $pwdUser->user;
 
-        return redirect()->route('pwd.pwd-users.index')
-            ->with('message', 'PWD user updated successfully');
+            // Log each required field
+            $requiredFields = [
+                'dateApplied', 'dob', 'sex', 'civilStatus', 'disability_type_id',
+                'disability_cause_id', 'region_id', 'province_id', 'municipality_id',
+                'barangay_id', 'house', 'education', 'employmentStatus',
+                'accomplishedBy', 'accomplished_by_first_name', 'accomplished_by_last_name',
+                'certifying_physician_first_name', 'certifying_physician_last_name',
+                'physician_license_no', 'processing_officer_first_name', 'processing_officer_last_name',
+                'approving_officer_first_name', 'approving_officer_last_name',
+                'encoder_first_name', 'encoder_last_name', 'reportingUnit', 'controlNo'
+            ];
+
+            foreach ($requiredFields as $field) {
+                \Log::info("Field {$field}:", [
+                    'value' => $request->input($field),
+                    'exists' => $request->has($field)
+                ]);
+            }
+
+            // Create validation rules array
+            $rules = [
+                'dateApplied' => 'required|date',
+                'dob' => 'required|date',
+                'sex' => 'required|in:Male,Female',
+                'civilStatus' => 'required|in:Single,Married,Widowed,Separated,Cohabitation',
+                'disability_type_id' => 'required|exists:disability_lists,id',
+                'disability_cause_id' => 'required|exists:disability_lists,id',
+                'region_id' => 'required|exists:regions,id',
+                'province_id' => 'required|exists:provinces,id',
+                'municipality_id' => 'required|exists:municipalities,id',
+                'barangay_id' => 'required|exists:barangays,id',
+                'house' => 'required|string',
+                'education' => 'required|string',
+                'employmentStatus' => 'required|string',
+                'employmentCategory' => 'nullable|string',
+                'employmentType' => 'nullable|string',
+                'occupation' => 'nullable|string',
+                'occupationOther' => 'nullable|string',
+                'organizationAffiliated' => 'nullable|string',
+                'organizationContact' => 'nullable|string',
+                'organizationAddress' => 'nullable|string',
+                'organizationTel' => 'nullable|string',
+                'sssNo' => 'nullable|string',
+                'gsisNo' => 'nullable|string',
+                'pagIbigNo' => 'nullable|string',
+                'psnNo' => 'nullable|string',
+                'philhealthNo' => 'nullable|string',
+                'father_first_name' => 'nullable|string',
+                'father_middle_name' => 'nullable|string',
+                'father_last_name' => 'nullable|string',
+                'mother_first_name' => 'nullable|string',
+                'mother_middle_name' => 'nullable|string',
+                'mother_last_name' => 'nullable|string',
+                'guardian_first_name' => 'nullable|string',
+                'guardian_middle_name' => 'nullable|string',
+                'guardian_last_name' => 'nullable|string',
+                'accomplishedBy' => 'required|string',
+                'accomplished_by_first_name' => 'required|string',
+                'accomplished_by_middle_name' => 'nullable|string',
+                'accomplished_by_last_name' => 'required|string',
+                'certifying_physician_first_name' => 'required|string',
+                'certifying_physician_middle_name' => 'nullable|string',
+                'certifying_physician_last_name' => 'required|string',
+                'physician_license_no' => 'required|string',
+                'processing_officer_first_name' => 'required|string',
+                'processing_officer_middle_name' => 'nullable|string',
+                'processing_officer_last_name' => 'required|string',
+                'approving_officer_first_name' => 'required|string',
+                'approving_officer_middle_name' => 'nullable|string',
+                'approving_officer_last_name' => 'required|string',
+                'encoder_first_name' => 'required|string',
+                'encoder_middle_name' => 'nullable|string',
+                'encoder_last_name' => 'required|string',
+                'reportingUnit' => 'required|string',
+                'controlNo' => 'required|string',
+            ];
+
+            // Only add email validation if it's being changed
+            if ($request->email !== $user->email) {
+                $rules['email'] = 'required|email|max:255|unique:users,email,' . $user->id;
+            }
+
+            // Only add phone validation if it's being changed
+            if ($request->mobile !== $user->phone) {
+                $rules['mobile'] = 'required|string|max:20|unique:users,phone,' . $user->id;
+            }
+
+            // Only add photo and signature validation if new files are being uploaded
+            if ($request->hasFile('photo')) {
+                $rules['photo'] = 'required|image|max:2048';
+            }
+            if ($request->hasFile('signature')) {
+                $rules['signature'] = 'required|image|max:2048';
+            }
+
+            $request->validate($rules);
+
+            \Log::info('Found PWD user:', ['id' => $pwdUser->id, 'current_photo' => $pwdUser->photo, 'current_signature' => $pwdUser->signature]);
+
+            // Combine name fields for the user's name
+            $fullName = $request->first_name;
+            if ($request->middle_name) {
+                $fullName .= ' ' . $request->middle_name;
+            }
+            $fullName .= ' ' . $request->last_name;
+            if ($request->suffix) {
+                $fullName .= ' ' . $request->suffix;
+            }
+
+            // Update user data first if email, phone, or name changed
+            if ($request->email !== $user->email || $request->mobile !== $user->phone || $fullName !== $user->name) {
+                $user->update([
+                    'name' => $fullName,
+                    'email' => $request->email,
+                    'phone' => $request->mobile,
+                ]);
+            }
+
+            // Handle photo update
+            if ($request->hasFile('photo')) {
+                \Log::info('Processing new photo upload');
+                // Delete old photo if exists
+                if ($pwdUser->photo && Storage::disk('public')->exists($pwdUser->photo)) {
+                    \Log::info('Deleting old photo:', ['path' => $pwdUser->photo]);
+                    Storage::disk('public')->delete($pwdUser->photo);
+                }
+
+                // Store new photo
+                $photoFile = $request->file('photo');
+                $photoName = 'photo_' . time() . '_' . uniqid() . '.png';
+                $photoPath = 'photos/' . $photoName;
+                $photoFile->storeAs('photos', $photoName, 'public');
+                $request->merge(['photo' => $photoPath]);
+                \Log::info('New photo saved:', ['path' => $photoPath]);
+            }
+
+            // Handle signature update
+            if ($request->hasFile('signature')) {
+                \Log::info('Processing new signature upload');
+                // Delete old signature if exists
+                if ($pwdUser->signature && Storage::disk('public')->exists($pwdUser->signature)) {
+                    \Log::info('Deleting old signature:', ['path' => $pwdUser->signature]);
+                    Storage::disk('public')->delete($pwdUser->signature);
+                }
+
+                // Store new signature
+                $signatureFile = $request->file('signature');
+                $sigName = 'signature_' . time() . '_' . uniqid() . '.' . $signatureFile->getClientOriginalExtension();
+                $sigPath = $signatureFile->storeAs('signatures', $sigName, 'public');
+                $request->merge(['signature' => $sigPath]);
+                \Log::info('New signature saved:', ['path' => $sigPath]);
+            }
+
+            // Update PWD user data
+            $pwdUser->update($request->except(['email', 'mobile']));
+            \Log::info('PWD user updated successfully');
+
+            return redirect()->route('pwd.pwd-users.index')
+                ->with('message', 'PWD user updated successfully');
+        } catch (\Exception $e) {
+            \Log::error('Error updating PWD user:', [
+                'message' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => 'Error updating PWD user: ' . $e->getMessage()]);
+        }
     }
 }

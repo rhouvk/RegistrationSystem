@@ -18,6 +18,7 @@ import AccomplishedByForm from '@/Components/AccomplishedByForm';
 import CertifyingPhysicianForm from '@/Components/CertifyingPhysicianForm';
 import OfficersForm from '@/Components/OfficersForm';
 import PhotoSignatureUpload from '@/Components/PhotoSignatureUpload';
+import ReportingInfoForm from '@/Components/ReportingInfoForm';
 
 
 
@@ -66,9 +67,9 @@ export default function Register(props) {
   const [values, setValues] = useState({
     pwdNumber: '',
     dateApplied: new Date().toISOString().split('T')[0],
-    lastName: '',
-    firstName: '',
-    middleName: '',
+    first_name: '',
+    middle_name: '',
+    last_name: '',
     suffix: '',
     dob: '',
     sex: '',
@@ -99,26 +100,32 @@ export default function Register(props) {
     pagIbigNo: '',
     psnNo: '',
     philhealthNo: '',
-    fatherFirstName: '',
-    fatherMiddleName: '',
-    fatherLastName: '',
-    motherFirstName: '',
-    motherMiddleName: '',
-    motherLastName: '',
-    guardianFirstName: '',
-    guardianMiddleName: '',
-    guardianLastName: '',
-    accomplishedBy: '',
-    accomplishedFirstName: '',
-    accomplishedMiddleName: '',
-    accomplishedLastName: '',
-    physicianLicenseNo: '',
-    certifyingPhysicianFirstName: '',
-    certifyingPhysicianMiddleName: '',
-    certifyingPhysicianLastName: '',
-    encoder: '',
-    processingOfficer: '',
-    approvingOfficer: '',
+    father_first_name: '',
+    father_middle_name: '',
+    father_last_name: '',
+    mother_first_name: '',
+    mother_middle_name: '',
+    mother_last_name: '',
+    guardian_first_name: '',
+    guardian_middle_name: '',
+    guardian_last_name: '',
+    accomplishedBy: 'applicant',
+    accomplished_by_first_name: '',
+    accomplished_by_middle_name: '',
+    accomplished_by_last_name: '',
+    certifying_physician_first_name: '',
+    certifying_physician_middle_name: '',
+    certifying_physician_last_name: '',
+    physician_license_no: '',
+    processing_officer_first_name: '',
+    processing_officer_middle_name: '',
+    processing_officer_last_name: '',
+    approving_officer_first_name: '',
+    approving_officer_middle_name: '',
+    approving_officer_last_name: '',
+    encoder_first_name: '',
+    encoder_middle_name: '',
+    encoder_last_name: '',
     reportingUnit: '',
     controlNo: '',
     photo: null,
@@ -144,29 +151,57 @@ export default function Register(props) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
+    // Validate required fields
+    const requiredFields = {
+      pwdNumber: 'PWD Number',
+      last_name: 'Last Name',
+      first_name: 'First Name',
+      dob: 'Date of Birth',
+      sex: 'Sex',
+      civilStatus: 'Civil Status',
+      disability_type_id: 'Type of Disability',
+      disability_cause_id: 'Cause of Disability',
+      house: 'House No.',
+      barangay_id: 'Barangay',
+      municipality_id: 'Municipality',
+      province_id: 'Province',
+      region_id: 'Region',
+      education: 'Educational Attainment',
+      employmentStatus: 'Status of Employment',
+      processing_officer_first_name: 'Processing Officer',
+      approving_officer_first_name: 'Approving Officer',
+      encoder_first_name: 'Encoder',
+      reportingUnit: 'Reporting Unit',
+      controlNo: 'Control No.'
+    };
+
+    // Check if at least one contact method is provided
+    if (!values.email && !values.mobile) {
+      alert('Please provide either an email address or mobile number.');
+      return;
+    }
+
+    // Check all required fields
+    const missingFields = Object.entries(requiredFields)
+      .filter(([key]) => !values[key])
+      .map(([_, label]) => label);
+
+    if (missingFields.length > 0) {
+      alert(`Please fill in the following required fields:\n${missingFields.join('\n')}`);
+      return;
+    }
+
     const isUnique = await checkDuplicates();
     if (!isUnique) {
       alert('Duplicate entry found. Please fix the highlighted fields.');
       return;
     }
   
-    const formattedValues = {
-      ...values,
-      certifyingPhysician: `${values.certifyingPhysicianFirstName} ${values.certifyingPhysicianMiddleName} ${values.certifyingPhysicianLastName}`.trim(),
-      accomplishedBy: values.accomplishedBy,
-      accomplishedFirstName: values.accomplishedFirstName,
-      accomplishedMiddleName: values.accomplishedMiddleName,
-      accomplishedLastName: values.accomplishedLastName,      
-      fatherName: `${values.fatherFirstName} ${values.fatherMiddleName} ${values.fatherLastName}`.trim(),
-      motherName: `${values.motherFirstName} ${values.motherMiddleName} ${values.motherLastName}`.trim(),
-      guardianName: `${values.guardianFirstName} ${values.guardianMiddleName} ${values.guardianLastName}`.trim(),
-    };
-  
     const formData = new FormData();
-    for (const key in formattedValues) {
+    for (const key in values) {
       if (!['photo', 'signature', 'photoPreview', 'signaturePreview'].includes(key)) {
-        const value = formattedValues[key];
+        const value = values[key];
         if (Array.isArray(value)) {
           value.forEach(item => formData.append(`${key}[]`, item));
         } else {
@@ -181,14 +216,24 @@ export default function Register(props) {
     if (values.signature) {
       formData.append('signature', values.signature);
     }
+
+    // Debug logging
+    console.log('Submitting form data:');
+    for (let pair of formData.entries()) {
+      console.log(pair[0] + ': ' + pair[1]);
+    }
   
     Inertia.post(route('pwd.register'), formData, {
       forceFormData: true,
       onError: (errors) => {
+        console.error('Form submission errors:', errors);
         const firstErrorField = Object.keys(errors)[0];
         const el = document.querySelector(`[name="${firstErrorField}"]`);
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       },
+      onSuccess: (response) => {
+        console.log('Form submitted successfully:', response);
+      }
     });
   };
   
@@ -231,6 +276,7 @@ export default function Register(props) {
               <AccomplishedByForm values={values} handleChange={handleChange} />
               <CertifyingPhysicianForm values={values} handleChange={handleChange} />
               <OfficersForm values={values} handleChange={handleChange} />
+              <ReportingInfoForm values={values} handleChange={handleChange} />
               <PhotoSignatureUpload values={values} handleChangeFile={handleChangeFile} />
 
 

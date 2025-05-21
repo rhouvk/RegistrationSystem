@@ -5,13 +5,13 @@ import React from 'react';
 export default function FamilyBackgroundForm({ values, handleChange }) {
   const renderNameFields = (prefix) => (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {['FirstName', 'MiddleName', 'LastName'].map((part) => (
-        <div key={`${prefix}${part}`}>
-          <label className="block text-sm font-medium text-gray-700">{part.replace('Name', ' Name')}</label>
+      {['first_name', 'middle_name', 'last_name'].map((part) => (
+        <div key={`${prefix}_${part}`}>
+          <label className="block text-sm font-medium text-gray-700">{part.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</label>
           <input
             type="text"
-            name={`${prefix}${part}`}
-            value={values[`${prefix}${part}`]}
+            name={`${prefix}_${part}`}
+            value={values[`${prefix}_${part}`]}
             onChange={handleChange}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
           />

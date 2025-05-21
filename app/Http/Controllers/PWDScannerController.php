@@ -37,7 +37,7 @@ class PWDScannerController extends Controller
             'user_id',
             'pwdNumber',
             'photo',
-            'updated_at',
+            'dateApplied',
             'disability_type_id'
         ])->with([
             'user' => function($query) {
@@ -68,7 +68,7 @@ class PWDScannerController extends Controller
     
         $controls = AdminControl::first();
         $years = $controls?->cardExpiration ?? 3;
-        $validUntil = Carbon::parse($user->updated_at)->addYears($years)->toDateString();
+        $validUntil = Carbon::parse($user->dateApplied)->addYears($years)->toDateString();
     
         $response = [
             'user' => $user->toArray(),
@@ -90,7 +90,7 @@ class PWDScannerController extends Controller
                 'user_id',
                 'pwdNumber',
                 'photo',
-                'updated_at',
+                'dateApplied',
                 'disability_type_id'
             ])->with([
                 'user' => function($query) {
@@ -108,7 +108,7 @@ class PWDScannerController extends Controller
 
             // Format data for offline storage
             $formattedData = $pwdData->map(function($pwd) use ($years) {
-                $validUntil = Carbon::parse($pwd->updated_at)->addYears($years)->toDateString();
+                $validUntil = Carbon::parse($pwd->dateApplied)->addYears($years)->toDateString();
                 
                 return [
                     'hashid' => Hashids::encode($pwd->id),

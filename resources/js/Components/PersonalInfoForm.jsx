@@ -18,6 +18,20 @@ export default function PersonalInfoForm({ values, handleChange, duplicateErrors
     });
   };
 
+  const capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+  };
+
+  const handleNameChange = (e) => {
+    const { name, value } = e.target;
+    handleChange({
+      target: {
+        name,
+        value: capitalizeFirstLetter(value),
+      },
+    });
+  };
+
   return (
     <div>
       {/* 1. PWD Number */}
@@ -51,17 +65,22 @@ export default function PersonalInfoForm({ values, handleChange, duplicateErrors
       {/* 3. Personal Information */}
       <h3 className="text-lg font-medium text-gray-900 mb-4">3. Personal Information</h3>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {['firstName', 'middleName', 'lastName', 'suffix'].map((field) => (
+        {[
+          { field: 'first_name', label: 'First Name' },
+          { field: 'middle_name', label: 'Middle Name' },
+          { field: 'last_name', label: 'Last Name' },
+          { field: 'suffix', label: 'Suffix' }
+        ].map(({ field, label }) => (
           <div key={field}>
             <label className="block text-sm font-medium text-gray-700">
-              {field.replace(/([A-Z])/g, ' $1')}
+              {label}
             </label>
             <input
               type="text"
               name={field}
               value={values[field]}
-              onChange={handleChange}
-              required={field !== 'middleName' && field !== 'suffix'}
+              onChange={handleNameChange}
+              required={field !== 'middle_name' && field !== 'suffix'}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             />
           </div>

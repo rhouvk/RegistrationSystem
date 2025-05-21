@@ -10,21 +10,21 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('pwd_users', function (Blueprint $table) {
+        Schema::create('pwd_renewals_and_preregistrations', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
     
-            $table->foreignId('user_id')->unique()->constrained('users')->onDelete('cascade');
-    
-            $table->string('pwdNumber')->unique();
-            $table->date('dateApplied');
-            $table->date('dob');
-            $table->string('sex');
-            $table->string('civilStatus');
+            $table->integer('registration_type')->nullable()->comment('1 - Pre-registration, 2 - Renewal, 3 - Approved, 4 - Rejected');
+            $table->string('pwdNumber')->nullable()->unique();
+            $table->date('dateApplied')->nullable();
+            $table->date('dob')->nullable();
+            $table->string('sex')->nullable();
+            $table->string('civilStatus')->nullable();
     
             // User's name fields
-            $table->string('first_name');
+            $table->string('first_name')->nullable();
             $table->string('middle_name')->nullable();
-            $table->string('last_name');
+            $table->string('last_name')->nullable();
             $table->string('suffix')->nullable();
     
             // Father's name fields
@@ -43,9 +43,9 @@ return new class extends Migration {
             $table->string('guardian_last_name')->nullable();
     
             // Accomplished by name fields
-            $table->string('accomplished_by_first_name');
+            $table->string('accomplished_by_first_name')->nullable();
             $table->string('accomplished_by_middle_name')->nullable();
-            $table->string('accomplished_by_last_name');
+            $table->string('accomplished_by_last_name')->nullable();
     
             // Certifying physician name fields
             $table->string('certifying_physician_first_name')->nullable();
@@ -54,33 +54,33 @@ return new class extends Migration {
             $table->string('physician_license_no')->nullable();
     
             // Processing officer name fields
-            $table->string('processing_officer_first_name');
+            $table->string('processing_officer_first_name')->nullable();
             $table->string('processing_officer_middle_name')->nullable();
-            $table->string('processing_officer_last_name');
+            $table->string('processing_officer_last_name')->nullable();
     
             // Approving officer name fields
-            $table->string('approving_officer_first_name');
+            $table->string('approving_officer_first_name')->nullable();
             $table->string('approving_officer_middle_name')->nullable();
-            $table->string('approving_officer_last_name');
+            $table->string('approving_officer_last_name')->nullable();
     
             // Encoder name fields
-            $table->string('encoder_first_name');
+            $table->string('encoder_first_name')->nullable();
             $table->string('encoder_middle_name')->nullable();
-            $table->string('encoder_last_name');
+            $table->string('encoder_last_name')->nullable();
     
             // Define as unsignedBigInteger only
-            $table->unsignedBigInteger('disability_type_id');
-            $table->unsignedBigInteger('disability_cause_id');
+            $table->unsignedBigInteger('disability_type_id')->nullable();
+            $table->unsignedBigInteger('disability_cause_id')->nullable();
     
             $table->string('house')->nullable();
-            $table->foreignId('barangay_id')->constrained('barangays')->onDelete('restrict');
-            $table->foreignId('municipality_id')->constrained('municipalities')->onDelete('restrict');
-            $table->foreignId('province_id')->constrained('provinces')->onDelete('restrict');
-            $table->foreignId('region_id')->constrained('regions')->onDelete('restrict');
+            $table->foreignId('barangay_id')->nullable()->constrained('barangays')->onDelete('restrict');
+            $table->foreignId('municipality_id')->nullable()->constrained('municipalities')->onDelete('restrict');
+            $table->foreignId('province_id')->nullable()->constrained('provinces')->onDelete('restrict');
+            $table->foreignId('region_id')->nullable()->constrained('regions')->onDelete('restrict');
     
             $table->string('landline')->nullable();
-            $table->string('education');
-            $table->string('employmentStatus');
+            $table->string('education')->nullable();
+            $table->string('employmentStatus')->nullable();
             $table->string('employmentCategory')->nullable();
             $table->string('employmentType')->nullable();
             $table->string('occupation')->nullable();
@@ -94,9 +94,9 @@ return new class extends Migration {
             $table->string('pagIbigNo')->nullable();
             $table->string('psnNo')->nullable();
             $table->string('philhealthNo')->nullable();
-            $table->enum('accomplishedBy', ['applicant', 'guardian', 'representative']);
-            $table->string('reportingUnit');
-            $table->string('controlNo');
+            $table->enum('accomplishedBy', ['applicant', 'guardian', 'representative'])->nullable();
+            $table->string('reportingUnit')->nullable();
+            $table->string('controlNo')->nullable(); 
     
             $table->string('photo')->nullable();
             $table->string('signature')->nullable();
@@ -105,7 +105,7 @@ return new class extends Migration {
         });
     
         // 🔁 Define foreign keys *after* table creation
-        Schema::table('pwd_users', function (Blueprint $table) {
+        Schema::table('pwd_renewals_and_preregistrations', function (Blueprint $table) {
             $table->foreign('disability_type_id')
                   ->references('id')->on('disability_lists')
                   ->onDelete('restrict');
@@ -114,8 +114,6 @@ return new class extends Migration {
                   ->references('id')->on('disability_lists')
                   ->onDelete('restrict');
         });
-    
-    
     }
 
     /**
@@ -123,6 +121,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('pwd_users');
+        Schema::dropIfExists('pwd_renewals_and_preregistrations');
     }
 };

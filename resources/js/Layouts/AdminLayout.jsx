@@ -43,12 +43,17 @@ export default function AuthenticatedLayout({ header, children }) {
                                             Register
                                         </NavLink>
                                         <NavLink
-    href={route('register.bp.view')}  // ✅ This is the GET route!
-    active={route().current('register.bp.view')}
->
-    Register B/P
-</NavLink>
-
+                                            href={route('register.bp.view')}
+                                            active={route().current('register.bp.view')}
+                                        >
+                                            Register B/P
+                                        </NavLink>
+                                        <NavLink
+                                            href={route('admin.pwd.renewals.index')}
+                                            active={route().current('admin.pwd.renewals.index')}
+                                        >
+                                            PWD Renewals
+                                        </NavLink>
                                     </>
                                 )}
                             </div>
@@ -142,6 +147,18 @@ export default function AuthenticatedLayout({ header, children }) {
                                     active={route().current('pwd.register')}
                                 >
                                     Register
+                                </ResponsiveNavLink>
+                                <ResponsiveNavLink
+                                    href={route('register.bp.view')}
+                                    active={route().current('register.bp.view')}
+                                >
+                                    Register B/P
+                                </ResponsiveNavLink>
+                                <ResponsiveNavLink
+                                    href={route('admin.pwd.renewals.index')}
+                                    active={route().current('admin.pwd.renewals.index')}
+                                >
+                                    PWD Renewals
                                 </ResponsiveNavLink>
                             </>
                         )}

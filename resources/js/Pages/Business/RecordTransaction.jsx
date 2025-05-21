@@ -86,10 +86,12 @@ export default function RecordTransaction() {
 
   const confirmSubmit = () => {
     setShowConfirm(false);
-post(route('business.bnpc-transactions.store'), {
-  forceFormData: true,
-});
-
+    post(route('business.bnpc-transactions.store'), {
+      forceFormData: true,
+      onSuccess: () => {
+        router.visit(route('business.sales-log'));
+      }
+    });
   };
 
   const reloadPage = () => window.location.reload();

@@ -2,15 +2,19 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class PWDRegistration extends Model
+class PwdRenewalAndPreregistration extends Model
 {
-    // Specify the actual table name
-    protected $table = 'pwd_users';
+    use HasFactory;
+
+    protected $table = 'pwd_renewals_and_preregistrations';
 
     protected $fillable = [
         'user_id',
+        'registration_type',
         'pwdNumber',
         'dateApplied',
         'dob',
@@ -74,13 +78,10 @@ class PWDRegistration extends Model
         'photo',
         'signature',
     ];
-    
 
     protected $casts = [
-        'disabilityTypes' => 'array',
-        'disabilityCauses'=> 'array',
-        'dateApplied'     => 'date',
-        'dob'             => 'date',
+        'dateApplied' => 'date',
+        'dob' => 'date',
     ];
 
     protected $appends = ['email', 'mobile'];
@@ -96,47 +97,68 @@ class PWDRegistration extends Model
     }
 
     /**
-     * Define a one-to-one relationship to the User model.
+     * Get the user that owns the registration.
      */
-    public function user()
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
-    
-    public function disabilityType() {
+
+    /**
+     * Get the registration associated with this registration.
+     */
+    public function registration(): BelongsTo
+    {
+        return $this->belongsTo(PWDRegistration::class, 'user_id', 'user_id');
+    }
+
+    /**
+     * Get the disability type.
+     */
+    public function disabilityType(): BelongsTo
+    {
         return $this->belongsTo(DisabilityList::class, 'disability_type_id')
                     ->where('category', 'Type');
     }
 
-    public function disabilityCause()
+    /**
+     * Get the disability cause.
+     */
+    public function disabilityCause(): BelongsTo
     {
         return $this->belongsTo(DisabilityList::class, 'disability_cause_id')
                     ->where('category', 'Cause');
     }
-    
-    public function region()
-    {
-        return $this->belongsTo(Region::class);
-    }
-    
-    public function province()
-    {
-        return $this->belongsTo(Province::class);
-    }
-    
-    public function municipality()
-    {
-        return $this->belongsTo(Municipality::class);
-    }
-    
-    public function barangay()
+
+    /**
+     * Get the barangay.
+     */
+    public function barangay(): BelongsTo
     {
         return $this->belongsTo(Barangay::class);
     }
 
-    public function renewals()
+    /**
+     * Get the municipality.
+     */
+    public function municipality(): BelongsTo
     {
-        return $this->hasMany(PwdRenewalAndPreregistration::class, 'user_id', 'user_id');
+        return $this->belongsTo(Municipality::class);
     }
 
+    /**
+     * Get the province.
+     */
+    public function province(): BelongsTo
+    {
+        return $this->belongsTo(Province::class);
+    }
+
+    /**
+     * Get the region.
+     */
+    public function region(): BelongsTo
+    {
+        return $this->belongsTo(Region::class);
+    }
 }

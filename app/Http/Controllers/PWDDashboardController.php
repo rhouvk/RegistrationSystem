@@ -19,12 +19,35 @@ class PWDDashboardController extends Controller
         $user = auth()->user();
 
         $registration = PWDRegistration::with([
-            'user', 'disabilityType', 'disabilityCause', 'region', 'province', 'municipality', 'barangay',
+            'user', 'disabilityType', 'disabilityCause', 'region', 'province', 'municipality', 'barangay', 'renewals'
         ])->where('user_id', $user->id)->firstOrFail();
 
         $adminControl = AdminControl::find(1);
         $purchaseLimit = (float) ($adminControl->purchaseLimit ?? 0);
         $cardExpiration = (int) ($adminControl->cardExpiration ?? 3);
+
+        // Get all renewals ordered by date
+        $renewals = $registration->renewals()
+            ->orderBy('dateApplied', 'desc')
+            ->get();
+
+        // Get the most recent approved renewal
+        $lastApprovedRenewal = $renewals->first(function($renewal) {
+            return $renewal->registration_type === 3; // 3 for approved
+        });
+
+        // Check for pending renewal
+        $hasPendingRenewal = $renewals->contains(function($renewal) {
+            return $renewal->registration_type === 2; // 2 for renewal
+        });
+
+        // Calculate expiration based on the most recent approved renewal or original registration
+        $baseDate = $lastApprovedRenewal ? $lastApprovedRenewal->dateApplied : $registration->dateApplied;
+        $expiryDate = Carbon::parse($baseDate)->addYears($cardExpiration);
+        $isExpired = now()->greaterThan($expiryDate);
+
+        // If card is expired and no pending renewal exists, allow new renewal
+        $canRenew = $isExpired && !$hasPendingRenewal;
 
         $startOfWeek = Carbon::now()->startOfWeek(Carbon::MONDAY);
         $endOfWeek = Carbon::now()->endOfWeek(Carbon::SUNDAY);
@@ -61,6 +84,12 @@ class PWDDashboardController extends Controller
             'recentPurchase' => $recentPurchase,
             'recentDate' => $recentDate,
             'subscription' => $subscription,
+            'expiryDate' => $expiryDate->format('Y-m-d'),
+            'isExpired' => $isExpired,
+            'hasPendingRenewal' => $hasPendingRenewal,
+            'canRenew' => $canRenew,
+            'renewals' => $renewals,
+            'lastApprovedRenewal' => $lastApprovedRenewal,
         ]);
     }
 }

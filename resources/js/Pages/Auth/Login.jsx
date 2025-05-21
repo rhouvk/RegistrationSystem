@@ -17,6 +17,12 @@ export default function Login({ status, canResetPassword }) {
         e.preventDefault();
         post(route('login'), {
             onFinish: () => reset('password'),
+            preserveScroll: true,
+            data: {
+                login: data.login,
+                password: data.password,
+                remember: data.remember,
+            },
         });
     };
 

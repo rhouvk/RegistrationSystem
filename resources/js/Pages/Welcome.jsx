@@ -69,7 +69,7 @@ export default function Welcome({ auth }) {
                         {/* Header */}
                         <div className="w-full flex justify-between items-center relative px-4">
                             <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 mb-2">
-                                <img src="/images/logow1.png" alt="PWD NA'TO Logo" className="w-16 h-16" />
+                                <img src="/images/logow1.png" alt="PWD NA'TO Logo" className="w-14 h-14" />
                             </div>
                             {!isMobile && (
                                 <div className="flex space-x-4 ml-auto flex-nowrap">
@@ -96,16 +96,16 @@ export default function Welcome({ auth }) {
                         <img
                             src="/images/wplettering.png"
                             alt="PWD NA'TO Lettering"
-                            className={`w-full lg:w-[110%] xl:w-[120%] max-w-none h-auto ${isMobile ? 'mt-12' : 'mt-10'}`}
+                            className={`w-full lg:w-[100%] xl:w-[110%] max-w-none h-auto ${isMobile ? 'mt-10' : 'mt-8'}`}
                         />
 
                         {/* Hero Text Section */}
-                        <main className="w-full max-w-7xl flex flex-col items-center mt-4 gap-8 lg:flex-row lg:justify-start lg:items-end lg:-translate-x-5 xl:-translate-x-20">
-                            <div className="text-center md:text-left max-w-md">
-                                <h2 className="text-3xl md:text-4xl font-bold mb-4 text-teal-700">
+                        <main className="w-full max-w-6xl flex flex-col items-center mt-2 gap-6 lg:flex-row lg:justify-start lg:items-end lg:-translate-x-4 xl:-translate-x-16">
+                            <div className="text-center md:text-left max-w-sm">
+                                <h2 className="text-2xl md:text-3xl font-bold mb-3 text-teal-700">
                                     Empowering PWDs Through Digital Innovation
                                 </h2>
-                                <p className="text-base md:text-lg text-white mb-2 leading-relaxed">
+                                <p className="text-sm md:text-base text-white mb-2 leading-relaxed">
                                     Welcome to <strong>PWD NA'TO</strong> — a platform built to simplify ID validation,
                                     track benefits, and deliver accessible services to Persons with Disabilities.
                                 </p>
@@ -140,7 +140,7 @@ export default function Welcome({ auth }) {
                         </main>
 
                         {/* Scanner Icon */}
-                        <div className="flex justify-center mt-8 lg:absolute lg:bottom-0 lg:-right-8 xl:-right-16 lg:translate-y-8 z-30">
+                        <div className="flex justify-center mt-6 lg:absolute lg:bottom-0 lg:-right-6 xl:-right-12 lg:translate-y-6 z-30">
                             <Link
                                 href={route('public.scan')}
                                 className="group relative inline-block rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
@@ -149,17 +149,17 @@ export default function Welcome({ auth }) {
                                 <img
                                     src="/images/wpscan.png"
                                     alt="Scan Icon"
-                                    className="w-44 sm:w-56 md:w-72 lg:w-80 xl:w-96 transition duration-300 group-hover:scale-110 group-hover:hue-rotate-60 group-hover:saturate-150 relative z-10"
+                                    className="w-36 sm:w-48 md:w-64 lg:w-72 xl:w-80 transition duration-300 group-hover:scale-110 group-hover:hue-rotate-60 group-hover:saturate-150 relative z-10"
                                 />
                             </Link>
                         </div>
 
                         {/* People Illustration */}
-                        <div className="flex justify-center mt-8 lg:absolute lg:inset-x-0 lg:bottom-0 lg:translate-y-48 lg:translate-x-8">
+                        <div className="flex justify-center mt-6 lg:absolute lg:inset-x-0 lg:bottom-0 lg:translate-y-40 lg:translate-x-6">
                             <img
                                 src="/images/wppeople.png"
                                 alt="PWD People Illustration"
-                                className="w-full h-auto object-contain md:h-[50vh] md:max-h-[350px] lg:h-[60vh] lg:max-h-[400px] xl:h-[calc(100vh-150px)] xl:max-h-[500px] md:w-auto lg:w-auto xl:w-auto"
+                                className="w-full h-auto object-contain md:h-[45vh] md:max-h-[300px] lg:h-[50vh] lg:max-h-[350px] xl:h-[calc(100vh-180px)] xl:max-h-[450px] md:w-auto lg:w-auto xl:w-auto"
                             />
                         </div>
                     </div>

@@ -62,127 +62,164 @@ class PWDRegistrationController extends Controller
      */
         public function store(Request $request)
         {
-            $request->validate([
-                'pwdNumber'           => 'required|unique:pwd_users,pwdNumber',
-                'dateApplied'         => 'required|date',
-                'firstName'           => 'required|string|max:255',
-                'lastName'            => 'required|string|max:255',
-                'dob'                 => 'required|date',
-                'sex'                 => 'required|string',
-                'civilStatus'         => 'required|string',
-                'disability_type_id'  => 'required|exists:disability_lists,id',
-                'disability_cause_id' => 'required|exists:disability_lists,id',
-                'region_id'           => 'required|exists:regions,id',
-                'province_id'         => 'required|exists:provinces,id',
-                'municipality_id'     => 'required|exists:municipalities,id',
-                'barangay_id'         => 'required|exists:barangays,id',
-                'mobile'              => 'nullable|string|max:20',
-                'email'               => 'nullable|email|max:255',
-                'encoder'             => 'required|string|max:255',
-                'processingOfficer'   => 'required|string|max:255',
-                'approvingOfficer'    => 'required|string|max:255',
-                'physicianLicenseNo'  => 'nullable|string|max:8', // ✅ ADDED VALIDATION
-                'photo'               => 'nullable|image|max:2048',
-                'signature'           => 'nullable|image|max:2048',
-            ]);
-
-            DB::beginTransaction();
-
             try {
-                $fullName = trim("{$request->firstName} {$request->middleName} {$request->lastName} {$request->suffix}");
-                $password = Hash::make($request->lastName . date('mdY', strtotime($request->dob)));
+                \Log::info('PWD Registration Request Data:', $request->all());
 
-                $user = User::create([
-                    'name'     => $fullName,
-                    'email'    => $request->email,
-                    'phone'    => $request->mobile,
-                    'role'     => 0,
-                    'password' => $password,
+                $request->validate([
+                    'pwdNumber'           => 'required|unique:pwd_users,pwdNumber',
+                    'dateApplied'         => 'required|date',
+                    'first_name'          => 'required|string|max:255',
+                    'last_name'           => 'required|string|max:255',
+                    'dob'                 => 'required|date',
+                    'sex'                 => 'required|string',
+                    'civilStatus'         => 'required|string',
+                    'disability_type_id'  => 'required|exists:disability_lists,id',
+                    'disability_cause_id' => 'required|exists:disability_lists,id',
+                    'region_id'           => 'required|exists:regions,id',
+                    'province_id'         => 'required|exists:provinces,id',
+                    'municipality_id'     => 'required|exists:municipalities,id',
+                    'barangay_id'         => 'required|exists:barangays,id',
+                    'mobile'              => 'nullable|string|max:20',
+                    'email'               => 'nullable|email|max:255',
+                    'accomplishedBy'      => 'required|in:applicant,guardian,representative',
+                    'accomplished_by_first_name' => 'required|string|max:255',
+                    'accomplished_by_last_name'  => 'required|string|max:255',
+                    'processing_officer_first_name' => 'required|string|max:255',
+                    'processing_officer_last_name'  => 'required|string|max:255',
+                    'approving_officer_first_name'  => 'required|string|max:255',
+                    'approving_officer_last_name'   => 'required|string|max:255',
+                    'encoder_first_name'           => 'required|string|max:255',
+                    'encoder_last_name'            => 'required|string|max:255',
+                    'photo'               => 'nullable|image|max:2048',
+                    'signature'           => 'nullable|image|max:2048',
                 ]);
 
-                $pwdData = [
-                    'user_id'             => $user->id,
-                    'pwdNumber'           => $request->pwdNumber,
-                    'dateApplied'         => $request->dateApplied,
-                    'dob'                 => $request->dob,
-                    'sex'                 => $request->sex,
-                    'civilStatus'         => $request->civilStatus,
-                    'disability_type_id'  => $request->disability_type_id,
-                    'disability_cause_id' => $request->disability_cause_id,
-                    'region_id'           => $request->region_id,
-                    'province_id'         => $request->province_id,
-                    'municipality_id'     => $request->municipality_id,
-                    'barangay_id'         => $request->barangay_id,
-                    'house'               => $request->house,
-                    'landline'            => $request->landline,
-                    'mobile'              => $request->mobile,
-                    'email'               => $request->email,
-                    'education'           => $request->education,
-                    'employmentStatus'    => $request->employmentStatus,
-                    'employmentCategory'  => $request->employmentCategory,
-                    'employmentType'      => $request->employmentType,
-                    'occupation'          => $request->occupation,
-                    'occupationOther'     => $request->occupationOther,
-                    'organizationAffiliated' => $request->organizationAffiliated,
-                    'organizationContact'    => $request->organizationContact,
-                    'organizationAddress'    => $request->organizationAddress,
-                    'organizationTel'        => $request->organizationTel,
-                    'sssNo'              => $request->sssNo,
-                    'gsisNo'             => $request->gsisNo,
-                    'pagIbigNo'          => $request->pagIbigNo,
-                    'psnNo'              => $request->psnNo,
-                    'philhealthNo'       => $request->philhealthNo,
-                    'fatherName'         => trim("{$request->fatherFirstName} {$request->fatherMiddleName} {$request->fatherLastName}"),
-                    'motherName'         => trim("{$request->motherFirstName} {$request->motherMiddleName} {$request->motherLastName}"),
-                    'guardianName'       => trim("{$request->guardianFirstName} {$request->guardianMiddleName} {$request->guardianLastName}"),
-                    'accomplishedBy' => $request->accomplishedBy === 'applicant'
-                        ? 'Applicant'
-                        : ucfirst($request->accomplishedBy) . ' - ' . collect([
-                            $request->accomplishedFirstName,
-                            $request->accomplishedMiddleName,
-                            $request->accomplishedLastName
-                        ])->filter()->unique()->implode(' '),
-                    'certifyingPhysician'=> trim("{$request->certifyingPhysicianFirstName} {$request->certifyingPhysicianMiddleName} {$request->certifyingPhysicianLastName}"),
-                    'physicianLicenseNo' => $request->physicianLicenseNo, // ✅ ADDED ASSIGNMENT
-                    'encoder'            => $request->encoder,
-                    'processingOfficer'  => $request->processingOfficer,
-                    'approvingOfficer'   => $request->approvingOfficer,
-                    'reportingUnit'      => $request->reportingUnit,
-                    'controlNo'          => $request->controlNo,
-                ];
+                DB::beginTransaction();
 
-                $photoFile = $request->file('photo');
-                $signatureFile = $request->file('signature');
+                try {
+                    $fullName = trim("{$request->first_name} {$request->middle_name} {$request->last_name} {$request->suffix}");
+                    $password = Hash::make($request->last_name . date('mdY', strtotime($request->dob)));
 
-                $registration = PWDRegistration::create($pwdData);
+                    $user = User::create([
+                        'name'     => $fullName,
+                        'email'    => $request->email,
+                        'phone'    => $request->mobile,
+                        'role'     => 0,
+                        'password' => $password,
+                    ]);
 
-                DB::commit();
+                    \Log::info('User created:', ['user_id' => $user->id]);
 
-                if ($photoFile) {
-                    $photoName = 'photo_' . time() . '_' . uniqid() . '.png';
-                    $image = imagecreatefromstring(file_get_contents($photoFile));
-                    $photoPath = 'photos/' . $photoName;
-                    imagepng($image, public_path('storage/' . $photoPath));
-                    $registration->update(['photo' => $photoPath]);
+                    $pwdData = [
+                        'user_id'             => $user->id,
+                        'pwdNumber'           => $request->pwdNumber,
+                        'dateApplied'         => $request->dateApplied,
+                        'dob'                 => $request->dob,
+                        'sex'                 => $request->sex,
+                        'civilStatus'         => $request->civilStatus,
+                        'first_name'          => $request->first_name,
+                        'middle_name'         => $request->middle_name,
+                        'last_name'           => $request->last_name,
+                        'suffix'              => $request->suffix,
+                        'father_first_name'   => $request->father_first_name,
+                        'father_middle_name'  => $request->father_middle_name,
+                        'father_last_name'    => $request->father_last_name,
+                        'mother_first_name'   => $request->mother_first_name,
+                        'mother_middle_name'  => $request->mother_middle_name,
+                        'mother_last_name'    => $request->mother_last_name,
+                        'guardian_first_name' => $request->guardian_first_name,
+                        'guardian_middle_name'=> $request->guardian_middle_name,
+                        'guardian_last_name'  => $request->guardian_last_name,
+                        'accomplished_by_first_name' => $request->accomplished_by_first_name,
+                        'accomplished_by_middle_name'=> $request->accomplished_by_middle_name,
+                        'accomplished_by_last_name'  => $request->accomplished_by_last_name,
+                        'certifying_physician_first_name' => $request->certifying_physician_first_name,
+                        'certifying_physician_middle_name'=> $request->certifying_physician_middle_name,
+                        'certifying_physician_last_name'  => $request->certifying_physician_last_name,
+                        'physician_license_no'           => $request->physician_license_no,
+                        'processing_officer_first_name'  => $request->processing_officer_first_name,
+                        'processing_officer_middle_name' => $request->processing_officer_middle_name,
+                        'processing_officer_last_name'   => $request->processing_officer_last_name,
+                        'approving_officer_first_name'   => $request->approving_officer_first_name,
+                        'approving_officer_middle_name'  => $request->approving_officer_middle_name,
+                        'approving_officer_last_name'    => $request->approving_officer_last_name,
+                        'encoder_first_name'            => $request->encoder_first_name,
+                        'encoder_middle_name'           => $request->encoder_middle_name,
+                        'encoder_last_name'             => $request->encoder_last_name,
+                        'disability_type_id'  => $request->disability_type_id,
+                        'disability_cause_id' => $request->disability_cause_id,
+                        'region_id'           => $request->region_id,
+                        'province_id'         => $request->province_id,
+                        'municipality_id'     => $request->municipality_id,
+                        'barangay_id'         => $request->barangay_id,
+                        'house'               => $request->house,
+                        'landline'            => $request->landline,
+                        'mobile'              => $request->mobile,
+                        'email'               => $request->email,
+                        'education'           => $request->education,
+                        'employmentStatus'    => $request->employmentStatus,
+                        'employmentCategory'  => $request->employmentCategory,
+                        'employmentType'      => $request->employmentType,
+                        'occupation'          => $request->occupation,
+                        'occupationOther'     => $request->occupationOther,
+                        'organizationAffiliated' => $request->organizationAffiliated,
+                        'organizationContact'    => $request->organizationContact,
+                        'organizationAddress'    => $request->organizationAddress,
+                        'organizationTel'        => $request->organizationTel,
+                        'sssNo'              => $request->sssNo,
+                        'gsisNo'             => $request->gsisNo,
+                        'pagIbigNo'          => $request->pagIbigNo,
+                        'psnNo'              => $request->psnNo,
+                        'philhealthNo'       => $request->philhealthNo,
+                        'accomplishedBy'     => $request->accomplishedBy,
+                        'reportingUnit'      => $request->reportingUnit,
+                        'controlNo'          => $request->controlNo,
+                    ];
+
+                    \Log::info('Creating PWD registration with data:', $pwdData);
+
+                    $registration = PWDRegistration::create($pwdData);
+
+                    \Log::info('PWD registration created:', ['registration_id' => $registration->id]);
+
+                    DB::commit();
+
+                    if ($request->hasFile('photo')) {
+                        $photoFile = $request->file('photo');
+                        $photoName = 'photo_' . time() . '_' . uniqid() . '.png';
+                        $image = imagecreatefromstring(file_get_contents($photoFile));
+                        $photoPath = 'photos/' . $photoName;
+                        imagepng($image, public_path('storage/' . $photoPath));
+                        $registration->update(['photo' => $photoPath]);
+                    }
+
+                    if ($request->hasFile('signature')) {
+                        $signatureFile = $request->file('signature');
+                        $sigName = 'signature_' . time() . '_' . uniqid() . '.' . $signatureFile->getClientOriginalExtension();
+                        $sigPath = $signatureFile->storeAs('signatures', $sigName, 'public');
+                        $registration->update(['signature' => $sigPath]);
+                    }
+
+                    return redirect()->back()->with('success', 'PWD Registered Successfully!');
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    \Log::error('Error in PWD registration transaction:', [
+                        'message' => $e->getMessage(),
+                        'line' => $e->getLine(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+                    throw $e;
                 }
-
-                if ($signatureFile) {
-                    $sigName = 'signature_' . time() . '_' . uniqid() . '.' . $signatureFile->getClientOriginalExtension();
-                    $sigPath = $signatureFile->storeAs('signatures', $sigName, 'public');
-                    $registration->update(['signature' => $sigPath]);
-                }
-
-                return redirect()->back()->with('success', 'PWD Registered Successfully!');
             } catch (\Exception $e) {
-                DB::rollBack();
-
-                \Log::error('❌ PWD Registration Error', [
+                \Log::error('PWD Registration Error:', [
                     'message' => $e->getMessage(),
                     'line' => $e->getLine(),
                     'trace' => $e->getTraceAsString()
                 ]);
 
-                return redirect()->back()->with('error', 'Error registering PWD: ' . $e->getMessage());
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['error' => 'Error registering PWD: ' . $e->getMessage()]);
             }
         }
 

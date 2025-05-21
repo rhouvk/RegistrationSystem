@@ -38,7 +38,7 @@ export default function DownloadSalesLogCSV({ data = [], storeName = 'My Store' 
       s.purchased_by,
       s.item_name,
       s.quantity,
-      typeof s.total_amount === 'number' ? `₱${s.total_amount.toFixed(2)}` : '₱0.00',
+      typeof s.total_amount === 'number' ? s.total_amount.toFixed(2) : '0.00',
     ]);
 
     const csvContent =
