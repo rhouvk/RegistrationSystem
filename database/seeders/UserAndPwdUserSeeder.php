@@ -22,10 +22,10 @@ class UserAndPWDUserSeeder extends Seeder
         $occupations = ['Laborer', 'Office Worker', 'Professional', 'Service Worker', 'Skilled Worker'];
         $civilStatuses = ['Single', 'Married', 'Widowed', 'Separated'];
 
-        for ($i = 1; $i <= 300; $i++) {
+        for ($i = 1; $i <= 3000; $i++) {
             // Create a user
             $userId = DB::table('users')->insertGetId([
-                'name'       => "PWD User $i",
+                'name'       => "John Doe $i",
                 'email'      => "pwduser$i@gmail.com",
                 'phone'      => '0912' . str_pad($i, 7, '0', STR_PAD_LEFT),
                 'role'       => 0,
