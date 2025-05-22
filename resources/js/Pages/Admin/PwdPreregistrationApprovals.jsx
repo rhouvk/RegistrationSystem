@@ -3,7 +3,7 @@ import { Head, usePage, router } from '@inertiajs/react';
 import { FaEye } from 'react-icons/fa';
 import AdminLayout from '@/Layouts/AdminLayout';
 
-export default function PwdPreregistrationApprovals({ preregistrations, filters }) {
+export default function PWDPreregistrationApprovals({ preregistrations, filters }) {
   const [search, setSearch] = useState(filters?.search || '');
   const [entriesPerPage, setEntriesPerPage] = useState(filters?.perPage || 10);
 

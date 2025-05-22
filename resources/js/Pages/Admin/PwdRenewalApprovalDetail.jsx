@@ -15,7 +15,7 @@ import CertifyingPhysicianForm from '@/Components/CertifyingPhysicianForm';
 import OfficersForm from '@/Components/OfficersForm';
 import ReportingInfoForm from '@/Components/ReportingInfoForm';
 
-export default function PwdRenewalApprovalDetail({ renewal, disabilityTypes, disabilityCauses, regions, provinces: initialProvinces, municipalities: initialMunicipalities, barangays: initialBarangays }) {
+export default function PWDRenewalApprovalDetail({ renewal, disabilityTypes, disabilityCauses, regions, provinces: initialProvinces, municipalities: initialMunicipalities, barangays: initialBarangays }) {
   const [provinces, setProvinces] = useState(initialProvinces);
   const [municipalities, setMunicipalities] = useState(initialMunicipalities);
   const [barangays, setBarangays] = useState(initialBarangays);

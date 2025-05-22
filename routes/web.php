@@ -35,10 +35,10 @@ use App\Http\Controllers\{
     LocationController,
     AdminDistrictDetailsController,
     PWDRenewalController,
-    PwdRenewalApprovalController,
+    PWDRenewalApprovalController,
     PWDInitialRegistrationController,
     PWDAdditionalInfoController,
-    PwdPreregistrationApprovalController,
+    PWDPreregistrationApprovalController,
 };
 
 use App\Models\PWDRegistration;
@@ -245,10 +245,10 @@ Route::middleware(['auth', 'can:admin'])->prefix('admin')->name('admin.')->group
     Route::post('/pwd/renewals/{renewal}/reject', [PWDRenewalApprovalController::class, 'reject'])->name('pwd.renewals.reject');
 
     // Pre-registration Approval Routes
-    Route::get('/pwd/preregistrations', [PwdPreregistrationApprovalController::class, 'index'])->name('pwd.preregistrations.index');
-    Route::get('/pwd/preregistrations/{preregistration}', [PwdPreregistrationApprovalController::class, 'show'])->name('pwd.preregistrations.show');
-    Route::post('/pwd/preregistrations/{preregistration}/approve', [PwdPreregistrationApprovalController::class, 'approve'])->name('pwd.preregistrations.approve');
-    Route::post('/pwd/preregistrations/{preregistration}/reject', [PwdPreregistrationApprovalController::class, 'reject'])->name('pwd.preregistrations.reject');
+    Route::get('/pwd/preregistrations', [PWDPreregistrationApprovalController::class, 'index'])->name('pwd.preregistrations.index');
+    Route::get('/pwd/preregistrations/{preregistration}', [PWDPreregistrationApprovalController::class, 'show'])->name('pwd.preregistrations.show');
+    Route::post('/pwd/preregistrations/{preregistration}/approve', [PWDPreregistrationApprovalController::class, 'approve'])->name('pwd.preregistrations.approve');
+    Route::post('/pwd/preregistrations/{preregistration}/reject', [PWDPreregistrationApprovalController::class, 'reject'])->name('pwd.preregistrations.reject');
 });
 
 Route::get('/validation-required', function () {

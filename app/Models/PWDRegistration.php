@@ -136,7 +136,7 @@ class PWDRegistration extends Model
 
     public function renewals()
     {
-        return $this->hasMany(PwdRenewalAndPreregistration::class, 'user_id', 'user_id');
+        return $this->hasMany(PWDRenewalAndPreregistration::class, 'user_id', 'user_id');
     }
 
 }

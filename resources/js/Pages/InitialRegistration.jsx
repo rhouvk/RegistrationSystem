@@ -1,6 +1,6 @@
 import React from 'react';
 import { Head } from '@inertiajs/react';
-import InitialPwdRegistration from '@/Components/InitialPwdRegistration';
+import InitialPWDRegistration from '@/Components/InitialPWDRegistration';
 
 export default function InitialRegistration() {
     return (
@@ -14,7 +14,7 @@ export default function InitialRegistration() {
             <div className="absolute inset-0 bg-[url('/images/wppattern.png')] bg-cover bg-center opacity-30 pointer-events-none z-0" />
 
             <div className="relative z-10">
-                <InitialPwdRegistration />
+                <InitialPWDRegistration />
             </div>
         </div>
     );

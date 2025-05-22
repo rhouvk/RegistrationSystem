@@ -1,7 +1,7 @@
 import React from 'react';
 import { useForm, Link } from '@inertiajs/react';
 
-export default function InitialPwdRegistration() {
+export default function InitialPWDRegistration() {
     const { data, setData, post, processing, errors } = useForm({
         first_name: '',
         middle_name: '',
