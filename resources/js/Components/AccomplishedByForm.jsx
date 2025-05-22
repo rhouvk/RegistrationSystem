@@ -22,7 +22,7 @@ export default function AccomplishedByForm({ values, handleChange }) {
 
   return (
     <div className="mt-8">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">17. Accomplished By</h3>
+      <h3 className="text-lg font-medium text-gray-900 mb-4">Accomplished By</h3>
       <div className="flex flex-wrap gap-4">
         {['applicant', 'guardian', 'representative'].map((option) => (
           <label key={option} className="inline-flex items-center">

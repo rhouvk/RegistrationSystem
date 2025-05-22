@@ -1,7 +1,6 @@
 import React, { useEffect, useCallback, Suspense, useState } from 'react';
 import {
     FaVolumeUp,
-    FaVolumeDown,
     FaStop,
     FaMoneyBillWave,
     FaCheck,
@@ -19,7 +18,6 @@ function ConfirmBNPCModal({
 }) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
-  const [voices, setVoices] = useState([]);
 
   const formatAmount = useCallback((amt) => parseFloat(amt).toFixed(2), []);
 
@@ -44,28 +42,11 @@ function ConfirmBNPCModal({
     stopSpeech();
     const utterance = new SpeechSynthesisUtterance(message);
     utterance.lang = lang;
-    
-    // Find the best matching voice
-    const targetLang = lang.split('-')[0]; // Get 'fil' or 'en'
-    const matchingVoices = voices.filter(v => v.lang.startsWith(targetLang));
-    
-    if (matchingVoices.length > 0) {
-      // Prefer female voices for Filipino
-      const femaleVoice = matchingVoices.find(v => v.name.toLowerCase().includes('female'));
-      utterance.voice = femaleVoice || matchingVoices[0];
-    }
-    
-    // Adjust speech rate and pitch for better Filipino pronunciation
-    if (lang === 'fil-PH') {
-      utterance.rate = 1; // Slightly slower
-      utterance.pitch = 1.1; // Slightly higher pitch
-    }
-    
     utterance.onend = () => setIsSpeaking(false);
     utterance.onerror = () => setIsSpeaking(false);
     setIsSpeaking(true);
     window.speechSynthesis.speak(utterance);
-  }, [voices, stopSpeech]);
+  }, [stopSpeech]);
 
   const speakEnglish = useCallback(() => {
     const total = formatPesosAndCentavos(totalAmount);
@@ -75,16 +56,6 @@ function ConfirmBNPCModal({
       `The discount is ${discount} percent. ` +
       `The remaining balance will be ${balance.pesos} pesos and ${balance.centavos} centavos.`;
     speakMessage(message, 'en-US');
-  }, [totalAmount, discount, remainingBalance, formatPesosAndCentavos, speakMessage]);
-
-  const speakFilipino = useCallback(() => {
-    const total = formatPesosAndCentavos(totalAmount);
-    const balance = formatPesosAndCentavos(remainingBalance);
-    
-    const message = `Paki kumpirma ang transaksiyon. Ang kabuuang halaga ay ${total.pesos} piso at ${total.centavos} sentimo. ` +
-      `Ang diskwento ay ${discount} porsyento. ` +
-      `Ang natitirang balanse ay ${balance.pesos} piso at ${balance.centavos} sentimo.`;
-    speakMessage(message, 'fil-PH');
   }, [totalAmount, discount, remainingBalance, formatPesosAndCentavos, speakMessage]);
 
   const handleCancel = useCallback(() => {
@@ -101,22 +72,6 @@ function ConfirmBNPCModal({
     // Check if speech synthesis is supported
     if ('speechSynthesis' in window) {
       setSpeechSupported(true);
-      
-      // Load voices
-      const loadVoices = () => {
-        const availableVoices = window.speechSynthesis.getVoices();
-        setVoices(availableVoices);
-      };
-      
-      // Initial load
-      loadVoices();
-      
-      // Handle voice changes
-      window.speechSynthesis.onvoiceschanged = loadVoices;
-      
-      return () => {
-        window.speechSynthesis.onvoiceschanged = null;
-      };
     }
   }, []);
 
@@ -159,14 +114,6 @@ function ConfirmBNPCModal({
               className="flex-1 flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 disabled:opacity-50"
             >
               <FaVolumeUp /> English
-            </button>
-            <button 
-              type="button"
-              onClick={speakFilipino}
-              disabled={isSpeaking}
-              className="flex-1 flex items-center gap-2 px-4 py-2 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200 disabled:opacity-50"
-            >
-              <FaVolumeDown /> Filipino
             </button>
             <button 
               type="button"

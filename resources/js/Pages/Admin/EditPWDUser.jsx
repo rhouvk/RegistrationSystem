@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Head, useForm } from '@inertiajs/react';
+import { Inertia } from '@inertiajs/inertia';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 // Import the form components
@@ -167,54 +168,42 @@ export default function EditPWDUser({ user, disabilityTypes, disabilityCauses, r
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        
         const formData = new FormData();
-        
+
+        // Log the data before processing
+        console.log('Form data before processing:', data);
+
         // Add all form fields to FormData
         Object.keys(data).forEach(key => {
             // Skip preview fields
-            if (['photoPreview', 'signaturePreview'].includes(key)) {
-                return;
-            }
-
-            // Handle File objects
-            if (data[key] instanceof File) {
-                formData.append(key, data[key]);
-            }
-            // Handle photo and signature paths
-            else if (key === 'photo' || key === 'signature') {
-                // Only append if it's a new file, not a path
-                if (data[key] && !data[key].startsWith('photos/') && !data[key].startsWith('signatures/')) {
-                    formData.append(key, data[key]);
-                }
-            }
-            // Handle null/undefined values
-            else if (data[key] === null || data[key] === undefined) {
-                formData.append(key, '');
-            }
-            // Handle all other values
-            else {
-                formData.append(key, data[key]);
+            if (["photoPreview", "signaturePreview"].includes(key)) return;
+            
+            const value = data[key];
+            
+            // Handle file uploads
+            if (value instanceof File) {
+                formData.append(key, value);
+            } 
+            // Handle all other fields
+            else if (value !== null && value !== undefined) {
+                formData.append(key, value);
             }
         });
 
-        // Log form data for debugging
-        console.log('Form data before submission:');
+        // Log the FormData contents
         for (let pair of formData.entries()) {
-            console.log(pair[0] + ': ' + (pair[1] instanceof File ? pair[1].name : pair[1]));
+            console.log(pair[0] + ': ' + pair[1]);
         }
 
-        put(route('pwd.pwd-users.update', user.id), formData, {
+        Inertia.post(route('pwd.pwd-users.update', user.id), formData, {
             forceFormData: true,
-            preserveScroll: true,
+            method: 'put',
             onError: (errors) => {
-                console.error('Form submission errors:', errors);
-                // Show all validation errors
+                console.error('Validation Errors:', errors);
                 Object.keys(errors).forEach(key => {
                     const el = document.querySelector(`[name="${key}"]`);
                     if (el) {
                         el.classList.add('border-red-500');
-                        // Add error message below the field
                         const errorDiv = document.createElement('div');
                         errorDiv.className = 'text-red-500 text-sm mt-1';
                         errorDiv.textContent = errors[key];
@@ -222,16 +211,9 @@ export default function EditPWDUser({ user, disabilityTypes, disabilityCauses, r
                     }
                 });
             },
-            onSuccess: (response) => {
-                console.log('Form submitted successfully:', response);
-                // Remove any error styling
-                document.querySelectorAll('.border-red-500').forEach(el => {
-                    el.classList.remove('border-red-500');
-                });
-                // Remove any error messages
-                document.querySelectorAll('.text-red-500').forEach(el => {
-                    el.remove();
-                });
+            onSuccess: () => {
+                document.querySelectorAll('.border-red-500').forEach(el => el.classList.remove('border-red-500'));
+                document.querySelectorAll('.text-red-500').forEach(el => el.remove());
             }
         });
     };
@@ -243,7 +225,7 @@ export default function EditPWDUser({ user, disabilityTypes, disabilityCauses, r
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <div className="p-6">
-                            <form onSubmit={handleSubmit} className="space-y-8">
+                            <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-8">
                                 <PersonalInfoForm values={data} handleChange={handleChange} />
                                 <DisabilityInfoForm values={data} handleChange={handleChange} disabilityTypes={disabilityTypes} disabilityCauses={disabilityCauses} />
                                 <ResidenceAddressForm values={data} handleChange={handleChange} regions={regions} provinces={provinces} municipalities={municipalities} barangays={barangays} />

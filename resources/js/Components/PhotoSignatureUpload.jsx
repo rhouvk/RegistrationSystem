@@ -1,10 +1,22 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 
 export default function PhotoSignatureUpload({ values, handleChangeFile: handleParentChangeFile }) {
   const signatureCanvasRef = useRef(null);
   const [signatureDataUrl, setSignatureDataUrl] = useState(values.signaturePreview || null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [showModal, setShowModal] = useState(false);
+
+  // Prevent scrolling when modal is open
+  useEffect(() => {
+    if (showModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [showModal]);
 
   const resizeImage = (file, width, height, callback) => {
     const reader = new FileReader();
@@ -15,9 +27,37 @@ export default function PhotoSignatureUpload({ values, handleChangeFile: handleP
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d');
+        
+        // Calculate dimensions to maintain aspect ratio
+        const imgRatio = img.width / img.height;
+        const targetRatio = width / height;
+        
+        let sourceX = 0;
+        let sourceY = 0;
+        let sourceWidth = img.width;
+        let sourceHeight = img.height;
+        
+        if (imgRatio > targetRatio) {
+          // Image is wider than target
+          sourceWidth = img.height * targetRatio;
+          sourceX = (img.width - sourceWidth) / 2;
+        } else {
+          // Image is taller than target
+          sourceHeight = img.width / targetRatio;
+          sourceY = (img.height - sourceHeight) / 2;
+        }
+        
+        // Fill with white background
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, width, height);
-        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Draw the cropped image
+        ctx.drawImage(
+          img,
+          sourceX, sourceY, sourceWidth, sourceHeight,
+          0, 0, width, height
+        );
+        
         canvas.toBlob((blob) => {
           const resizedFile = new File([blob], file.name, { type: 'image/png' });
           callback(resizedFile);
@@ -217,22 +257,24 @@ export default function PhotoSignatureUpload({ values, handleChangeFile: handleP
 
       {/* Modal for Drawing Signature */}
       {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center  bg-gradient-to-t from-cyan-950/80 to-transparent z-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-t from-cyan-950/80 to-transparent z-50">
           <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
             <h2 className="text-xl font-semibold mb-6 text-center">Draw Your Signature</h2>
-            <canvas
-              ref={signatureCanvasRef}
-              width={400}
-              height={250}
-              className="border border-gray-300 rounded bg-white w-full"
-              onMouseDown={startDrawing}
-              onMouseMove={draw}
-              onMouseUp={stopDrawing}
-              onMouseLeave={stopDrawing}
-              onTouchStart={startDrawing}
-              onTouchMove={draw}
-              onTouchEnd={stopDrawing}
-            />
+            <div className="relative">
+              <canvas
+                ref={signatureCanvasRef}
+                width={400}
+                height={250}
+                className="border border-gray-300 rounded bg-white w-full touch-none"
+                onMouseDown={startDrawing}
+                onMouseMove={draw}
+                onMouseUp={stopDrawing}
+                onMouseLeave={stopDrawing}
+                onTouchStart={startDrawing}
+                onTouchMove={draw}
+                onTouchEnd={stopDrawing}
+              />
+            </div>
             <div className="flex justify-between mt-6">
               <button
                 type="button"

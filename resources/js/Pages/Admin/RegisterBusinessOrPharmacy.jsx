@@ -13,7 +13,9 @@ export default function RegisterBusinessOrPharmacy() {
     password: '',
     password_confirmation: '',
     role: '2', // default to Business
-    relevant_document: null, // placeholder for PDF
+    representative_name: '',
+    location: '',
+    relevant_document: null,
   });
 
   const submit = (e) => {
@@ -85,6 +87,34 @@ export default function RegisterBusinessOrPharmacy() {
               <InputError message={errors.phone} className="mt-2" />
             </div>
 
+            {data.role === '2' && (
+              <>
+                <div>
+                  <InputLabel htmlFor="representative_name" value="Representative Name" />
+                  <TextInput
+                    id="representative_name"
+                    name="representative_name"
+                    value={data.representative_name}
+                    onChange={(e) => setData('representative_name', e.target.value)}
+                    className="mt-1 block w-full"
+                  />
+                  <InputError message={errors.representative_name} className="mt-2" />
+                </div>
+
+                <div>
+                  <InputLabel htmlFor="location" value="Location" />
+                  <TextInput
+                    id="location"
+                    name="location"
+                    value={data.location}
+                    onChange={(e) => setData('location', e.target.value)}
+                    className="mt-1 block w-full"
+                  />
+                  <InputError message={errors.location} className="mt-2" />
+                </div>
+              </>
+            )}
+
             <div>
               <InputLabel htmlFor="password" value="Password" />
               <TextInput
@@ -111,7 +141,6 @@ export default function RegisterBusinessOrPharmacy() {
               <InputError message={errors.password_confirmation} className="mt-2" />
             </div>
 
-            {/* PDF Upload Field */}
             <div>
               <InputLabel htmlFor="relevant_document" value="Relevant Documents (PDF only)" />
               <input

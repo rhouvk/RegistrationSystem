@@ -24,34 +24,7 @@ export default function AuthenticatedLayout({ header, children }) {
                             </div>
 
                             <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                <NavLink
-                                    href={route('dashboard')}
-                                    active={route().current('dashboard')}
-                                >
-                                    Dashboard
-                                </NavLink>
-                                {user && (
-                                    <>
-                                        <NavLink
-                                            href={route('pwd.scan')}
-                                            active={route().current('pwd.scan')}
-                                        >
-                                            QR Scan
-                                        </NavLink>
-                                        <NavLink
-                                            href={route('pwd.pwd-users.index')}
-                                            active={route().current('pwd.pwd-users.index')}
-                                        >
-                                            PWD Users
-                                        </NavLink>
-                                        <NavLink
-                                            href={route('pwd.register')}
-                                            active={route().current('pwd.register')}
-                                        >
-                                            Register
-                                        </NavLink>
-                                    </>
-                                )}
+
                             </div>
                         </div>
 
@@ -82,12 +55,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                     </Dropdown.Trigger>
 
                                     <Dropdown.Content>
-                                        <Dropdown.Link href={route('profile.edit')}>
-                                            Profile
-                                        </Dropdown.Link>
-                                        <Dropdown.Link href={route('admin.controls.index')}>
-                                            Admin Settings
-                                        </Dropdown.Link>
+                                    
                                         <Dropdown.Link href={route('logout')} method="post" as="button">
                                             Log Out
                                         </Dropdown.Link>
@@ -124,34 +92,7 @@ export default function AuthenticatedLayout({ header, children }) {
 
                 <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' sm:hidden'}>
                     <div className="space-y-1 pb-3 pt-2">
-                        <ResponsiveNavLink
-                            href={route('dashboard')}
-                            active={route().current('dashboard')}
-                        >
-                            Dashboard
-                        </ResponsiveNavLink>
-                        {user && (
-                            <>
-                                <ResponsiveNavLink
-                                    href={route('pwd.scan')}
-                                    active={route().current('pwd.scan')}
-                                >
-                                    QR Scan
-                                </ResponsiveNavLink>
-                                <ResponsiveNavLink
-                                    href={route('pwd.pwd-users.index')}
-                                    active={route().current('pwd.pwd-users.index')}
-                                >
-                                    PWD Users
-                                </ResponsiveNavLink>
-                                <ResponsiveNavLink
-                                    href={route('pwd.register')}
-                                    active={route().current('pwd.register')}
-                                >
-                                    Register
-                                </ResponsiveNavLink>
-                            </>
-                        )}
+                       
                     </div>
 
                     <div className="border-t border-gray-200 pb-1 pt-4">
@@ -165,12 +106,6 @@ export default function AuthenticatedLayout({ header, children }) {
                         </div>
 
                         <div className="mt-3 space-y-1">
-                            <ResponsiveNavLink href={route('profile.edit')}>
-                                Profile
-                            </ResponsiveNavLink>
-                            <ResponsiveNavLink href={route('admin.controls.index')}>
-                                Admin Settings
-                            </ResponsiveNavLink>
                             <ResponsiveNavLink method="post" href={route('logout')} as="button">
                                 Log Out
                             </ResponsiveNavLink>

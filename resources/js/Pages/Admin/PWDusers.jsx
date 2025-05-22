@@ -177,12 +177,12 @@ export default function PWDUser({ users, filters }) {
               <h3 className="text-lg font-semibold text-gray-800">Generated PWD Card</h3>
               <button onClick={closeCardModal} className="text-gray-500 hover:text-gray-700"><FaTimes /></button>
             </div>
-            <div className="flex justify-center items-center h-96 relative">
+            <div className="flex justify-center items-center h-70 relative">
               {cardLoading && <FaSpinner className="animate-spin text-3xl text-blue-500" />}
               <img
                 src={cardUrl}
                 alt="PWD Card"
-                className={`${cardLoading ? 'hidden' : 'block'} max-h-96 object-contain`}
+                className={`${cardLoading ? 'hidden' : 'block'} max-h-70 object-contain`}
                 onLoad={() => setCardLoading(false)}
               />
             </div>

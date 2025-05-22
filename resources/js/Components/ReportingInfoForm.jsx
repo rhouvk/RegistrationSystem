@@ -3,7 +3,7 @@ import React from 'react';
 export default function ReportingInfoForm({ values, handleChange }) {
   return (
     <div className="mt-8">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">20. Reporting Information</h3>
+      <h3 className="text-lg font-medium text-gray-900 mb-4">Reporting Information</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700">Reporting Unit (Office/Section)</label>

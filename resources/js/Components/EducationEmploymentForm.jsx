@@ -5,7 +5,7 @@ import React from 'react';
 export default function EducationEmploymentForm({ values, handleChange }) {
   return (
     <div>
-      <h3 className="text-lg font-medium text-gray-900 mb-4">11. Educational Attainment</h3>
+      <h3 className="text-lg font-medium text-gray-900 mb-4">Educational Attainment</h3>
       <div className="flex flex-wrap gap-4">
         {[
           'None', 'Elementary', 'High School', 'Vocational',
@@ -25,7 +25,7 @@ export default function EducationEmploymentForm({ values, handleChange }) {
         ))}
       </div>
 
-      <h3 className="text-lg font-medium text-gray-900 mt-8 mb-4">12. Status of Employment</h3>
+      <h3 className="text-lg font-medium text-gray-900 mt-8 mb-4">Status of Employment</h3>
       <div className="flex flex-wrap gap-4">
         {['Employed', 'Unemployed', 'Self-employed'].map((status) => (
           <label key={status} className="inline-flex items-center">
@@ -44,7 +44,7 @@ export default function EducationEmploymentForm({ values, handleChange }) {
 
       {values.employmentStatus === 'Employed' && (
         <>
-          <h3 className="text-lg font-medium text-gray-900 mt-8 mb-4">12a. Category of Employment</h3>
+          <h3 className="text-lg font-medium text-gray-900 mt-8 mb-4">Category of Employment</h3>
           <div className="flex flex-wrap gap-4">
             {['Public', 'Private'].map((category) => (
               <label key={category} className="inline-flex items-center">
@@ -61,7 +61,7 @@ export default function EducationEmploymentForm({ values, handleChange }) {
             ))}
           </div>
 
-          <h3 className="text-lg font-medium text-gray-900 mt-8 mb-4">12b. Types of Employment</h3>
+          <h3 className="text-lg font-medium text-gray-900 mt-8 mb-4">Types of Employment</h3>
           <div className="flex flex-wrap gap-4">
             {['Permanent', 'Temporary', 'Contractual'].map((type) => (
               <label key={type} className="inline-flex items-center">
@@ -82,7 +82,7 @@ export default function EducationEmploymentForm({ values, handleChange }) {
 
       {['Employed', 'Self-employed'].includes(values.employmentStatus) && (
         <div className="mt-8">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">13. Occupation</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Occupation</h3>
           <div className="flex flex-wrap gap-4">
             {[
               'Managers', 'Professionals', 'Technicians and Associate Professionals',

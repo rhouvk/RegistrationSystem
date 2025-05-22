@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { FaCheck, FaTimes, FaVolumeUp, FaVolumeDown, FaStop, FaCapsules } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaVolumeUp, FaStop, FaCapsules } from 'react-icons/fa';
 
 export default function ConfirmPrescriptionUpdateModal({
   onConfirm,
@@ -29,11 +29,6 @@ export default function ConfirmPrescriptionUpdateModal({
     speak(message, 'en-US');
   };
 
-  const speakFilipino = () => {
-    const message = `Paki kumpirma ang reseta. Gamot: ${medicineName}. Dami na kinuha: ${filledQty}. Parmasista: ${pharmacistName}.`;
-    speak(message, 'fil-PH');
-  };
-
   useEffect(() => {
     if (!show) stopSpeech();
   }, [show]);
@@ -57,12 +52,6 @@ export default function ConfirmPrescriptionUpdateModal({
             className="flex-1 flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-800 rounded hover:bg-blue-200"
           >
             <FaVolumeUp /> English
-          </button>
-          <button
-            onClick={speakFilipino}
-            className="flex-1 flex items-center gap-2 px-4 py-2 bg-yellow-100 text-yellow-800 rounded hover:bg-yellow-200"
-          >
-            <FaVolumeDown /> Filipino
           </button>
           <button
             onClick={stopSpeech}

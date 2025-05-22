@@ -5,18 +5,12 @@ import PWDLayout from '@/Layouts/PWDLayout';
 export default function MedicinePurchase({ mpEntries, filters }) {
     const [expandedRow, setExpandedRow] = useState(null);
     const [search, setSearch] = useState(filters.search || '');
-    const [entriesPerPage, setEntriesPerPage] = useState(filters.perPage || 12);
+    const [entriesPerPage] = useState(10);
 
     const handleSearchChange = (e) => {
         const val = e.target.value;
         setSearch(val);
         router.get(route('pwd.medicine-purchases.index'), { search: val, perPage: entriesPerPage }, { preserveState: true, replace: true });
-    };
-
-    const handlePerPageChange = (e) => {
-        const val = parseInt(e.target.value);
-        setEntriesPerPage(val);
-        router.get(route('pwd.medicine-purchases.index'), { search, perPage: val }, { preserveState: true, replace: true });
     };
 
     const changePage = (page) => {
@@ -47,15 +41,6 @@ export default function MedicinePurchase({ mpEntries, filters }) {
                                 onChange={handleSearchChange}
                                 className="w-full sm:w-64 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
                             />
-                            <select
-                                value={entriesPerPage}
-                                onChange={handlePerPageChange}
-                                className="w-full sm:w-auto border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
-                            >
-                                <option value={12}>12 entries</option>
-                                <option value={24}>24 entries</option>
-                                <option value={100}>100 entries</option>
-                            </select>
                         </div>
                     </div>
 

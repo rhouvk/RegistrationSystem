@@ -12,7 +12,7 @@ export default function PWDUserEditModal({ selectedUser, editData, handleEditCha
         { label: 'PWD Number', name: 'pwdNumber', type: 'text', readOnly: true },
         { label: 'Date Applied', name: 'dateApplied', type: 'date' },
         { label: 'Date of Birth', name: 'dob', type: 'date' },
-        { label: 'Sex', name: 'sex', type: 'select', options: ['male', 'female'] },
+        { label: 'Sex', name: 'sex', type: 'select', options: ['Male', 'Female'] },
         { label: 'Civil Status', name: 'civilStatus', type: 'select', options: ['single', 'married', 'widowed', 'divorced'] },
       ],
     },

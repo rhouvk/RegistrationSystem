@@ -31,7 +31,7 @@ export default function OrganizationInfoForm({ values, handleChange }) {
 
   return (
     <div>
-      <h3 className="text-lg font-medium text-gray-900 mb-4">14. Organization Information</h3>
+      <h3 className="text-lg font-medium text-gray-900 mb-4">Organization Information</h3>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {['organizationAffiliated', 'organizationContact', 'organizationAddress', 'organizationTel'].map((field) => (
           <div key={field}>

@@ -25,7 +25,7 @@ export default function ContactDetailsForm({ values, handleChange, duplicateErro
 
   return (
     <div>
-      <h3 className="text-lg font-medium text-gray-900 mb-4">10. Contact Details</h3>
+      <h3 className="text-lg font-medium text-gray-900 mb-4">Contact Details</h3>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
         {/* Landline */}

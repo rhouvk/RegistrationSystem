@@ -193,18 +193,29 @@ class PwdRenewalController extends Controller
 
             $validated = $request->validate($rules);
 
-            // Handle photo upload
+            // Handle photo update
             if ($request->hasFile('photo')) {
                 Log::info('Processing new photo upload');
+                
+                // Get the original registration photo
+                $originalRegistration = PWDRegistration::where('user_id', Auth::id())->first();
+                $originalPhoto = $originalRegistration ? $originalRegistration->photo : null;
+                
+                // Only delete if it's not the same as the original registration photo
+                if ($renewal->photo && 
+                    Storage::disk('public')->exists($renewal->photo) && 
+                    $renewal->photo !== $originalPhoto) {
+                    Log::info('Deleting old renewal photo:', ['path' => $renewal->photo]);
+                    Storage::disk('public')->delete($renewal->photo);
+                }
+
+                // Store new photo
                 $photoFile = $request->file('photo');
                 $photoName = 'photo_' . time() . '_' . uniqid() . '.png';
                 $photoPath = 'photos/' . $photoName;
-                
-                // Store the new photo
                 $photoFile->storeAs('photos', $photoName, 'public');
-                Log::info('New photo stored:', ['path' => $photoPath]);
-                
                 $validated['photo'] = $photoPath;
+                Log::info('New photo saved:', ['path' => $photoPath]);
             } else if ($request->has('photo')) {
                 // Use the provided photo path
                 $validated['photo'] = $request->photo;
@@ -215,18 +226,28 @@ class PwdRenewalController extends Controller
                 Log::info('Preserving existing photo:', ['path' => $renewal->photo]);
             }
 
-            // Handle signature upload
+            // Handle signature update
             if ($request->hasFile('signature')) {
                 Log::info('Processing new signature upload');
+                
+                // Get the original registration signature
+                $originalRegistration = PWDRegistration::where('user_id', Auth::id())->first();
+                $originalSignature = $originalRegistration ? $originalRegistration->signature : null;
+                
+                // Only delete if it's not the same as the original registration signature
+                if ($renewal->signature && 
+                    Storage::disk('public')->exists($renewal->signature) && 
+                    $renewal->signature !== $originalSignature) {
+                    Log::info('Deleting old renewal signature:', ['path' => $renewal->signature]);
+                    Storage::disk('public')->delete($renewal->signature);
+                }
+
+                // Store new signature
                 $signatureFile = $request->file('signature');
                 $sigName = 'signature_' . time() . '_' . uniqid() . '.' . $signatureFile->getClientOriginalExtension();
-                $sigPath = 'signatures/' . $sigName;
-                
-                // Store the new signature
-                $signatureFile->storeAs('signatures', $sigName, 'public');
-                Log::info('New signature stored:', ['path' => $sigPath]);
-                
+                $sigPath = $signatureFile->storeAs('signatures', $sigName, 'public');
                 $validated['signature'] = $sigPath;
+                Log::info('New signature saved:', ['path' => $sigPath]);
             } else if ($request->has('signature')) {
                 // Use the provided signature path
                 $validated['signature'] = $request->signature;
@@ -295,7 +316,6 @@ class PwdRenewalController extends Controller
                     'string',
                     'max:255',
                     function ($attribute, $value, $fail) use ($renewal) {
-                        // Check if the PWD number exists in any other renewal request from a different user
                         $exists = PwdRenewalAndPreregistration::where('pwdNumber', $value)
                             ->where('user_id', '!=', Auth::id())
                             ->exists();
@@ -368,11 +388,6 @@ class PwdRenewalController extends Controller
 
             // Handle file uploads
             if ($request->hasFile('photo')) {
-                // Delete old photo if exists
-                if ($renewal->photo && Storage::disk('public')->exists($renewal->photo)) {
-                    Storage::disk('public')->delete($renewal->photo);
-                }
-
                 $photoFile = $request->file('photo');
                 $photoName = 'photo_' . time() . '_' . uniqid() . '.png';
                 $photoPath = 'photos/' . $photoName;
@@ -382,16 +397,27 @@ class PwdRenewalController extends Controller
                 // Use the provided photo path
                 $validated['photo'] = $request->photo;
             } else {
-                // Preserve existing photo
-                $validated['photo'] = $renewal->photo;
+                // If this is a new renewal and no new photo uploaded, copy from registration
+                if (!$renewal->exists && $request->has('registration_id')) {
+                    $registration = PWDRegistration::find($request->registration_id);
+                    if ($registration && $registration->photo) {
+                        // Copy the photo file
+                        $newPhotoName = 'photo_' . time() . '_' . uniqid() . '.png';
+                        $newPhotoPath = 'photos/' . $newPhotoName;
+                        
+                        if (Storage::disk('public')->exists($registration->photo)) {
+                            Storage::disk('public')->copy($registration->photo, $newPhotoPath);
+                            $validated['photo'] = $newPhotoPath;
+                            Log::info('Copied photo from registration:', ['from' => $registration->photo, 'to' => $newPhotoPath]);
+                        }
+                    }
+                } else {
+                    // Preserve existing photo
+                    $validated['photo'] = $renewal->photo;
+                }
             }
 
             if ($request->hasFile('signature')) {
-                // Delete old signature if exists
-                if ($renewal->signature && Storage::disk('public')->exists($renewal->signature)) {
-                    Storage::disk('public')->delete($renewal->signature);
-                }
-
                 $signatureFile = $request->file('signature');
                 $sigName = 'signature_' . time() . '_' . uniqid() . '.' . $signatureFile->getClientOriginalExtension();
                 $sigPath = $signatureFile->storeAs('signatures', $sigName, 'public');
@@ -400,14 +426,25 @@ class PwdRenewalController extends Controller
                 // Use the provided signature path
                 $validated['signature'] = $request->signature;
             } else {
-                // Preserve existing signature
-                $validated['signature'] = $renewal->signature;
+                // If this is a new renewal and no new signature uploaded, copy from registration
+                if (!$renewal->exists && $request->has('registration_id')) {
+                    $registration = PWDRegistration::find($request->registration_id);
+                    if ($registration && $registration->signature) {
+                        // Copy the signature file
+                        $newSigName = 'signature_' . time() . '_' . uniqid() . '.' . pathinfo($registration->signature, PATHINFO_EXTENSION);
+                        $newSigPath = 'signatures/' . $newSigName;
+                        
+                        if (Storage::disk('public')->exists($registration->signature)) {
+                            Storage::disk('public')->copy($registration->signature, $newSigPath);
+                            $validated['signature'] = $newSigPath;
+                            Log::info('Copied signature from registration:', ['from' => $registration->signature, 'to' => $newSigPath]);
+                        }
+                    }
+                } else {
+                    // Preserve existing signature
+                    $validated['signature'] = $renewal->signature;
+                }
             }
-
-            Log::info('Updating renewal with data:', [
-                'photo' => $validated['photo'],
-                'signature' => $validated['signature']
-            ]);
 
             // Update or create the renewal request
             $renewal->fill($validated);

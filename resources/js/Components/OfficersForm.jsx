@@ -25,7 +25,7 @@ export default function OfficersForm({ values, handleChange }) {
 
   return (
     <div className="mt-8">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">19. Officers Information</h3>
+      <h3 className="text-lg font-medium text-gray-900 mb-4">Officers Information</h3>
       <div className="space-y-6">
         {renderOfficerFields('processing_officer', 'Processing Officer')}
         {renderOfficerFields('approving_officer', 'Approving Officer')}

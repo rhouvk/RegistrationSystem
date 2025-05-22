@@ -4,13 +4,15 @@ import React from 'react';
 export default function PWDUserDetailsModal({ selectedUser, closeModal }) {
   if (!selectedUser) return null;
 
-  // Grouped fields
+  // Helper to join name parts
+  const joinName = (...parts) => parts.filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+
   const groups = [
     {
       title: 'Personal Information',
       fields: [
         { label: 'PWD Number', value: selectedUser.pwdNumber },
-        { label: 'Name', value: selectedUser.user?.name || `${selectedUser.firstName} ${selectedUser.lastName} ${selectedUser.suffix || ''}` },
+        { label: 'Name', value: joinName(selectedUser.first_name, selectedUser.middle_name, selectedUser.last_name, selectedUser.suffix) },
         { label: 'Date Applied', value: selectedUser.dateApplied && new Date(selectedUser.dateApplied).toLocaleDateString() },
         { label: 'Date of Birth', value: selectedUser.dob && new Date(selectedUser.dob).toLocaleDateString() },
         { label: 'Sex', value: selectedUser.sex },
@@ -20,8 +22,8 @@ export default function PWDUserDetailsModal({ selectedUser, closeModal }) {
     {
       title: 'Disability Details',
       fields: [
-        { label: 'Disability Type', value: selectedUser.disability_type?.name },
-        { label: 'Disability Cause', value: selectedUser.disability_cause?.name },
+        { label: 'Disability Type', value: selectedUser.disability_type?.name || selectedUser.disabilityType?.name },
+        { label: 'Disability Cause', value: selectedUser.disability_cause?.name || selectedUser.disabilityCause?.name },
       ],
     },
     {
@@ -33,9 +35,10 @@ export default function PWDUserDetailsModal({ selectedUser, closeModal }) {
         { label: 'Province', value: selectedUser.province?.name },
         { label: 'Region', value: selectedUser.region?.name },
         { label: 'Landline', value: selectedUser.landline },
+        { label: 'Mobile', value: selectedUser.mobile },
+        { label: 'Email', value: selectedUser.email },
       ],
     },
-    
     {
       title: 'Education & Employment',
       fields: [
@@ -69,19 +72,19 @@ export default function PWDUserDetailsModal({ selectedUser, closeModal }) {
     {
       title: 'Family Information',
       fields: [
-        { label: 'Father Name', value: selectedUser.fatherName },
-        { label: 'Mother Name', value: selectedUser.motherName },
-        { label: 'Guardian Name', value: selectedUser.guardianName },
+        { label: 'Father Name', value: joinName(selectedUser.father_first_name, selectedUser.father_middle_name, selectedUser.father_last_name) },
+        { label: 'Mother Name', value: joinName(selectedUser.mother_first_name, selectedUser.mother_middle_name, selectedUser.mother_last_name) },
+        { label: 'Guardian Name', value: joinName(selectedUser.guardian_first_name, selectedUser.guardian_middle_name, selectedUser.guardian_last_name) },
       ],
     },
     {
       title: 'Administrative',
       fields: [
         { label: 'Accomplished By', value: selectedUser.accomplishedBy },
-        { label: 'Certifying Physician', value: selectedUser.certifyingPhysician },
-        { label: 'Encoder', value: selectedUser.encoder },
-        { label: 'Processing Officer', value: selectedUser.processingOfficer },
-        { label: 'Approving Officer', value: selectedUser.approvingOfficer },
+        { label: 'Certifying Physician', value: joinName(selectedUser.certifying_physician_first_name, selectedUser.certifying_physician_middle_name, selectedUser.certifying_physician_last_name) },
+        { label: 'Encoder', value: joinName(selectedUser.encoder_first_name, selectedUser.encoder_middle_name, selectedUser.encoder_last_name) },
+        { label: 'Processing Officer', value: joinName(selectedUser.processing_officer_first_name, selectedUser.processing_officer_middle_name, selectedUser.processing_officer_last_name) },
+        { label: 'Approving Officer', value: joinName(selectedUser.approving_officer_first_name, selectedUser.approving_officer_middle_name, selectedUser.approving_officer_last_name) },
         { label: 'Reporting Unit', value: selectedUser.reportingUnit },
         { label: 'Control No.', value: selectedUser.controlNo },
         { label: 'Created At', value: selectedUser.created_at && new Date(selectedUser.created_at).toLocaleString() },

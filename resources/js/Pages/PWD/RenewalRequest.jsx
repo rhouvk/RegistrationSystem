@@ -203,9 +203,10 @@ export default function RenewalRequest({ registration, renewal, basedOnRenewal, 
         });
 
         if (renewal) {
-            // If we're editing an existing renewal
-            put(route('pwd.renewals.update', renewal.id), formData, {
+            // If we're editing an existing renewal, use post with method: 'put'
+            post(route('pwd.renewals.update', renewal.id), formData, {
                 forceFormData: true,
+                method: 'put',
                 preserveScroll: true,
                 onError: handleError,
                 onSuccess: handleSuccess

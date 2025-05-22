@@ -30,29 +30,66 @@ export default function AuthenticatedLayout({ header, children }) {
                                 </NavLink>
                                 {user && (
                                     <>
-                                        <NavLink
-                                            href={route('pwd.pwd-users.index')}
-                                            active={route().current('pwd.pwd-users.index')}
+
+
+                        <div className="hidden sm:ms-6 sm:flex sm:items-center">
+                            <div className="relative ms-3">
+                                    <Dropdown>
+                                <Dropdown.Trigger>
+                                    <span className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-700">
+                                        PWD Management
+                                        <svg
+                                            className="ms-1 h-4 w-4"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
                                         >
-                                            PWD Users
-                                        </NavLink>
-                                        <NavLink
-                                            href={route('pwd.register')}
-                                            active={route().current('pwd.register')}
-                                        >
-                                            Register
-                                        </NavLink>
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2"
+                                                d="M19 9l-7 7-7-7"
+                                            />
+                                        </svg>
+                                    </span>
+                                </Dropdown.Trigger>
+
+                                <Dropdown.Content align="left" width="48">
+                                    <Dropdown.Link
+                                        href={route('pwd.pwd-users.index')}
+                                        active={route().current('pwd.pwd-users.index')}
+                                    >
+                                        Users
+                                    </Dropdown.Link>
+                                    <Dropdown.Link
+                                        href={route('pwd.register')}
+                                        active={route().current('pwd.register')}
+                                    >
+                                        Registration
+                                    </Dropdown.Link>
+                                    <Dropdown.Link
+                                        href={route('admin.pwd.renewals.index')}
+                                        active={route().current('admin.pwd.renewals.index')}
+                                    >
+                                        Renewals
+                                    </Dropdown.Link>
+                                    <Dropdown.Link
+                                        href={route('admin.pwd.preregistrations.index')}
+                                        active={route().current('admin.pwd.preregistrations.index')}
+                                    >
+                                        Pre-registrations
+                                    </Dropdown.Link>
+                                </Dropdown.Content>
+                            </Dropdown>
+                            </div>
+                        </div>
+
                                         <NavLink
                                             href={route('register.bp.view')}
                                             active={route().current('register.bp.view')}
                                         >
                                             Register B/P
-                                        </NavLink>
-                                        <NavLink
-                                            href={route('admin.pwd.renewals.index')}
-                                            active={route().current('admin.pwd.renewals.index')}
-                                        >
-                                            PWD Renewals
                                         </NavLink>
                                     </>
                                 )}
@@ -190,7 +227,7 @@ export default function AuthenticatedLayout({ header, children }) {
             </nav>
 
             {header && (
-                <header className="bg-white shadow">
+                <header className="bg-white text-cyan-900 shadow">
                     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
                         {header}
                     </div>

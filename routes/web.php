@@ -34,8 +34,11 @@ use App\Http\Controllers\{
     PharmacyUpdateController,
     LocationController,
     AdminDistrictDetailsController,
-    PwdRenewalController,
-    PwdRenewalApprovalController,
+    PWDRenewalController,
+    PWDRenewalApprovalController,
+    PWDInitialRegistrationController,
+    PWDAdditionalInfoController,
+    PwdPreregistrationApprovalController,
 };
 
 use App\Models\PWDRegistration;
@@ -46,8 +49,6 @@ use App\Models\PWDRegistration;
 |--------------------------------------------------------------------------
 */
 
-
-
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin'       => Route::has('login'),
@@ -57,6 +58,15 @@ Route::get('/', function () {
     ]);
 })->name('welcome');
 
+// Initial PWD Registration Routes (Public)
+Route::get('/pwd/initial-registration', [PWDInitialRegistrationController::class, 'show'])->name('pwd.initial-registration');
+Route::post('/pwd/initial-registration', [PWDInitialRegistrationController::class, 'store'])->name('pwd.initial-registration.store');
+
+// PWD Additional Information Routes (Public)
+Route::get('/pwd/additional-info', [PWDAdditionalInfoController::class, 'show'])
+    ->name('pwd.additional-info.show');
+Route::post('/pwd/additional-info', [PWDAdditionalInfoController::class, 'store'])
+    ->name('pwd.additional-info.store');
 
 Route::get('/dashboard', fn() => Inertia::render('Dashboard'))
     ->middleware(['auth', 'verified'])
@@ -64,7 +74,6 @@ Route::get('/dashboard', fn() => Inertia::render('Dashboard'))
 
 Route::get('/scan', fn() => Inertia::render('Scan'))->name('public.scan');
 Route::get('/api/scan-user', [PWDScannerController::class, 'findByHashId']);
-
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/subscribe', fn() => Inertia::render('Subscription/Subscribe'))->name('subscription.page');
@@ -105,7 +114,6 @@ Route::middleware(['auth', 'can:business'])->group(function () {
     Route::post('/business/transactions', [BusinessBnpcController::class, 'store'])->name('business.bnpc-transactions.store');
     Route::get('/business/bnpc-transactions/{id}/edit', [BusinessEditTransactionController::class, 'edit'])->name('business.bnpc-transactions.edit');
     Route::put('/business/bnpc-transactions/{id}', [BusinessEditTransactionController::class, 'update'])->name('business.bnpc-transactions.update');
-
 });
 
 /*
@@ -117,28 +125,21 @@ Route::middleware(['auth', 'can:business'])->group(function () {
 Route::middleware(['auth', 'can:pharmacy'])->group(function () {
     Route::get('/pharmacy/dashboard', [PharmacyDashboardController::class, 'index'])->name('pharmacy.dashboard');
     // Record Prescription (Pharmacy Side)
-Route::get('/pharmacy/record-prescription', [PharmacyPrescriptionController::class, 'create'])->name('pharmacy.prescriptions.create');
-Route::post('/pharmacy/record-prescription', [PharmacyPrescriptionController::class, 'store'])->name('pharmacy.prescriptions.store');
+    Route::get('/pharmacy/record-prescription', [PharmacyPrescriptionController::class, 'create'])->name('pharmacy.prescriptions.create');
+    Route::post('/pharmacy/record-prescription', [PharmacyPrescriptionController::class, 'store'])->name('pharmacy.prescriptions.store');
 
+    Route::get('/pharmacy/prescription-log', [PharmacyPrescriptionLogController::class, 'index'])->name('pharmacy.prescriptions.log');
 
-Route::get('/pharmacy/prescription-log', [PharmacyPrescriptionLogController::class, 'index'])->name('pharmacy.prescriptions.log');
+    // Update Prescription Filling
+    Route::get('/pharmacy/update-prescription', [PharmacyUpdateController::class, 'lookup'])
+        ->name('pharmacy.prescriptions.update.create');
 
+    Route::post('/pharmacy/update-prescription', [PharmacyUpdateController::class, 'update'])
+        ->name('pharmacy.prescriptions.update');
 
-// Update Prescription Filling
-Route::get('/pharmacy/update-prescription', [PharmacyUpdateController::class, 'lookup'])
-->name('pharmacy.prescriptions.update.create');
-
-Route::post('/pharmacy/update-prescription', [PharmacyUpdateController::class, 'update'])
-->name('pharmacy.prescriptions.update');
-
- Route::get('/prescriptions/{id}/edit', [PharmacyPrescriptionEditController::class, 'edit'])->name('prescriptions.edit');
-Route::put('/prescriptions/{id}', [PharmacyPrescriptionEditController::class, 'update'])->name('prescriptions.update');
-
-
-
-
+    Route::get('/prescriptions/{id}/edit', [PharmacyPrescriptionEditController::class, 'edit'])->name('prescriptions.edit');
+    Route::put('/prescriptions/{id}', [PharmacyPrescriptionEditController::class, 'update'])->name('prescriptions.update');
 });
-
 
 /*
 |--------------------------------------------------------------------------
@@ -157,12 +158,12 @@ Route::middleware(['auth', 'can:pwd'])->group(function () {
         ->name('pwd.analytics.index'); // ✅ Add this line
 
     Route::get('/pwd/card', [PWDUserBarcodeController::class, 'generate'])->name('pwd.pwd-users.dashboard.generate');
-        Route::get('/pwd/renewal/{registration}', [PwdRenewalController::class, 'create'])->name('pwd.renewal.create');
+    Route::get('/pwd/renewal/{registration}', [PWDRenewalController::class, 'create'])->name('pwd.renewal.create');
 
-        Route::post('/pwd/renewal', [PwdRenewalController::class, 'store'])->name('pwd.renewals.store');
-        Route::get('/pwd/renewal/{registration}', [PwdRenewalController::class, 'create'])->name('pwd.renewal.create');
-        Route::get('/pwd/renewals/{renewal}/edit', [PwdRenewalController::class, 'edit'])->name('pwd.renewal.edit');
-        Route::put('/pwd/renewals/{renewal}', [PwdRenewalController::class, 'update'])->name('pwd.renewals.update');
+    Route::post('/pwd/renewal', [PWDRenewalController::class, 'store'])->name('pwd.renewals.store');
+    Route::get('/pwd/renewal/{registration}', [PWDRenewalController::class, 'create'])->name('pwd.renewal.create');
+    Route::get('/pwd/renewals/{renewal}/edit', [PWDRenewalController::class, 'edit'])->name('pwd.renewal.edit');
+    Route::match(['put', 'post'], '/pwd/renewals/{renewal}', [PWDRenewalController::class, 'update'])->name('pwd.renewals.update');
 });
 
 /*
@@ -180,7 +181,7 @@ Route::middleware(['auth', 'can:admin'])->group(function () {
 
     Route::get('/admin/PWDusers', [PWDUserController::class, 'index'])->name('pwd.pwd-users.index');
     Route::get('/admin/PWDusers/{id}/edit', [PWDUserController::class, 'edit'])->name('pwd.pwd-users.edit');
-    Route::put('/admin/PWDusers/{id}', [PWDUserController::class, 'update'])->name('pwd.pwd-users.update');
+    Route::match(['put', 'post'], '/admin/PWDusers/{id}', [PWDUserController::class, 'update'])->name('pwd.pwd-users.update');
     Route::get('/admin/PWDusers/{id}/generate', [PWDBarcodeController::class, 'generate'])->name('pwd.pwd-users.generate');
 
     Route::get('/admin/bnpc', [AdminBnpcItemController::class, 'index'])->name('admin.bnpc.index');
@@ -203,7 +204,6 @@ Route::middleware(['auth', 'can:admin'])->group(function () {
     Route::get('/admin/register-bp', function () {
         return Inertia::render('Admin/RegisterBusinessOrPharmacy');
     })->name('register.bp.view');
-
 });
 
 /*
@@ -239,10 +239,34 @@ Route::middleware(['auth'])->group(function () {
 */
 
 Route::middleware(['auth', 'can:admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/pwd/renewals', [PwdRenewalApprovalController::class, 'index'])->name('pwd.renewals.index');
-    Route::get('/pwd/renewals/{renewal}', [PwdRenewalApprovalController::class, 'show'])->name('pwd.renewals.show');
-    Route::post('/pwd/renewals/{renewal}/approve', [PwdRenewalApprovalController::class, 'approve'])->name('pwd.renewals.approve');
-    Route::post('/pwd/renewals/{renewal}/reject', [PwdRenewalApprovalController::class, 'reject'])->name('pwd.renewals.reject');
+    Route::get('/pwd/renewals', [PWDRenewalApprovalController::class, 'index'])->name('pwd.renewals.index');
+    Route::get('/pwd/renewals/{renewal}', [PWDRenewalApprovalController::class, 'show'])->name('pwd.renewals.show');
+    Route::post('/pwd/renewals/{renewal}/approve', [PWDRenewalApprovalController::class, 'approve'])->name('pwd.renewals.approve');
+    Route::post('/pwd/renewals/{renewal}/reject', [PWDRenewalApprovalController::class, 'reject'])->name('pwd.renewals.reject');
+
+    // Pre-registration Approval Routes
+    Route::get('/pwd/preregistrations', [PwdPreregistrationApprovalController::class, 'index'])->name('pwd.preregistrations.index');
+    Route::get('/pwd/preregistrations/{preregistration}', [PwdPreregistrationApprovalController::class, 'show'])->name('pwd.preregistrations.show');
+    Route::post('/pwd/preregistrations/{preregistration}/approve', [PwdPreregistrationApprovalController::class, 'approve'])->name('pwd.preregistrations.approve');
+    Route::post('/pwd/preregistrations/{preregistration}/reject', [PwdPreregistrationApprovalController::class, 'reject'])->name('pwd.preregistrations.reject');
 });
+
+Route::get('/validation-required', function () {
+    return Inertia::render('Auth/ValidationRequired', [
+        'requiredDocuments' => session('requiredDocuments'),
+        'userType' => session('userType')
+    ]);
+})->name('validation.required');
+
+// Business Registration Routes
+Route::get('/register/business', function () {
+    return Inertia::render('RegisterBusiness');
+})->name('register.business');
+
+Route::post('/register/business', [BusinessPharmacyRegisterController::class, 'store'])->name('register.business.store');
+
+Route::get('/register/pharmacy', function () {
+    return Inertia::render('RegisterPharmacy');
+})->name('register.pharmacy');
 
 require __DIR__ . '/auth.php';

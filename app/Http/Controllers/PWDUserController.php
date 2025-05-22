@@ -90,30 +90,10 @@ class PWDUserController extends Controller
         try {
             \Log::info('PWD User Update Request Data:', $request->all());
             \Log::info('Files in request:', $request->allFiles());
-            \Log::info('Request headers:', $request->headers->all());
 
             // Get the PWD user first to access the user relationship
             $pwdUser = PWDRegistration::with('user')->findOrFail($id);
             $user = $pwdUser->user;
-
-            // Log each required field
-            $requiredFields = [
-                'dateApplied', 'dob', 'sex', 'civilStatus', 'disability_type_id',
-                'disability_cause_id', 'region_id', 'province_id', 'municipality_id',
-                'barangay_id', 'house', 'education', 'employmentStatus',
-                'accomplishedBy', 'accomplished_by_first_name', 'accomplished_by_last_name',
-                'certifying_physician_first_name', 'certifying_physician_last_name',
-                'physician_license_no', 'processing_officer_first_name', 'processing_officer_last_name',
-                'approving_officer_first_name', 'approving_officer_last_name',
-                'encoder_first_name', 'encoder_last_name', 'reportingUnit', 'controlNo'
-            ];
-
-            foreach ($requiredFields as $field) {
-                \Log::info("Field {$field}:", [
-                    'value' => $request->input($field),
-                    'exists' => $request->has($field)
-                ]);
-            }
 
             // Create validation rules array
             $rules = [
@@ -193,8 +173,6 @@ class PWDUserController extends Controller
 
             $request->validate($rules);
 
-            \Log::info('Found PWD user:', ['id' => $pwdUser->id, 'current_photo' => $pwdUser->photo, 'current_signature' => $pwdUser->signature]);
-
             // Combine name fields for the user's name
             $fullName = $request->first_name;
             if ($request->middle_name) {
@@ -214,6 +192,9 @@ class PWDUserController extends Controller
                 ]);
             }
 
+            // Get all form data except files and user-related fields
+            $pwdData = $request->except(['email', 'mobile', 'photo', 'signature', '_method']);
+
             // Handle photo update
             if ($request->hasFile('photo')) {
                 \Log::info('Processing new photo upload');
@@ -228,7 +209,7 @@ class PWDUserController extends Controller
                 $photoName = 'photo_' . time() . '_' . uniqid() . '.png';
                 $photoPath = 'photos/' . $photoName;
                 $photoFile->storeAs('photos', $photoName, 'public');
-                $request->merge(['photo' => $photoPath]);
+                $pwdData['photo'] = $photoPath;
                 \Log::info('New photo saved:', ['path' => $photoPath]);
             }
 
@@ -245,12 +226,12 @@ class PWDUserController extends Controller
                 $signatureFile = $request->file('signature');
                 $sigName = 'signature_' . time() . '_' . uniqid() . '.' . $signatureFile->getClientOriginalExtension();
                 $sigPath = $signatureFile->storeAs('signatures', $sigName, 'public');
-                $request->merge(['signature' => $sigPath]);
+                $pwdData['signature'] = $sigPath;
                 \Log::info('New signature saved:', ['path' => $sigPath]);
             }
 
             // Update PWD user data
-            $pwdUser->update($request->except(['email', 'mobile']));
+            $pwdUser->update($pwdData);
             \Log::info('PWD user updated successfully');
 
             return redirect()->route('pwd.pwd-users.index')

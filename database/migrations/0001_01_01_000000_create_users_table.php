@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('email')->unique()->nullable();
             $table->string('phone')->unique()->nullable();
             $table->unsignedTinyInteger('role')->default(0); // 0: PWD, 1: Admin, 2: Business, 3: Pharmacy
+            $table->unsignedTinyInteger('is_validated')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();

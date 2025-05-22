@@ -61,7 +61,7 @@ export default function IdReferenceForm({ values, handleChange }) {
 
   return (
     <div className="mt-8">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">15. ID Reference Numbers</h3>
+      <h3 className="text-lg font-medium text-gray-900 mb-4">ID Reference Numbers</h3>
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         {['sssNo', 'gsisNo', 'pagIbigNo', 'psnNo', 'philhealthNo'].map((field) => (
           <div key={field}>

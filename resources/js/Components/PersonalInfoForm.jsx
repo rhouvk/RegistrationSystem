@@ -36,7 +36,7 @@ export default function PersonalInfoForm({ values, handleChange, duplicateErrors
     <div>
       {/* 1. PWD Number */}
       <h3 className="text-lg font-medium text-gray-900 mb-4">
-        1. PWD Number <span className="text-sm font-normal text-gray-600">(Format: RR-PPMM-BBB-NNNNNNN)</span>
+        PWD Number <span className="text-sm font-normal text-gray-600">(Format: RR-PPMM-BBB-NNNNNNN)</span>
       </h3>
       <input
         type="text"
@@ -52,7 +52,7 @@ export default function PersonalInfoForm({ values, handleChange, duplicateErrors
       )}
 
       {/* 2. Date Applied */}
-      <h3 className="text-lg font-medium text-gray-900 mt-8 mb-4">2. Date Applied</h3>
+      <h3 className="text-lg font-medium text-gray-900 mt-8 mb-4">Date Applied</h3>
       <input
         type="date"
         name="dateApplied"
@@ -63,7 +63,7 @@ export default function PersonalInfoForm({ values, handleChange, duplicateErrors
       />
 
       {/* 3. Personal Information */}
-      <h3 className="text-lg font-medium text-gray-900 mb-4">3. Personal Information</h3>
+      <h3 className="text-lg font-medium text-gray-900 mb-4">Personal Information</h3>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
           { field: 'first_name', label: 'First Name' },
@@ -90,7 +90,7 @@ export default function PersonalInfoForm({ values, handleChange, duplicateErrors
       {/* 4. Date of Birth and 5. Sex */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
         <div>
-          <label className="block text-sm font-medium text-gray-700">4. Date of Birth</label>
+          <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
           <input
             type="date"
             name="dob"
@@ -101,7 +101,7 @@ export default function PersonalInfoForm({ values, handleChange, duplicateErrors
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">5. Sex</label>
+          <label className="block text-sm font-medium text-gray-700">Sex</label>
           <div className="flex space-x-4 mt-2">
             {['Female', 'Male'].map((gender) => (
               <label key={gender} className="inline-flex items-center">
@@ -123,7 +123,7 @@ export default function PersonalInfoForm({ values, handleChange, duplicateErrors
 
       {/* 6. Civil Status */}
       <div className="mt-8">
-        <label className="block text-sm font-medium text-gray-700">6. Civil Status</label>
+        <label className="block text-sm font-medium text-gray-700">Civil Status</label>
         <div className="flex flex-wrap gap-4 mt-2">
           {['Single', 'Married', 'Widowed', 'Separated', 'Cohabitation'].map((status) => (
             <label key={status} className="inline-flex items-center">

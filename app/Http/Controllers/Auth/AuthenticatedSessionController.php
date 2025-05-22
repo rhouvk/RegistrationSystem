@@ -33,6 +33,13 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
     
         $user = Auth::user();
+
+        // Check if account is validated
+        if ($user->is_validated === 0) {
+            return redirect()->route('validation.required')->with([
+                'userType' => $user->disability_type
+            ]);
+        }
     
         switch ($user->role) {
             case 3:

@@ -21,7 +21,7 @@ export default function CertifyingPhysicianForm({ values, handleChange }) {
 
   return (
     <div className="mt-8">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">18. Certifying Physician</h3>
+      <h3 className="text-lg font-medium text-gray-900 mb-4">Certifying Physician</h3>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {['first_name', 'middle_name', 'last_name'].map((part) => (
           <div key={`certifying_physician_${part}`}>

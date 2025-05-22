@@ -1,5 +1,7 @@
 import React from 'react';
 
+const joinName = (...parts) => parts.filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+
 export default function PWDInfoModal({ isOpen, registration, onClose }) {
   if (!isOpen || !registration) return null;
 
@@ -8,7 +10,7 @@ export default function PWDInfoModal({ isOpen, registration, onClose }) {
       title: 'Personal Information',
       fields: [
         { label: 'PWD Number', value: registration.pwdNumber },
-        { label: 'Name', value: registration.user?.name },
+        { label: 'Name', value: joinName(registration.first_name, registration.middle_name, registration.last_name, registration.suffix) },
         { label: 'Date Applied', value: registration.dateApplied && new Date(registration.dateApplied).toLocaleDateString() },
         { label: 'Date of Birth', value: registration.dob && new Date(registration.dob).toLocaleDateString() },
         { label: 'Sex', value: registration.sex },
@@ -31,6 +33,8 @@ export default function PWDInfoModal({ isOpen, registration, onClose }) {
         { label: 'Province', value: registration.province?.name },
         { label: 'Region', value: registration.region?.name },
         { label: 'Landline', value: registration.landline },
+        { label: 'Mobile', value: registration.mobile },
+        { label: 'Email', value: registration.email },
       ],
     },
     {
@@ -66,25 +70,13 @@ export default function PWDInfoModal({ isOpen, registration, onClose }) {
     {
       title: 'Family Information',
       fields: [
-        { label: 'Father Name', value: registration.fatherName },
-        { label: 'Mother Name', value: registration.motherName },
-        { label: 'Guardian Name', value: registration.guardianName },
+        { label: 'Father Name', value: joinName(registration.father_first_name, registration.father_middle_name, registration.father_last_name) },
+        { label: 'Mother Name', value: joinName(registration.mother_first_name, registration.mother_middle_name, registration.mother_last_name) },
+        { label: 'Guardian Name', value: joinName(registration.guardian_first_name, registration.guardian_middle_name, registration.guardian_last_name) },
       ],
     },
-    {
-      title: 'Administrative Info',
-      fields: [
-        { label: 'Accomplished By', value: registration.accomplishedBy },
-        { label: 'Certifying Physician', value: registration.certifyingPhysician },
-        { label: 'Encoder', value: registration.encoder },
-        { label: 'Processing Officer', value: registration.processingOfficer },
-        { label: 'Approving Officer', value: registration.approvingOfficer },
-        { label: 'Reporting Unit', value: registration.reportingUnit },
-        { label: 'Control No.', value: registration.controlNo },
-        { label: 'Created At', value: registration.created_at && new Date(registration.created_at).toLocaleString() },
-        { label: 'Updated At', value: registration.updated_at && new Date(registration.updated_at).toLocaleString() },
-      ],
-    },
+
+    
   ];
 
   return (
