@@ -75,8 +75,6 @@ class UserAndPwdUserSeeder extends Seeder
                 'province_id' => $provinceId,
                 'region_id' => $regionId,
                 'landline' => rand(0, 1) ? '082-' . str_pad(rand(1, 9999999), 7, '0', STR_PAD_LEFT) : null,
-                'mobile' => '0912' . str_pad($i, 7, '0', STR_PAD_LEFT),
-                'email' => "pwduser$i@gmail.com",
                 'education' => $educationLevels[rand(0, count($educationLevels) - 1)],
                 'employmentStatus' => $employmentStatuses[rand(0, count($employmentStatuses) - 1)],
                 'employmentCategory' => $employmentCategories[rand(0, count($employmentCategories) - 1)],
