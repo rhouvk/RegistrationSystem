@@ -35,7 +35,7 @@ use App\Http\Controllers\{
     LocationController,
     AdminDistrictDetailsController,
     PWDRenewalController,
-    PWDRenewalApprovalController,
+    PwdRenewalApprovalController,
     PWDInitialRegistrationController,
     PWDAdditionalInfoController,
     PwdPreregistrationApprovalController,

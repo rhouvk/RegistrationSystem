@@ -136,7 +136,7 @@ class PwdRenewalApprovalController extends Controller
 
             // Update renewal status to approved (3)
             $renewal->update([
-                'registration_type' => 3, // 3 for approved
+                'registration_type' => 3, // 3 for approsved
                 'processing_officer_first_name' => $request->user()->first_name,
                 'processing_officer_middle_name' => $request->user()->middle_name,
                 'processing_officer_last_name' => $request->user()->last_name,
