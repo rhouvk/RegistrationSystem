@@ -17,66 +17,124 @@ export default function DownloadDashboardPDF({
     const doc = new jsPDF();
     const data = yearData[selectedYear] || {};
     const dateGenerated = new Date().toLocaleString();
+    const totalPWDs = maleCount + femaleCount;
 
+    // Calculate percentages
+    const malePercentage = ((maleCount / totalPWDs) * 100).toFixed(1);
+    const femalePercentage = ((femaleCount / totalPWDs) * 100).toFixed(1);
+
+    // Get status counts from the correct data structure
+    const newCount = data?.status?.new || 0;
+    const renewedCount = data?.status?.renewed || 0;
+    const expiredCount = data?.status?.expired || 0;
+    const statusTotal = data?.status?.total || totalPWDs;
+
+    // Calculate status percentages based on total PWDs
+    const newPercentage = ((newCount / statusTotal) * 100).toFixed(1);
+    const renewedPercentage = ((renewedCount / statusTotal) * 100).toFixed(1);
+    const expiredPercentage = ((expiredCount / statusTotal) * 100).toFixed(1);
+
+    // Add logo - reduced size
+    const logoWidth = 15;
+    const logoHeight = 15;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
+    // Add logo image - using the correct public path
+    doc.addImage('/images/logo.png', 'PNG', 14, 10, logoWidth, logoHeight);
+
+    // Add title with adjusted position to accommodate logo
     doc.setFontSize(16);
     doc.setTextColor(33, 37, 41);
-    doc.text(`PWD NA 'TO - Dashboard Summary Report`, 14, 16);
+    doc.text("PWD NA 'TO - Dashboard Summary Report", logoWidth + 20, 18);
 
+    // Add generation date with adjusted position
     doc.setFontSize(10);
     doc.setTextColor(100);
-    doc.text(`Generated: ${dateGenerated}`, 14, 22);
+    doc.text(`Generated: ${dateGenerated}`, logoWidth + 20, 25);
 
+    // Main summary table - adjust starting Y position to accommodate logo
     autoTable(doc, {
-      head: [['Category', 'Value']],
+      theme: 'grid',
+      head: [[{ content: 'Category', styles: { fontStyle: 'bold' } }, 
+              { content: 'Count', styles: { fontStyle: 'bold' } }, 
+              { content: 'Percentage', styles: { fontStyle: 'bold' } }]],
       body: [
-        ['Selected Year', selectedYear],
-        ['Total Males', maleCount],
-        ['Total Females', femaleCount],
-        ['Total Registered', maleCount + femaleCount],
-        ['New', data.status?.new || 0],
-        ['Renewed', data.status?.renewed || 0],
-        ['Expired', data.status?.expired || 0],
+        ['Selected Year', selectedYear, ''],
+        ['Total Registered', totalPWDs, '100%'],
+        ['Total Males', maleCount, `${malePercentage}%`],
+        ['Total Females', femaleCount, `${femalePercentage}%`],
       ],
-      startY: 28,
+      startY: 35,
+      styles: {
+        fontSize: 10,
+        cellPadding: 3,
+      },
     });
 
-    const insertTable = (title, headers, rows) => {
-      if (rows.length) {
+    const insertTable = (title, headers, data, calculatePercentage = true) => {
+      if (data.length) {
+        const total = calculatePercentage ? data.reduce((sum, row) => sum + (Array.isArray(row) ? row[1] : row), 0) : 0;
+        const rows = data.map(row => {
+          const count = Array.isArray(row) ? row[1] : row;
+          const percentage = calculatePercentage ? ((count / total) * 100).toFixed(1) + '%' : '';
+          return Array.isArray(row) ? [...row, percentage] : [row, count, percentage];
+        });
+
+        // Add table title
+        doc.setFontSize(12);
+        doc.setTextColor(33, 37, 41);
+        doc.text(title, 14, doc.lastAutoTable.finalY + 15);
+
         autoTable(doc, {
-          head: [headers],
+          theme: 'grid',
+          head: [[
+            { content: headers[0], styles: { fontStyle: 'bold' } },
+            { content: headers[1], styles: { fontStyle: 'bold' } },
+            { content: 'Percentage', styles: { fontStyle: 'bold' } }
+          ]],
           body: rows,
-          startY: doc.lastAutoTable.finalY + 10,
-          headStyles: { fillColor: [13, 148, 136] },
+          startY: doc.lastAutoTable.finalY + 20,
+          headStyles: { 
+            fillColor: [13, 148, 136],
+            fontSize: 10,
+            cellPadding: 3,
+          },
+          styles: {
+            fontSize: 10,
+            cellPadding: 3,
+          },
         });
       }
     };
 
+    // Convert disability data
+    const disabilityData = (data.disabilities || []).map((d) => [d.name, d.count]);
     insertTable(
-      'Disability Types',
+      'Disability Types Distribution',
       ['Disability Type', 'Count'],
-      (data.disabilities || []).map((d) => [d.name, d.count])
+      disabilityData
     );
 
     insertTable(
-      'Admin Districts',
+      'Administrative District Distribution',
       ['Admin District', 'PWD Count'],
       Object.entries(adminDistrictData)
     );
 
     insertTable(
-      'Education Levels',
+      'Education Level Distribution',
       ['Education Level', 'Count'],
       Object.entries(education)
     );
 
     insertTable(
-      'Employment Status',
+      'Employment Status Distribution',
       ['Employment Status', 'Count'],
       Object.entries(employmentStatus)
     );
 
     insertTable(
-      'Age Groups',
+      'Age Group Distribution',
       ['Age Range', 'Count'],
       Object.entries(ageGroups)
     );

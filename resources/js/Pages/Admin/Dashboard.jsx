@@ -71,19 +71,31 @@ const chartOptions = {
 export default function AdminDashboard({ 
   yearData = {}, 
   maleCount = 0, 
-  femaleCount = 0, 
-  adminDistrictData = {}, 
-  educationData = {}, 
-  employmentData = {}, 
-  ageGroups = {} 
+  femaleCount = 0,
+  overallStatus = { new: 0, renewed: 0, expired: 0, total: 0 }
 }) {
   const currentYear = new Date().getFullYear();
-  const allKeys = Object.keys(yearData);
-  const allYears = allKeys.filter(y => y !== 'overall').map(Number).sort((a, b) => b - a);
-  const [selectedYear, setSelectedYear] = useState(allKeys.includes('overall') ? 'overall' : `${allYears[0] || currentYear}`);
+  const allYears = Object.keys(yearData)
+    .filter(year => year !== 'overall')
+    .map(Number)
+    .sort((a, b) => b - a);
+  const [selectedYear, setSelectedYear] = useState('overall');
   const last5Years = allYears.filter(y => y >= currentYear - 4).sort((a, b) => a - b);
 
-  const { registered = {}, status = {}, disabilities = [] } = yearData[selectedYear] || {};
+  const selectedData = yearData[selectedYear] || {
+    registered: { female: 0, male: 0, total: 0 },
+    disabilities: [],
+    adminDistrictData: {},
+    educationData: {},
+    employmentData: {},
+    ageGroups: {
+      '0-16': 0,
+      '17-30': 0,
+      '31-45': 0,
+      '46-59': 0,
+      '60+': 0,
+    }
+  };
 
   const [fadeIn, setFadeIn] = useState(false);
   useEffect(() => {
@@ -105,42 +117,42 @@ export default function AdminDashboard({
       }],
     },
     disability: {
-      labels: disabilities.map(d => d.name),
+      labels: selectedData.disabilities.map(d => d.name),
       datasets: [{
         label: `PWDs in ${selectedYear}`,
-        data: disabilities.map(d => d.count),
-        backgroundColor: disabilities.map((_, index) => colorPalette[index % colorPalette.length]),
+        data: selectedData.disabilities.map(d => d.count),
+        backgroundColor: selectedData.disabilities.map((_, index) => colorPalette[index % colorPalette.length]),
       }],
     },
     district: {
-      labels: Object.keys(adminDistrictData),
+      labels: Object.keys(selectedData.adminDistrictData),
       datasets: [{
-        label: 'PWD Count by Admin District',
-        data: Object.values(adminDistrictData),
+        label: `PWD Count by Admin District (${selectedYear})`,
+        data: Object.values(selectedData.adminDistrictData),
         backgroundColor: colorPalette,
       }],
     },
     education: {
-      labels: Object.keys(educationData),
+      labels: Object.keys(selectedData.educationData),
       datasets: [{
-        label: 'PWDs by Education Level',
-        data: Object.values(educationData),
+        label: `PWDs by Education Level (${selectedYear})`,
+        data: Object.values(selectedData.educationData),
         backgroundColor: colorPalette,
       }],
     },
     employment: {
-      labels: Object.keys(employmentData),
+      labels: Object.keys(selectedData.employmentData),
       datasets: [{
-        label: 'PWDs by Employment Status',
-        data: Object.values(employmentData),
+        label: `PWDs by Employment Status (${selectedYear})`,
+        data: Object.values(selectedData.employmentData),
         backgroundColor: colorPalette,
       }],
     },
     age: {
-      labels: Object.keys(ageGroups),
+      labels: Object.keys(selectedData.ageGroups),
       datasets: [{
-        label: 'PWDs by Age Group',
-        data: Object.values(ageGroups),
+        label: `PWDs by Age Group (${selectedYear})`,
+        data: Object.values(selectedData.ageGroups),
         backgroundColor: colorPalette,
       }],
     },
@@ -176,24 +188,22 @@ export default function AdminDashboard({
               </div>
 
               <div className="bg-white rounded p-3 flex flex-col items-center">
-                <h3 className="text-center text-xl font-semibold mb-2 text-cyan-950">
-                  {selectedYear === 'overall' ? 'Overall Status' : `${selectedYear} Status`}
-                </h3>
+                <h3 className="text-center text-xl font-semibold mb-2 text-cyan-950">Overall Status</h3>
                 <div className="flex justify-center items-center space-x-8">
                   <div className="flex flex-col items-center">
                     <FaClipboardCheck className="text-5xl text-cyan-600" />
                     <p className="mt-1 text-slate-700">New</p>
-                    <p className="font-bold text-slate-800">{status.new || 0}</p>
+                    <p className="font-bold text-slate-800">{overallStatus.new}</p>
                   </div>
                   <div className="flex flex-col items-center">
                     <FaSyncAlt className="text-5xl text-sky-600" />
                     <p className="mt-1 text-slate-700">Renewed</p>
-                    <p className="font-bold text-slate-800">{status.renewed || 0}</p>
+                    <p className="font-bold text-slate-800">{overallStatus.renewed}</p>
                   </div>
                   <div className="flex flex-col items-center">
                     <FaExclamationCircle className="text-5xl text-teal-500" />
                     <p className="mt-1 text-slate-700">Expired</p>
-                    <p className="font-bold text-slate-800">{status.expired || 0}</p>
+                    <p className="font-bold text-slate-800">{overallStatus.expired}</p>
                   </div>
                 </div>
               </div>
@@ -202,7 +212,7 @@ export default function AdminDashboard({
             {/* Right: Map */}
             <div className="bg-white rounded p-4 w-full md:w-1/3">
               <h3 className="text-xl font-bold text-center mb-4 text-cyan-950">Davao District Map</h3>
-              <HoverMap adminDistrictData={adminDistrictData} />
+              <HoverMap adminDistrictData={selectedData.adminDistrictData} />
             </div>
           </div>
 
@@ -215,9 +225,9 @@ export default function AdminDashboard({
               className="bg-white border rounded px-4 py-2 focus:outline-none text-slate-700"
               style={{ borderColor: teal[600] }}
             >
-              {allKeys.includes('overall') && <option value="overall">Overall</option>}
+              <option value="overall">Overall</option>
               {allYears.map(yr => (
-                <option key={yr} value={String(yr)}>{yr}</option>
+                <option key={yr} value={yr.toString()}>{yr}</option>
               ))}
             </select>
           </div>
@@ -226,12 +236,12 @@ export default function AdminDashboard({
             <DownloadDashboardPDF
               yearData={yearData}
               selectedYear={selectedYear}
-              adminDistrictData={adminDistrictData}
+              adminDistrictData={selectedData.adminDistrictData}
               maleCount={maleCount}
               femaleCount={femaleCount}
-              education={educationData}
-              employmentStatus={employmentData}
-              ageGroups={ageGroups}
+              education={selectedData.educationData}
+              employmentStatus={selectedData.employmentData}
+              ageGroups={selectedData.ageGroups}
             />
           </div>
 
@@ -246,7 +256,7 @@ export default function AdminDashboard({
 
           <div className={`transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
             <div className="bg-white rounded p-4">
-              <h3 className="text-xl font-bold text-center mb-4 text-cyan-950">PWD Distribution by Admin District</h3>
+              <h3 className="text-xl font-bold text-center mb-4 text-cyan-950">PWD Distribution by Admin District ({selectedYear})</h3>
               <div className="h-72">
                 <Bar data={chartData.district} options={chartOptions} />
               </div>
@@ -255,7 +265,7 @@ export default function AdminDashboard({
 
           <div className={`transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
             <div className="bg-white rounded p-4">
-              <h3 className="text-xl font-bold text-center mb-4 text-cyan-950">PWDs by Education Level</h3>
+              <h3 className="text-xl font-bold text-center mb-4 text-cyan-950">PWDs by Education Level ({selectedYear})</h3>
               <div className="h-72">
                 <Bar data={chartData.education} options={chartOptions} />
               </div>
@@ -266,7 +276,7 @@ export default function AdminDashboard({
             {/* Employment Pie Chart */}
             <div className="bg-white rounded p-4 w-full md:w-1/2 flex justify-center items-center">
               <div className="w-full max-w-xs">
-                <h3 className="text-xl font-bold text-center mb-4 text-cyan-950">PWDs by Employment Status</h3>
+                <h3 className="text-xl font-bold text-center mb-4 text-cyan-950">PWDs by Employment Status ({selectedYear})</h3>
                 <div className="aspect-square">
                   <Pie data={chartData.employment} options={chartOptions} />
                 </div>
@@ -276,7 +286,7 @@ export default function AdminDashboard({
             {/* Age Group Pie Chart */}
             <div className="bg-white rounded p-4 w-full md:w-1/2 flex justify-center items-center">
               <div className="w-full max-w-xs">
-                <h3 className="text-xl font-bold text-center mb-4 text-cyan-950">PWDs by Age Group</h3>
+                <h3 className="text-xl font-bold text-center mb-4 text-cyan-950">PWDs by Age Group ({selectedYear})</h3>
                 <div className="aspect-square">
                   <Pie data={chartData.age} options={chartOptions} />
                 </div>

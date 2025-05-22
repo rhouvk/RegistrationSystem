@@ -39,6 +39,7 @@ use App\Http\Controllers\{
     PWDInitialRegistrationController,
     PWDAdditionalInfoController,
     PWDPreregistrationApprovalController,
+    BusinessPharmacyController,
 };
 
 use App\Models\PWDRegistration;
@@ -204,7 +205,15 @@ Route::middleware(['auth', 'can:admin'])->group(function () {
     Route::get('/admin/register-bp', function () {
         return Inertia::render('Admin/RegisterBusinessOrPharmacy');
     })->name('register.bp.view');
+
+        Route::get('/admin/business-pharmacy', [BusinessPharmacyController::class, 'index'])
+        ->name('admin.business-pharmacy.index');
+    Route::get('/admin/business-pharmacy/{id}/edit', [BusinessPharmacyController::class, 'edit'])
+        ->name('admin.business-pharmacy.edit');
+    Route::put('/admin/business-pharmacy/{id}', [BusinessPharmacyController::class, 'update'])
+        ->name('admin.business-pharmacy.update');
 });
+
 
 /*
 |--------------------------------------------------------------------------

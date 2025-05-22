@@ -5,7 +5,7 @@ import React from 'react';
 export default function EducationEmploymentForm({ values, handleChange }) {
   return (
     <div>
-      <h3 className="text-lg font-medium text-gray-900 mb-4">Educational Attainment</h3>
+      <h3 className="text-lg font-medium text-gray-900 mb-4">Educational Attainment <span className="text-red-500">*</span></h3>
       <div className="flex flex-wrap gap-4">
         {[
           'None', 'Elementary', 'High School', 'Vocational',
@@ -19,13 +19,14 @@ export default function EducationEmploymentForm({ values, handleChange }) {
               checked={values.education === level}
               onChange={handleChange}
               className="form-radio"
+              required
             />
             <span className="ml-2">{level}</span>
           </label>
         ))}
       </div>
 
-      <h3 className="text-lg font-medium text-gray-900 mt-8 mb-4">Status of Employment</h3>
+      <h3 className="text-lg font-medium text-gray-900 mt-8 mb-4">Status of Employment <span className="text-red-500">*</span></h3>
       <div className="flex flex-wrap gap-4">
         {['Employed', 'Unemployed', 'Self-employed'].map((status) => (
           <label key={status} className="inline-flex items-center">
@@ -36,6 +37,7 @@ export default function EducationEmploymentForm({ values, handleChange }) {
               checked={values.employmentStatus === status}
               onChange={handleChange}
               className="form-radio"
+              required
             />
             <span className="ml-2">{status}</span>
           </label>

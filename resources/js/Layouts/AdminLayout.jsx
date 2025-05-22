@@ -85,12 +85,47 @@ export default function AuthenticatedLayout({ header, children }) {
                             </div>
                         </div>
 
-                                        <NavLink
+                                                <div className="hidden sm:ms-6 sm:flex sm:items-center">
+                            <div className="relative ms-3">
+                                    <Dropdown>
+                                <Dropdown.Trigger>
+                                    <span className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-700">
+                                        Pharmacy/Business
+                                        <svg
+                                            className="ms-1 h-4 w-4"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2"
+                                                d="M19 9l-7 7-7-7"
+                                            />
+                                        </svg>
+                                    </span>
+                                </Dropdown.Trigger>
+
+                                <Dropdown.Content align="left" width="48">
+                                    <Dropdown.Link
+                                        href={route('admin.business-pharmacy.index')}
+                                        active={route().current('admin.business-pharmacy.index')}
+                                    >
+                                        Users
+                                    </Dropdown.Link>
+                                    <Dropdown.Link
                                             href={route('register.bp.view')}
                                             active={route().current('register.bp.view')}
-                                        >
-                                            Register B/P
-                                        </NavLink>
+                                    >
+                                        Business & Pharmacy
+                                    </Dropdown.Link>
+                                </Dropdown.Content>
+                            </Dropdown>
+                            </div>
+                        </div>
+
                                     </>
                                 )}
                             </div>

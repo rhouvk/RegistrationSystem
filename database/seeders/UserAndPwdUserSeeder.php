@@ -52,9 +52,7 @@ class UserAndPWDUserSeeder extends Seeder
             DB::table('pwd_users')->insert([
                 'user_id' => $userId,
                 'pwdNumber' => sprintf(
-                    "%02d-%04d-%03d-%07d",
-                    $regionId,
-                    $provinceId * 100 + $municipalityId,
+                    "11-2402-%03d-%07d",
                     rand(1, 182),
                     $i
                 ),

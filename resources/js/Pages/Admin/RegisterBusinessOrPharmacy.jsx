@@ -30,7 +30,7 @@ export default function RegisterBusinessOrPharmacy() {
       <Head title="Register Business / Pharmacy" />
 
       <div className="py-10 px-4">
-        <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
+        <div className="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-lg font-bold text-center mb-6">
             Register as Business or Pharmacy
           </h2>

@@ -14,23 +14,39 @@ export default function ValidationRequired() {
                             <p className="mb-4">Your account needs to be validated before you can access the system. Please prepare the following documents:</p>
 
                             <div className="space-y-4">
-                                <h3 className="text-xl font-semibold">Required Documents:</h3>
+                                <h3 className="text-xl font-semibold">Basic Requirements:</h3>
                                 <ul className="list-disc pl-6 space-y-2">
                                     <li>Barangay Certificate</li>
                                     <li>Birth Certificate or Any Valid ID</li>
-                                    
-                                    <li className="font-semibold mt-4">If Apparent:</li>
-                                    <li>Certificate of Disability (Signed by Social Worker with License Number)</li>
-                                    
-                                    <li className="font-semibold mt-4">If Non-Apparent:</li>
-                                    <li>Medical Certificate (Signed by Medical Doctor with License Number)</li>
-                                    <li>Certificate of Disability (Signed by Medical Doctor with License Number)</li>
                                 </ul>
+
+                                <div className="mt-6">
+                                    <h3 className="text-xl font-semibold mb-2">For Apparent Disabilities</h3>
+                                    <p className="text-gray-600 text-sm mb-2">(Disabilities that are visible or easily noticeable)</p>
+                                    <ul className="list-disc pl-6 space-y-2">
+                                        <li>Certificate of Disability<br/>
+                                            <span className="text-sm text-gray-600">(Duly signed by a Registered Social Worker with License Number)</span>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <div className="mt-6">
+                                    <h3 className="text-xl font-semibold mb-2">For Non-Apparent Disabilities</h3>
+                                    <p className="text-gray-600 text-sm mb-2">(Disabilities that are not immediately visible and require medical diagnosis)</p>
+                                    <ul className="list-disc pl-6 space-y-2">
+                                        <li>Medical Certificate<br/>
+                                            <span className="text-sm text-gray-600">(Duly signed by a Medical Doctor with License Number)</span>
+                                        </li>
+                                        <li>Certificate of Disability<br/>
+                                            <span className="text-sm text-gray-600">(Duly signed by a Medical Doctor with License Number)</span>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
 
                             <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                                 <p className="text-yellow-800">
-                                    Please submit these documents to your local PWD office for validation. Once validated, you will be able to access the system.
+                                    Please submit these documents to your local PDAO office for validation. Once validated, you will be able to access the system.
                                 </p>
                             </div>
                         </div>

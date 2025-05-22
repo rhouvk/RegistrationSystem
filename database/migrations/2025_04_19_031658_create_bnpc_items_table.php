@@ -40,7 +40,7 @@ return new class extends Migration
             'Locally produced firewood',
             'Locally manufactured charcoal',
             'All kinds of candles (except decorative and scented)',
-            'Household LPG ≤11 kg (once every 5 months)',
+            'Household LPG ≤11 kg',
             'Kerosene ≤2 liters per month',
         ];
 

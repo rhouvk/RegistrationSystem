@@ -134,6 +134,21 @@ class PWDRenewalApprovalController extends Controller
                 'controlNo' => $request->controlNo,
             ]);
 
+            // Update user's name by combining the name fields
+            $fullName = $request->first_name;
+            if ($request->middle_name) {
+                $fullName .= ' ' . $request->middle_name;
+            }
+            $fullName .= ' ' . $request->last_name;
+            if ($request->suffix) {
+                $fullName .= ' ' . $request->suffix;
+            }
+
+            // Update the user's name
+            $renewal->user->update([
+                'name' => $fullName
+            ]);
+
             // Update renewal status to approved (3)
             $renewal->update([
                 'registration_type' => 3, // 3 for approsved

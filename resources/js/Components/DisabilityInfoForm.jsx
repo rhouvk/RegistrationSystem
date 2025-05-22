@@ -3,7 +3,7 @@ export default function DisabilityInfoForm({ values, handleChange, disabilityTyp
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Type of Disability</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Type of Disability <span className="text-red-500">*</span></h3>
           <select
             name="disability_type_id"
             value={values.disability_type_id}
@@ -19,7 +19,7 @@ export default function DisabilityInfoForm({ values, handleChange, disabilityTyp
         </div>
 
         <div>
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Cause of Disability</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Cause of Disability <span className="text-red-500">*</span></h3>
           <select
             name="disability_cause_id"
             value={values.disability_cause_id}

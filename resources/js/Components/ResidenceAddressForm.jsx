@@ -4,7 +4,7 @@ export default function ResidenceAddressForm({ values, handleChange, regions, pr
       <h3 className="text-lg font-medium text-gray-900 mb-4">Residence Address</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700">Region</label>
+          <label className="block text-sm font-medium text-gray-700">Region <span className="text-red-500">*</span></label>
           <select
             name="region_id"
             value={values.region_id}
@@ -20,7 +20,7 @@ export default function ResidenceAddressForm({ values, handleChange, regions, pr
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Province</label>
+          <label className="block text-sm font-medium text-gray-700">Province <span className="text-red-500">*</span></label>
           <select
             name="province_id"
             value={values.province_id}
@@ -36,7 +36,7 @@ export default function ResidenceAddressForm({ values, handleChange, regions, pr
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Municipality</label>
+          <label className="block text-sm font-medium text-gray-700">Municipality <span className="text-red-500">*</span></label>
           <select
             name="municipality_id"
             value={values.municipality_id}
@@ -52,7 +52,7 @@ export default function ResidenceAddressForm({ values, handleChange, regions, pr
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Barangay</label>
+          <label className="block text-sm font-medium text-gray-700">Barangay <span className="text-red-500">*</span></label>
           <select
             name="barangay_id"
             value={values.barangay_id}
@@ -69,7 +69,7 @@ export default function ResidenceAddressForm({ values, handleChange, regions, pr
       </div>
 
       <div className="mt-6">
-        <label className="block text-sm font-medium text-gray-700">House No. and Street</label>
+        <label className="block text-sm font-medium text-gray-700">House No. and Street <span className="text-red-500">*</span></label>
         <input
           type="text"
           name="house"

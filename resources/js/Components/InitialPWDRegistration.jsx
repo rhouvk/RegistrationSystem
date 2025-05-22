@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm, Link } from '@inertiajs/react';
 
 export default function InitialPWDRegistration() {
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const { data, setData, post, processing, errors } = useForm({
         first_name: '',
         middle_name: '',
@@ -264,6 +265,13 @@ export default function InitialPWDRegistration() {
                                 </div>
 
                                 <div className="col-span-2 text-center mt-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsModalOpen(true)}
+                                        className="text-sm text-teal-600 hover:text-teal-800 transition-colors duration-200 underline mr-4"
+                                    >
+                                        What to Bring After Initial Registration?
+                                    </button>
                                     <Link
                                         href={route('welcome')}
                                         className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200"
@@ -276,6 +284,68 @@ export default function InitialPWDRegistration() {
                     </div>
                 </div>
             </div>
+
+            {/* What to Bring Modal */}
+            {isModalOpen && (
+                <div className="fixed inset-0 z-50 overflow-y-auto">
+                    <div className="flex items-center justify-center min-h-screen px-4">
+                        {/* Modal Backdrop */}
+                        <div 
+                            className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+                            onClick={() => setIsModalOpen(false)}
+                        ></div>
+
+                        {/* Modal Content */}
+                        <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 my-8">
+                            <div className="bg-gradient-to-r from-teal-600 to-cyan-600 rounded-t-lg px-6 py-4">
+                                <h3 className="text-xl font-semibold text-white">Required Documents</h3>
+                            </div>
+
+                            <div className="p-6 space-y-6">
+                                <div className="space-y-4">
+                                    {/* Basic Requirements */}
+                                    <div>
+                                        <h4 className="text-lg font-medium text-gray-900 mb-2">Basic Requirements</h4>
+                                        <ul className="list-disc pl-5 space-y-2 text-gray-700">
+                                            <li>Barangay Certificate</li>
+                                            <li>Birth Certificate or Any Valid ID</li>
+                                        </ul>
+                                    </div>
+
+                                    {/* Apparent Disabilities */}
+                                    <div>
+                                        <h4 className="text-lg font-medium text-gray-900 mb-2">For Apparent Disabilities</h4>
+                                        <p className="text-sm text-gray-600 italic mb-2">(Disabilities that are visible or easily noticeable)</p>
+                                        <ul className="list-disc pl-5 space-y-2 text-gray-700">
+                                            <li>Certificate of Disability (Duly signed by a Registered Social Worker with License Number)</li>
+                                        </ul>
+                                    </div>
+
+                                    {/* Non-Apparent Disabilities */}
+                                    <div>
+                                        <h4 className="text-lg font-medium text-gray-900 mb-2">For Non-Apparent Disabilities</h4>
+                                        <p className="text-sm text-gray-600 italic mb-2">(Disabilities that are not immediately visible and require medical diagnosis)</p>
+                                        <ul className="list-disc pl-5 space-y-2 text-gray-700">
+                                            <li>Medical Certificate (Duly signed by a Medical Doctor with License Number)</li>
+                                            <li>Certificate of Disability (Duly signed by a Medical Doctor with License Number)</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-gray-50 px-6 py-4 rounded-b-lg flex justify-end">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 } 
