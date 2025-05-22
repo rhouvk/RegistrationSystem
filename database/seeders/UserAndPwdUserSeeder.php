@@ -14,7 +14,6 @@ class UserAndPwdUserSeeder extends Seeder
         $regionId = DB::table('regions')->value('id');
         $provinceId = DB::table('provinces')->value('id');
         $municipalityId = DB::table('municipalities')->value('id');
-        $barangayId = DB::table('barangays')->value('id');
 
         $educationLevels = ['None', 'Elementary', 'High School', 'Vocational', 'College', 'Post Graduate'];
         $employmentStatuses = ['Employed', 'Unemployed', 'Self-employed'];
@@ -56,7 +55,7 @@ class UserAndPwdUserSeeder extends Seeder
                     "%02d-%04d-%03d-%07d",
                     $regionId,
                     $provinceId * 100 + $municipalityId,
-                    $barangayId,
+                    rand(1, 182),
                     $i
                 ),
                 'dateApplied' => $dateApplied->toDateString(),
@@ -70,7 +69,7 @@ class UserAndPwdUserSeeder extends Seeder
                 'disability_type_id' => rand(1, 10),
                 'disability_cause_id' => rand(11, 18),
                 'house' => rand(1, 999) . " Example St.",
-                'barangay_id' => $barangayId,
+                'barangay_id' => rand(1, 182),
                 'municipality_id' => $municipalityId,
                 'province_id' => $provinceId,
                 'region_id' => $regionId,
