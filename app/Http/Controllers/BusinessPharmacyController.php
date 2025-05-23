@@ -16,7 +16,11 @@ class BusinessPharmacyController extends Controller
         $roleFilter = $request->input('role');
 
         $query = User::with('establishment')
-            ->whereIn('role', [2, 3]); // 2 for Business, 3 for Pharmacy
+            ->whereIn('role', [2, 3]) // 2 for Business, 3 for Pharmacy
+            ->where(function($q) {
+                $q->whereNull('is_validated')
+                  ->orWhere('is_validated', '!=', 3);
+            });
 
         if ($roleFilter) {
             $query->where('role', $roleFilter);

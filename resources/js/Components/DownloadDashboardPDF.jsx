@@ -67,7 +67,7 @@ export default function DownloadDashboardPDF({
       startY: 35,
       styles: {
         fontSize: 10,
-        cellPadding: 3,
+        cellPadding: 2,
       },
     });
 
@@ -97,11 +97,11 @@ export default function DownloadDashboardPDF({
           headStyles: { 
             fillColor: [13, 148, 136],
             fontSize: 10,
-            cellPadding: 3,
+            cellPadding: 2,
           },
           styles: {
             fontSize: 10,
-            cellPadding: 3,
+            cellPadding: 2,
           },
         });
       }

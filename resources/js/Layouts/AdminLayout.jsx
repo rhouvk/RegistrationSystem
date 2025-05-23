@@ -119,7 +119,13 @@ export default function AuthenticatedLayout({ header, children }) {
                                             href={route('register.bp.view')}
                                             active={route().current('register.bp.view')}
                                     >
-                                        Business & Pharmacy
+                                        Register
+                                    </Dropdown.Link>
+                                    <Dropdown.Link
+                                            href={route('admin.validations.index')}
+                                            active={route().current('admin.validations.index')}
+                                    >
+                                        Approval
                                     </Dropdown.Link>
                                 </Dropdown.Content>
                             </Dropdown>

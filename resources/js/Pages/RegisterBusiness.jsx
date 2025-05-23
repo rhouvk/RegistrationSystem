@@ -19,10 +19,15 @@ export default function RegisterBusiness() {
 
   const submit = (e) => {
     e.preventDefault();
+    console.log('Form data being submitted:', data); // Debug log
     post(route('register.business.store'), {
       onSuccess: () => {
+        console.log('Registration successful'); // Debug log
         reset('password', 'password_confirmation');
         window.location.href = route('login');
+      },
+      onError: (errors) => {
+        console.error('Registration failed:', errors); // Debug log
       },
     });
   };
@@ -167,7 +172,7 @@ export default function RegisterBusiness() {
                 <div>
                   <InputLabel 
                     htmlFor="relevant_document" 
-                    value={data.role === '2' ? "Business Documents (PDF only)" : "Pharmacy License (PDF only)"} 
+                    value={data.role === '2' ? "BIR Business permit (or Mayor's Permit) and other relevant documents (PDF only)" : "License to Operate (LTO) -  Food and Drug Administration and other relevant documents (PDF only)"} 
                   />
                   <input
                     type="file"

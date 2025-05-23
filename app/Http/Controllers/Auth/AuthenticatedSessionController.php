@@ -40,6 +40,13 @@ class AuthenticatedSessionController extends Controller
                 'userType' => $user->disability_type
             ]);
         }
+
+        // Check if account is pending approval
+        if ($user->is_validated === 3) {
+            return redirect()->route('approval.pending')->with([
+                'message' => 'Your account is pending approval. Please wait for admin verification.'
+            ]);
+        }
     
         switch ($user->role) {
             case 3:

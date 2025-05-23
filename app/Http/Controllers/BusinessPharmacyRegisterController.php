@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class BusinessPharmacyRegisterController extends Controller
 {
@@ -18,17 +19,27 @@ class BusinessPharmacyRegisterController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        Log::info('Registration request received', $request->all());
+
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|in:2,3', // 2 for business, 3 for pharmacy
             'representative_name' => 'required|string|max:255',
             'location' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
         ]);
 
         try {
             DB::beginTransaction();
+
+            Log::info('Creating user with data', [
+                'name' => $request->name,
+                'email' => $request->email,
+                'role' => $request->role,
+                'phone' => $request->phone
+            ]);
 
             // Create user
             $user = User::create([
@@ -36,7 +47,11 @@ class BusinessPharmacyRegisterController extends Controller
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'role' => $request->role,
+                'is_validated' => 3,
+                'phone' => $request->phone,
             ]);
+
+            Log::info('User created successfully', ['user_id' => $user->id]);
 
             // Create establishment record
             $establishment = Establishment::create([
@@ -45,11 +60,18 @@ class BusinessPharmacyRegisterController extends Controller
                 'location' => $request->location,
             ]);
 
+            Log::info('Establishment created successfully', ['establishment_id' => $establishment->id]);
+
             DB::commit();
+            Log::info('Transaction committed successfully');
 
             return redirect()->route('login')->with('success', 'Registration successful! Please login.');
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Registration failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return back()->withErrors(['error' => 'Registration failed. Please try again.']);
         }
     }

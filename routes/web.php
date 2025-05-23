@@ -40,6 +40,7 @@ use App\Http\Controllers\{
     PWDAdditionalInfoController,
     PWDPreregistrationApprovalController,
     BusinessPharmacyController,
+    ValidationController,
 };
 
 use App\Models\PWDRegistration;
@@ -58,6 +59,13 @@ Route::get('/', function () {
         'phpVersion'     => PHP_VERSION,
     ]);
 })->name('welcome');
+
+// Pending Approval Route
+Route::get('/approval-pending', function () {
+    return Inertia::render('Auth/PendingApproval', [
+        'message' => session('message')
+    ]);
+})->name('approval.pending');
 
 // Initial PWD Registration Routes (Public)
 Route::get('/pwd/initial-registration', [PWDInitialRegistrationController::class, 'show'])->name('pwd.initial-registration');
@@ -212,6 +220,10 @@ Route::middleware(['auth', 'can:admin'])->group(function () {
         ->name('admin.business-pharmacy.edit');
     Route::put('/admin/business-pharmacy/{id}', [BusinessPharmacyController::class, 'update'])
         ->name('admin.business-pharmacy.update');
+
+    // Validation management routes
+    Route::get('/admin/validations', [ValidationController::class, 'index'])->name('admin.validations.index');
+    Route::post('/admin/validations/{id}/approve', [ValidationController::class, 'approve'])->name('admin.validations.approve');
 });
 
 

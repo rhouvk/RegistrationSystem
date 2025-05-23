@@ -55,9 +55,7 @@ const chartOptions = {
       callbacks: {
         label: (context) => {
           const value = context.parsed.x || context.parsed || 0;
-          const total = context.dataset.data.reduce((a, b) => a + b, 0);
-          const percentage = ((value / total) * 100).toFixed(1);
-          return `${context.label || ''}: ${value} (${percentage}%)`;
+          return `${context.label || ''}: ${value.toLocaleString()}`;
         }
       }
     }
@@ -66,6 +64,22 @@ const chartOptions = {
     x: { ticks: { color: slate[700] }, grid: { color: slate[200] } },
     y: { ticks: { color: slate[700] }, grid: { color: slate[200] } },
   },
+};
+
+const lineChartOptions = {
+  ...chartOptions,
+  indexAxis: 'x',
+  plugins: {
+    ...chartOptions.plugins,
+    tooltip: {
+      callbacks: {
+        label: (context) => {
+          const value = context.raw;
+          return `Total Registered: ${value.toLocaleString()}`;
+        }
+      }
+    }
+  }
 };
 
 export default function AdminDashboard({ 
@@ -166,7 +180,7 @@ export default function AdminDashboard({
           <div className="flex flex-col md:flex-row gap-6">
             {/* Left: Line Chart */}
             <div className="bg-white rounded p-4 w-full md:w-1/3 min-h-[14rem]">
-              <Line data={chartData.line} options={{ ...chartOptions, indexAxis: 'x' }} />
+              <Line data={chartData.line} options={lineChartOptions} />
             </div>
 
             {/* Middle: Gender Stats */}
