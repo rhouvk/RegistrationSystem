@@ -29,7 +29,7 @@ class PWDInitialRegistrationController extends Controller
             'sex' => 'required|string|in:Male,Female',
             'civilStatus' => 'required|string|in:Single,Married,Widowed,Separated,Cohabitation',
             'email' => 'required|string|email|max:255|unique:users',
-            'phone' => 'required|string|max:255',
+            'phone' => 'required|string|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
         ]);
 

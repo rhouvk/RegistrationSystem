@@ -54,7 +54,7 @@ class PWDPreregistrationApprovalController extends Controller
             $pwdRegistration = PWDRegistration::create([
                 'user_id' => $preregistration->user_id,
                 'pwdNumber' => $request->pwdNumber,
-                'dateApplied' => $request->dateApplied,
+                'dateApplied' => now(),
                 'dob' => $request->dob,
                 'sex' => $request->sex,
                 'civilStatus' => $request->civilStatus,

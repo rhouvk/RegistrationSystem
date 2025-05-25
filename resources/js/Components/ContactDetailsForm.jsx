@@ -9,7 +9,7 @@ export default function ContactDetailsForm({ values, handleChange, duplicateErro
     const { name, value } = e.target;
     let formattedValue = value;
 
-    if (name === 'mobile') {
+    if (name === 'phone') {
       formattedValue = formatMobile(value);
     } else if (name === 'landline') {
       formattedValue = formatLandline(value);
@@ -46,16 +46,17 @@ export default function ContactDetailsForm({ values, handleChange, duplicateErro
 
         {/* Mobile */}
         <div>
-          <label htmlFor="mobile" className="block text-sm font-medium text-gray-700">
-            Mobile No.
+          <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+            Mobile No. <span className="text-red-500">*</span>
           </label>
           <input
-            id="mobile"
+            id="phone"
             type="text"
-            name="mobile"
-            value={values.mobile}
+            name="phone"
+            value={values.phone}
             onChange={handleFormattedChange}
             placeholder="09123456789"
+            required
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
           />
           {duplicateErrors.phone && (

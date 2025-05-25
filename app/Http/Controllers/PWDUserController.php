@@ -97,6 +97,7 @@ class PWDUserController extends Controller
 
             // Create validation rules array
             $rules = [
+                'pwdNumber' => 'required|string|unique:pwd_users,pwdNumber,' . $id,
                 'dateApplied' => 'required|date',
                 'dob' => 'required|date',
                 'sex' => 'required|in:Male,Female',
@@ -136,10 +137,6 @@ class PWDUserController extends Controller
                 'accomplished_by_first_name' => 'required|string',
                 'accomplished_by_middle_name' => 'nullable|string',
                 'accomplished_by_last_name' => 'required|string',
-                'certifying_physician_first_name' => 'required|string',
-                'certifying_physician_middle_name' => 'nullable|string',
-                'certifying_physician_last_name' => 'required|string',
-                'physician_license_no' => 'required|string',
                 'processing_officer_first_name' => 'required|string',
                 'processing_officer_middle_name' => 'nullable|string',
                 'processing_officer_last_name' => 'required|string',
@@ -159,8 +156,8 @@ class PWDUserController extends Controller
             }
 
             // Only add phone validation if it's being changed
-            if ($request->mobile !== $user->phone) {
-                $rules['mobile'] = 'required|string|max:20|unique:users,phone,' . $user->id;
+            if ($request->phone !== $user->phone) {
+                $rules['phone'] = 'required|string|max:20|unique:users,phone,' . $user->id;
             }
 
             // Only add photo and signature validation if new files are being uploaded
@@ -184,16 +181,16 @@ class PWDUserController extends Controller
             }
 
             // Update user data first if email, phone, or name changed
-            if ($request->email !== $user->email || $request->mobile !== $user->phone || $fullName !== $user->name) {
+            if ($request->email !== $user->email || $request->phone !== $user->phone || $fullName !== $user->name) {
                 $user->update([
                     'name' => $fullName,
                     'email' => $request->email,
-                    'phone' => $request->mobile,
+                    'phone' => $request->phone,
                 ]);
             }
 
             // Get all form data except files and user-related fields
-            $pwdData = $request->except(['email', 'mobile', 'photo', 'signature', '_method']);
+            $pwdData = $request->except(['email', 'phone', 'photo', 'signature', '_method']);
 
             // Handle photo update
             if ($request->hasFile('photo')) {

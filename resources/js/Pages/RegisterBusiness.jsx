@@ -42,7 +42,7 @@ export default function RegisterBusiness() {
       {/* Pattern Overlay */}
       <div className="absolute inset-0 bg-[url('/images/wppattern.png')] bg-cover bg-center opacity-30 pointer-events-none z-0" />
 
-      <div className="relative z-10 py-12">
+      <div className="relative z-10 py-20">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-xl overflow-hidden">
             {/* Header Section */}

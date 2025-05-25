@@ -341,7 +341,7 @@ class PWDRenewalController extends Controller
                 'barangay_id' => 'required|exists:barangays,id',
                 'house' => 'required|string|max:255',
                 'landline' => 'nullable|string|max:255',
-                'mobile' => 'nullable|string|max:255',
+                'phone' => 'nullable|string|max:255',
                 'email' => 'nullable|email|max:255',
                 'education' => 'required|string|max:255',
                 'employmentStatus' => 'required|string|max:255',

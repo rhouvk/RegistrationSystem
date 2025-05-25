@@ -224,6 +224,16 @@ Route::middleware(['auth', 'can:admin'])->group(function () {
     // Validation management routes
     Route::get('/admin/validations', [ValidationController::class, 'index'])->name('admin.validations.index');
     Route::post('/admin/validations/{id}/approve', [ValidationController::class, 'approve'])->name('admin.validations.approve');
+    
+    // File download route (bypasses Inertia)
+    Route::get('/download/document/{path}', [BusinessPharmacyController::class, 'viewDocument'])
+        ->name('document.download')
+        ->withoutMiddleware([\App\Http\Middleware\HandleInertiaRequests::class]);
+    
+    // Original view document route (for Inertia)
+    Route::get('/admin/validations/view-document/{path}', [BusinessPharmacyController::class, 'viewDocument'])
+        ->name('admin.validations.view-document')
+        ->middleware(['auth', 'admin']);
 });
 
 

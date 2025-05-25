@@ -27,7 +27,7 @@ export default function InitialPWDRegistration() {
             <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-xl overflow-hidden">
                     {/* Header Section */}
-                    <div className="bg-gradient-to-r from-teal-600 to-cyan-600 px-6 py-4">
+                    <div className="bg-gradient-to-r from-teal-600 to-cyan-600 px-4 sm:px-6 py-4">
                         <h2 className="text-2xl font-bold text-center text-white">
                             Initial PWD Registration
                         </h2>
@@ -36,11 +36,90 @@ export default function InitialPWDRegistration() {
                         </p>
                     </div>
 
-                    <div className="p-6">
+                    <div className="p-4 sm:p-6">
                         <form className="space-y-4" onSubmit={handleSubmit}>
-                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+                                {/* Contact Information Section */}
+                                <div className="lg:col-span-2 mt-2">
+                                    <h3 className="text-base font-medium text-gray-900 mb-3">Account Information</h3>
+                                </div>
+
+                                <div>
+                                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                                        Email
+                                    </label>
+                                    <div className="mt-1">
+                                        <input
+                                            id="email"
+                                            name="email"
+                                            type="email"
+                                            value={data.email}
+                                            onChange={e => setData('email', e.target.value)}
+                                            className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
+                                        />
+                                        {errors.email && <div className="text-red-500 text-sm mt-1">{errors.email}</div>}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                                        Phone Number *
+                                    </label>
+                                    <div className="mt-1">
+                                    <input
+                                        id="phone"
+                                        name="phone"
+                                        type="tel"
+                                        required
+                                        maxLength="11"  // This limits the input to 11 digits
+                                        value={data.phone}
+                                        onChange={e => setData('phone', e.target.value.replace(/\D/g, '').slice(0, 11))}  // Removes non-digit characters and limits to 11 digits
+                                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
+                                    />
+                                    {errors.phone && <div className="text-red-500 text-sm mt-1">{errors.phone}</div>}
+                                </div>
+
+                                </div>
+
+                                <div>
+                                    <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                                        Password *
+                                    </label>
+                                    <div className="mt-1">
+                                        <input
+                                            id="password"
+                                            name="password"
+                                            type="password"
+                                            required
+                                            value={data.password}
+                                            onChange={e => setData('password', e.target.value)}
+                                            className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
+                                        />
+                                        {errors.password && <div className="text-red-500 text-sm mt-1">{errors.password}</div>}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label htmlFor="password_confirmation" className="block text-sm font-medium text-gray-700">
+                                        Confirm Password *
+                                    </label>
+                                    <div className="mt-1">
+                                        <input
+                                            id="password_confirmation"
+                                            name="password_confirmation"
+                                            type="password"
+                                            required
+                                            value={data.password_confirmation}
+                                            onChange={e => setData('password_confirmation', e.target.value)}
+                                            className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
+                                        />
+                                        {errors.password_confirmation && <div className="text-red-500 text-sm mt-1">{errors.password_confirmation}</div>}
+                                    </div>
+                                </div>
+
                                 {/* Personal Information Section */}
-                                <div className="col-span-2">
+                                <div className="lg:col-span-2">
                                     <h3 className="text-base font-medium text-gray-900 mb-3">Personal Information</h3>
                                 </div>
 
@@ -177,84 +256,7 @@ export default function InitialPWDRegistration() {
                                     </div>
                                 </div>
 
-                                {/* Contact Information Section */}
-                                <div className="col-span-2 mt-2">
-                                    <h3 className="text-base font-medium text-gray-900 mb-3">Contact Information</h3>
-                                </div>
-
-                                <div>
-                                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                                        Email *
-                                    </label>
-                                    <div className="mt-1">
-                                        <input
-                                            id="email"
-                                            name="email"
-                                            type="email"
-                                            required
-                                            value={data.email}
-                                            onChange={e => setData('email', e.target.value)}
-                                            className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
-                                        />
-                                        {errors.email && <div className="text-red-500 text-sm mt-1">{errors.email}</div>}
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                                        Phone Number *
-                                    </label>
-                                    <div className="mt-1">
-                                        <input
-                                            id="phone"
-                                            name="phone"
-                                            type="tel"
-                                            required
-                                            value={data.phone}
-                                            onChange={e => setData('phone', e.target.value)}
-                                            className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
-                                        />
-                                        {errors.phone && <div className="text-red-500 text-sm mt-1">{errors.phone}</div>}
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                                        Password *
-                                    </label>
-                                    <div className="mt-1">
-                                        <input
-                                            id="password"
-                                            name="password"
-                                            type="password"
-                                            required
-                                            value={data.password}
-                                            onChange={e => setData('password', e.target.value)}
-                                            className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
-                                        />
-                                        {errors.password && <div className="text-red-500 text-sm mt-1">{errors.password}</div>}
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label htmlFor="password_confirmation" className="block text-sm font-medium text-gray-700">
-                                        Confirm Password *
-                                    </label>
-                                    <div className="mt-1">
-                                        <input
-                                            id="password_confirmation"
-                                            name="password_confirmation"
-                                            type="password"
-                                            required
-                                            value={data.password_confirmation}
-                                            onChange={e => setData('password_confirmation', e.target.value)}
-                                            className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
-                                        />
-                                        {errors.password_confirmation && <div className="text-red-500 text-sm mt-1">{errors.password_confirmation}</div>}
-                                    </div>
-                                </div>
-
-                                <div className="col-span-2">
+                                <div className="lg:col-span-2 mt-2">
                                     <button
                                         type="submit"
                                         disabled={processing}
@@ -264,20 +266,22 @@ export default function InitialPWDRegistration() {
                                     </button>
                                 </div>
 
-                                <div className="col-span-2 text-center mt-4">
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsModalOpen(true)}
-                                        className="text-sm text-teal-600 hover:text-teal-800 transition-colors duration-200 underline mr-4"
-                                    >
-                                        What to Bring After Initial Registration?
-                                    </button>
-                                    <Link
-                                        href={route('welcome')}
-                                        className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200"
-                                    >
-                                        Back to Welcome
-                                    </Link>
+                                <div className="lg:col-span-2 text-center mt-4">
+                                    <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsModalOpen(true)}
+                                            className="text-sm text-teal-600 hover:text-teal-800 transition-colors duration-200 underline"
+                                        >
+                                            What to Bring After Initial Registration?
+                                        </button>
+                                        <Link
+                                            href={route('welcome')}
+                                            className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200"
+                                        >
+                                            Back to Welcome
+                                        </Link>
+                                    </div>
                                 </div>
                             </div>
                         </form>

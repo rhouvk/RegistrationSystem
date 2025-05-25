@@ -122,7 +122,7 @@ export default function PWDDashboard() {
     return (
         <PWDLayout header={<h2 className="text-xl font-semibold leading-tight">Dashboard</h2>}>
             <Head title="Dashboard" />
-            <div className="py-5 px-4 sm:px-6 lg:px-8"> {/* Added padding for mobile view */}
+            <div className="py-5 px-4 sm:px-6 lg:px-8"> {/* Added padding for phone view */}
                 <div className="mx-auto max-w-3xl space-y-5">
 
                     {/* User Photo */}

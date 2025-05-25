@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function PersonalInfoForm({ values, handleChange, duplicateErrors = {} }) {
+export default function PersonalInfoForm({ values, handleChange, duplicateErrors = {}, errors }) {
   const handlePWDNumberChange = (e) => {
     let input = e.target.value.replace(/\D/g, '').slice(0, 16); // Only digits, max 16 digits
     let formatted = '';
@@ -45,10 +45,12 @@ export default function PersonalInfoForm({ values, handleChange, duplicateErrors
         value={values.pwdNumber}
         onChange={handlePWDNumberChange}
         required
-        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+        className={`mt-1 block w-full rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 ${
+          errors?.pwdNumber ? 'border-red-500' : 'border-gray-300'
+        }`}
       />
-      {duplicateErrors.pwdNumber && (
-        <p className="mt-1 text-sm text-red-600">{duplicateErrors.pwdNumber}</p>
+      {errors?.pwdNumber && (
+        <p className="mt-1 text-sm text-red-600">{errors.pwdNumber}</p>
       )}
 
       {/* 2. Date Applied */}

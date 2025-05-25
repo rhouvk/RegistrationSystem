@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Head, usePage, router } from '@inertiajs/react';
-import { FaCheck } from 'react-icons/fa';
+import { FaCheck, FaFilePdf } from 'react-icons/fa';
 import AdminLayout from '@/Layouts/AdminLayout';
+import PdfViewerModal from '@/Components/PdfViewerModal';
 
 export default function PendingValidations({ pendingValidations, filters }) {
     const [search, setSearch] = useState(filters.search || '');
     const [entriesPerPage, setEntriesPerPage] = useState(filters.perPage || 10);
     const [roleFilter, setRoleFilter] = useState(filters.role || '');
+    const [selectedDocument, setSelectedDocument] = useState(null);
 
     const handleSearchChange = (e) => {
         const val = e.target.value;
@@ -41,6 +43,12 @@ export default function PendingValidations({ pendingValidations, filters }) {
     const handleApprove = (id) => {
         if (confirm('Are you sure you want to approve this user?')) {
             router.post(route('admin.validations.approve', id));
+        }
+    };
+
+    const handleViewDocument = (documentPath) => {
+        if (documentPath) {
+            setSelectedDocument(documentPath);
         }
     };
 
@@ -90,6 +98,7 @@ export default function PendingValidations({ pendingValidations, filters }) {
                                     <th className="px-6 py-3 text-xs uppercase tracking-wider text-left">Phone</th>
                                     <th className="px-6 py-3 text-xs uppercase tracking-wider text-left">Representative</th>
                                     <th className="px-6 py-3 text-xs uppercase tracking-wider text-left">Location</th>
+                                    <th className="px-6 py-3 text-xs uppercase tracking-wider text-center">Document</th>
                                     <th className="px-6 py-3 text-xs uppercase tracking-wider text-center">Actions</th>
                                 </tr>
                             </thead>
@@ -109,6 +118,19 @@ export default function PendingValidations({ pendingValidations, filters }) {
                                             {user.establishment?.location}
                                         </td>
                                         <td className="px-6 py-4 text-center">
+                                            {user.establishment?.document_path ? (
+                                                <button
+                                                    onClick={() => handleViewDocument(user.establishment.document_path)}
+                                                    className="text-red-600 hover:text-red-800"
+                                                    title="View Document"
+                                                >
+                                                    <FaFilePdf size={18} />
+                                                </button>
+                                            ) : (
+                                                <span className="text-gray-400">No document</span>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
                                             <button 
                                                 onClick={() => handleApprove(user.id)}
                                                 className="text-green-600 hover:text-green-800"
@@ -120,7 +142,7 @@ export default function PendingValidations({ pendingValidations, filters }) {
                                     </tr>
                                 )) : (
                                     <tr>
-                                        <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
+                                        <td colSpan={8} className="px-6 py-4 text-center text-gray-500">
                                             No pending validations found.
                                         </td>
                                     </tr>
@@ -177,6 +199,13 @@ export default function PendingValidations({ pendingValidations, filters }) {
                     )}
                 </div>
             </div>
+
+            {/* PDF Viewer Modal */}
+            <PdfViewerModal
+                isOpen={!!selectedDocument}
+                onClose={() => setSelectedDocument(null)}
+                documentPath={selectedDocument}
+            />
         </AdminLayout>
     );
 } 

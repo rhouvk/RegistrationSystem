@@ -28,20 +28,14 @@ class BusinessPharmacyRegisterController extends Controller
             'role' => 'required|in:2,3', // 2 for business, 3 for pharmacy
             'representative_name' => 'required|string|max:255',
             'location' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
+            'phone' => 'required|string|max:20|unique:users',
+            'relevant_document' => 'required|file|mimes:pdf|max:10240', // Max 10MB
         ]);
 
         try {
             DB::beginTransaction();
 
-            Log::info('Creating user with data', [
-                'name' => $request->name,
-                'email' => $request->email,
-                'role' => $request->role,
-                'phone' => $request->phone
-            ]);
-
-            // Create user
+            // Create user first
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
@@ -53,11 +47,24 @@ class BusinessPharmacyRegisterController extends Controller
 
             Log::info('User created successfully', ['user_id' => $user->id]);
 
-            // Create establishment record
+            // Handle file upload only after user creation
+            $path = null;
+            if ($request->hasFile('relevant_document')) {
+                $file = $request->file('relevant_document');
+                
+                // Create a simple filename with timestamp and user ID
+                $fileName = date('YmdHis') . $user->id . '.pdf';
+                
+                // Store in private disk for sensitive documents
+                $path = $file->storeAs('documents', $fileName, 'private');
+            }
+
+            // Create establishment record with document path
             $establishment = Establishment::create([
                 'user_id' => $user->id,
                 'representative_name' => $request->representative_name,
                 'location' => $request->location,
+                'document_path' => $path,
             ]);
 
             Log::info('Establishment created successfully', ['establishment_id' => $establishment->id]);

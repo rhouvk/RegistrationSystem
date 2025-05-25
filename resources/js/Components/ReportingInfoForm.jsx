@@ -16,17 +16,19 @@ export default function ReportingInfoForm({ values, handleChange }) {
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Control No.</label>
-          <input
-            type="text"
-            name="controlNo"
-            value={values.controlNo}
-            onChange={handleChange}
-            required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          />
-        </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Control No.</label>
+        <input
+          type="text"
+          name="controlNo"
+          value={values.controlNo}
+          onChange={e => handleChange({ target: { name: 'controlNo', value: e.target.value.replace(/\D/g, '').slice(0, 6) }})}  // Limit to 6 digits and remove non-numeric characters
+          required
+          maxLength="6"  // Limit to 6 characters
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+        />
+      </div>
+
       </div>
     </div>
   );

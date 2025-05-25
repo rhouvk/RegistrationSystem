@@ -33,7 +33,7 @@ export default function PWDInfoModal({ isOpen, registration, onClose }) {
         { label: 'Province', value: registration.province?.name },
         { label: 'Region', value: registration.region?.name },
         { label: 'Landline', value: registration.landline },
-        { label: 'Mobile', value: registration.mobile },
+        { label: 'Mobile', value: registration.phone },
         { label: 'Email', value: registration.email },
       ],
     },

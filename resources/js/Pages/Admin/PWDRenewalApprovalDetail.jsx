@@ -38,7 +38,7 @@ export default function PWDRenewalApprovalDetail({ renewal, disabilityTypes, dis
     barangay_id: renewal.barangay_id || '',
     house: renewal.house || '',
     landline: renewal.landline || '',
-    mobile: renewal.mobile || '',
+    phone: renewal.phone || '',
     email: renewal.email || '',
     education: renewal.education || '',
     employmentStatus: renewal.employmentStatus || '',

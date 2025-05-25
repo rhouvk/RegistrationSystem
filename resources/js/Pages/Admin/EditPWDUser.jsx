@@ -48,7 +48,7 @@ export default function EditPWDUser({ user, disabilityTypes, disabilityCauses, r
         barangay_id: user.barangay_id || '',
         house: user.house || '',
         landline: user.landline || '',
-        mobile: user.mobile || '',
+        phone: user.phone || '',
         email: user.email || '',
         education: user.education || '',
         employmentStatus: user.employmentStatus || '',

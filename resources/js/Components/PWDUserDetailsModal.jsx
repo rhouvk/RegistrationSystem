@@ -35,7 +35,7 @@ export default function PWDUserDetailsModal({ selectedUser, closeModal }) {
         { label: 'Province', value: selectedUser.province?.name },
         { label: 'Region', value: selectedUser.region?.name },
         { label: 'Landline', value: selectedUser.landline },
-        { label: 'Mobile', value: selectedUser.mobile },
+        { label: 'Mobile', value: selectedUser.phone },
         { label: 'Email', value: selectedUser.email },
       ],
     },

@@ -13,6 +13,7 @@ class Establishment extends Model
         'user_id',
         'representative_name',
         'location',
+        'document_path',
     ];
 
     public function user()

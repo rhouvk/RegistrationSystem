@@ -38,7 +38,7 @@ export default function PWDPreregistrationApprovalDetail({ preregistration, disa
     barangay_id: preregistration.barangay_id || '',
     house: preregistration.house || '',
     landline: preregistration.landline || '',
-    mobile: preregistration.mobile || '',
+    phone: preregistration.phone || '',
     email: preregistration.email || '',
     education: preregistration.education || '',
     employmentStatus: preregistration.employmentStatus || '',

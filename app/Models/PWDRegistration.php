@@ -83,14 +83,14 @@ class PWDRegistration extends Model
         'dob'             => 'date',
     ];
 
-    protected $appends = ['email', 'mobile'];
+    protected $appends = ['email', 'phone'];
 
     public function getEmailAttribute()
     {
         return $this->user->email;
     }
 
-    public function getMobileAttribute()
+    public function getPhoneAttribute()
     {
         return $this->user->phone;
     }

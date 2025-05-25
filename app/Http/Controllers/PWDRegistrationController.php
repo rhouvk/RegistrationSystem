@@ -79,8 +79,8 @@ class PWDRegistrationController extends Controller
                     'province_id'         => 'required|exists:provinces,id',
                     'municipality_id'     => 'required|exists:municipalities,id',
                     'barangay_id'         => 'required|exists:barangays,id',
-                    'mobile'              => 'nullable|string|max:20',
-                    'email'               => 'nullable|email|max:255',
+                    'phone'              => 'nullable|string|max:20|unique:users',
+                    'email'               => 'nullable|email|max:255|unique:users',
                     'accomplishedBy'      => 'required|in:applicant,guardian,representative',
                     'accomplished_by_first_name' => 'required|string|max:255',
                     'accomplished_by_last_name'  => 'required|string|max:255',
@@ -103,7 +103,7 @@ class PWDRegistrationController extends Controller
                     $user = User::create([
                         'name'     => $fullName,
                         'email'    => $request->email,
-                        'phone'    => $request->mobile,
+                        'phone'    => $request->phone,
                         'role'     => 0,
                         'password' => $password,
                     ]);
@@ -154,7 +154,7 @@ class PWDRegistrationController extends Controller
                         'barangay_id'         => $request->barangay_id,
                         'house'               => $request->house,
                         'landline'            => $request->landline,
-                        'mobile'              => $request->mobile,
+                        'phone'              => $request->phone,
                         'email'               => $request->email,
                         'education'           => $request->education,
                         'employmentStatus'    => $request->employmentStatus,
@@ -200,7 +200,7 @@ class PWDRegistrationController extends Controller
                         $registration->update(['signature' => $sigPath]);
                     }
 
-                    return redirect()->back()->with('success', 'PWD Registered Successfully!');
+                    return redirect()->route('pwd.pwd-users.index');
                 } catch (\Exception $e) {
                     DB::rollBack();
                     \Log::error('Error in PWD registration transaction:', [

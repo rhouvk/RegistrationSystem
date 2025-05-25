@@ -37,7 +37,7 @@ export default function Register(props) {
       const response = await axios.post(route('pwd.check-duplicates'), {
         pwdNumber: values.pwdNumber,
         email: values.email,
-        phone: values.mobile,
+        phone: values.phone,
       });
   
       const data = response.data;
@@ -82,7 +82,7 @@ export default function Register(props) {
     province_id: '',
     region_id: '',
     landline: '',
-    mobile: '',
+    phone: '',
     email: '',
     education: '',
     employmentStatus: '',
@@ -173,12 +173,14 @@ export default function Register(props) {
       approving_officer_first_name: 'Approving Officer',
       encoder_first_name: 'Encoder',
       reportingUnit: 'Reporting Unit',
-      controlNo: 'Control No.'
+      controlNo: 'Control No.',
+      photo: 'Photo',
+      signature: 'Signature'
     };
 
     // Check if at least one contact method is provided
-    if (!values.email && !values.mobile) {
-      alert('Please provide either an email address or mobile number.');
+    if (!values.email && !values.phone) {
+      alert('Please provide either an email address or phone number.');
       return;
     }
 
@@ -189,6 +191,16 @@ export default function Register(props) {
 
     if (missingFields.length > 0) {
       alert(`Please fill in the following required fields:\n${missingFields.join('\n')}`);
+      return;
+    }
+
+    // Check if photo and signature are provided
+    if (!values.photo) {
+      alert('Please upload a photo.');
+      return;
+    }
+    if (!values.signature) {
+      alert('Please upload a signature.');
       return;
     }
 
@@ -231,8 +243,9 @@ export default function Register(props) {
         const el = document.querySelector(`[name="${firstErrorField}"]`);
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       },
-      onSuccess: (response) => {
-        console.log('Form submitted successfully:', response);
+      onSuccess: () => {
+        // Let the controller handle the redirection
+        console.log('Form submitted successfully');
       }
     });
   };
