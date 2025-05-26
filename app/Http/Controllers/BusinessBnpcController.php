@@ -26,6 +26,9 @@ class BusinessBnpcController extends Controller
             $userName = null;
             $isCardExpired = false;
             $validUntil = null;
+            $fatherName = null;
+            $motherName = null;
+            $guardianName = null;
 
             if ($pwdNumber !== '') {
                 $pwdUser = PWDRegistration::with('user')->where('pwdNumber', $pwdNumber)->first();
@@ -43,10 +46,17 @@ class BusinessBnpcController extends Controller
                 $validUntil = $expiryDate->toDateString();
                 $userName = $pwdUser->user->name ?? null;
 
+                $fatherName = trim(implode(' ', array_filter([$pwdUser->father_first_name, $pwdUser->father_middle_name, $pwdUser->father_last_name])));
+                $motherName = trim(implode(' ', array_filter([$pwdUser->mother_first_name, $pwdUser->mother_middle_name, $pwdUser->mother_last_name])));
+                $guardianName = trim(implode(' ', array_filter([$pwdUser->guardian_first_name, $pwdUser->guardian_middle_name, $pwdUser->guardian_last_name])));
+
                 Log::info('PWD lookup success', [
                     'user_id' => $pwdUser->user_id,
                     'expired' => $isCardExpired,
                     'valid_until' => $validUntil,
+                    'fatherName' => $fatherName ?: null,
+                    'motherName' => $motherName ?: null,
+                    'guardianName' => $guardianName ?: null,
                 ]);
             }
 
@@ -66,6 +76,9 @@ class BusinessBnpcController extends Controller
                 'isCardExpired'    => $isCardExpired,
                 'validUntil'       => $validUntil,
                 'BNPCdiscount'     => $bnpcDiscount,
+                'fatherName'       => $fatherName ?: null,
+                'motherName'       => $motherName ?: null,
+                'guardianName'     => $guardianName ?: null,
             ]);
         } catch (\Throwable $e) {
             Log::error('Error loading transaction form', [

@@ -9,7 +9,8 @@ import {
   FaMoneyBillWave,
   FaExclamationTriangle,
   FaSearch,
-  FaIdCard
+  FaIdCard,
+  FaInfoCircle,
 } from 'react-icons/fa';
 
 export default function RecordTransaction() {
@@ -25,12 +26,16 @@ export default function RecordTransaction() {
     userName = '',
     flash = {},
     errors = {},
+    fatherName = '',
+    motherName = '',
+    guardianName = '',
   } = usePage().props;
   
   const [lookupNumber, setLookupNumber] = useState('');
   const [showConfirm, setShowConfirm] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [signatureError, setSignatureError] = useState('');
+  const [showPwdInfoModal, setShowPwdInfoModal] = useState(false);
 
   const { data, setData, post, processing } = useForm({
     date_of_purchase: new Date().toISOString().substr(0, 10),
@@ -204,10 +209,16 @@ export default function RecordTransaction() {
                 <p className="text-lg font-bold text-gray-900">{pwdUser.pwdNumber}</p>
                 <p className="text-sm text-gray-500">{userName}</p>
                 <p className={`text-xs ${isCardExpired ? 'text-red-600' : 'text-green-600'}`}>
-  Valid Until: {validUntil}
-</p>
-
+                  Valid Until: {validUntil}
+                </p>
               </div>
+              <button 
+                onClick={() => setShowPwdInfoModal(true)} 
+                className="ml-auto text-gray-500 hover:text-teal-600"
+                aria-label="Show PWD Information"
+              >
+                <FaInfoCircle size={24} />
+              </button>
             </div>
 
             {/* Financial Overview */}
@@ -318,6 +329,49 @@ export default function RecordTransaction() {
           remainingBalance={data.remaining_balance}
           discount={BNPCdiscount}
         />
+        {showPwdInfoModal && (
+          <div className="fixed inset-0 bg-gradient-to-t from-cyan-950/80 to-transparent z-50 flex justify-center items-center p-4">
+            <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full space-y-4">
+              <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">PWD Information</h3>
+              
+              <div className="space-y-1">
+                <p className="text-sm text-gray-600"><strong>PWD ID:</strong> {pwdUser.pwdNumber}</p>
+                <p className="text-sm text-gray-600"><strong>Name:</strong> {userName}</p>
+                <p className={`text-sm ${isCardExpired ? 'text-red-600 font-semibold' : 'text-green-600'}`}>
+                  <strong>Valid Until:</strong> {validUntil} {isCardExpired && '(Expired)'}
+                </p>
+              </div>
+
+              {fatherName && (
+                <div className="space-y-1 border-t pt-2 mt-2">
+                  <p className="text-sm text-gray-500 font-medium">Father's Name:</p>
+                  <p className="text-sm text-gray-700">{fatherName}</p>
+                </div>
+              )}
+
+              {motherName && (
+                <div className="space-y-1 border-t pt-2 mt-2">
+                  <p className="text-sm text-gray-500 font-medium">Mother's Name:</p>
+                  <p className="text-sm text-gray-700">{motherName}</p>
+                </div>
+              )}
+
+              {guardianName && (
+                <div className="space-y-1 border-t pt-2 mt-2">
+                  <p className="text-sm text-gray-500 font-medium">Guardian's Name:</p>
+                  <p className="text-sm text-gray-700">{guardianName}</p>
+                </div>
+              )}
+              
+              <button
+                onClick={() => setShowPwdInfoModal(false)}
+                className="mt-4 w-full py-2 px-4 bg-teal-600 text-white rounded hover:bg-teal-700 text-sm font-medium"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
         <div className="block sm:hidden mt-4 px-6">
           <button
             onClick={() => window.history.back()}

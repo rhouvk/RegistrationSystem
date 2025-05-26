@@ -35,7 +35,16 @@ class PharmacyPrescriptionController extends Controller
         $years = null; // ✅ Set default so it's always defined
     
         if ($pwdNumber) {
-            $pwdUser = PWDRegistration::with('user')->where('pwdNumber', $pwdNumber)->first();
+            $pwdUser = PWDRegistration::with('user')
+                ->select([
+                    'pwd_users.*', // Select all columns from pwd_users table
+                    'users.name as user_name', // Alias user name to avoid conflict if 'name' exists in pwd_users
+                    'users.email as user_email',
+                    'users.phone as user_phone'
+                ])
+                ->join('users', 'users.id', '=', 'pwd_users.user_id') // Join with users table
+                ->where('pwdNumber', $pwdNumber)
+                ->first();
     
             if (!$pwdUser) {
                 return Redirect::route('pharmacy.prescriptions.create')
@@ -62,7 +71,7 @@ class PharmacyPrescriptionController extends Controller
         ]);
     
         return Inertia::render('Pharmacy/RecordPrescription', [
-            'pwdUser' => $pwdUser,
+            'pwdUser' => $pwdUser ? $pwdUser->toArray() : null, // Ensure pwdUser is passed as an array
             'expiryDate' => $expiryDate,
             'isExpired' => $isExpired,
         ]);

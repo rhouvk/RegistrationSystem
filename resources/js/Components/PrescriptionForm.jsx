@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { FaTrash, FaPlus } from 'react-icons/fa';
+import { FaTrash, FaPlus, FaInfoCircle } from 'react-icons/fa';
 import ConfirmPrescriptionModal from '@/Components/ConfirmPrescriptionModal';
+import FamilyInfoModal from '@/Components/FamilyInfoModal';
 
 export default function PrescriptionForm({
   data,
@@ -17,6 +18,7 @@ export default function PrescriptionForm({
   isExpired,
 }) {
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showFamilyInfo, setShowFamilyInfo] = useState(false);
 
   const handleConfirmSubmit = (e) => {
     e.preventDefault();
@@ -65,6 +67,14 @@ export default function PrescriptionForm({
             <p className="text-lg font-semibold text-gray-800">{pwdUser.user?.name || 'Unnamed PWD'}</p>
             <p className={`text-sm font-medium ${isExpired ? 'text-red-600' : 'text-green-600'}`}>Valid Until: {expiryDate}</p>
           </div>
+          <button 
+            type="button" 
+            onClick={() => setShowFamilyInfo(true)} 
+            className="ml-auto text-teal-600 hover:text-teal-700 p-2"
+            aria-label="Show family information"
+          >
+            <FaInfoCircle size={20} />
+          </button>
         </div>
 
         {isExpired && (
@@ -221,6 +231,12 @@ export default function PrescriptionForm({
           onConfirm={confirmedSubmit}
           entries={data.entries}
           processing={processing}
+        />
+
+        <FamilyInfoModal 
+          show={showFamilyInfo}
+          onClose={() => setShowFamilyInfo(false)}
+          pwdUser={pwdUser}
         />
       </div>
     </div>
