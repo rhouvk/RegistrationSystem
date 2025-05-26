@@ -249,6 +249,12 @@ export default function RenewalRequest({ registration, renewal, basedOnRenewal, 
         });
     };
 
+    // Override handleChange to prevent editing pwdNumber
+    const handleChangeNoPwdNumber = (e) => {
+        if (e.target.name === 'pwdNumber') return;
+        handleChange(e);
+    };
+
     return (
         <PWDLayout header={<h2 className="text-xl font-semibold leading-tight">Request PWD Card Renewal</h2>}>
             <Head title="Request PWD Card Renewal" />
@@ -264,10 +270,18 @@ export default function RenewalRequest({ registration, renewal, basedOnRenewal, 
                             </div>
 
                             <form onSubmit={handleSubmit} className="space-y-8">
-                                <PersonalInfoForm values={data} handleChange={handleChange} />
+                                <PersonalInfoForm values={data} handleChange={handleChangeNoPwdNumber} />
+                                <style>
+                                    {`
+                                        input[name="pwdNumber"] {
+                                        pointer-events: none;
+                                        background-color: #f3f4f6;
+                                        color: #6b7280;
+                                        }
+                                    `}
+                                    </style>
                                 <DisabilityInfoForm values={data} handleChange={handleChange} disabilityTypes={disabilityTypes} disabilityCauses={disabilityCauses} />
                                 <ResidenceAddressForm values={data} handleChange={handleChange} regions={regions} provinces={provinces} municipalities={municipalities} barangays={barangays} />
-                                <ContactDetailsForm values={data} handleChange={handleChange} />
                                 <EducationEmploymentForm values={data} handleChange={handleChange} />
                                 <OrganizationInfoForm values={data} handleChange={handleChange} />
                                 <IdReferenceForm values={data} handleChange={handleChange} />
@@ -297,4 +311,4 @@ export default function RenewalRequest({ registration, renewal, basedOnRenewal, 
             </div>
         </PWDLayout>
     );
-} 
+}

@@ -181,30 +181,35 @@ export default function PWDRenewalApprovalDetail({ renewal, disabilityTypes, dis
     });
   };
 
-  const approve = () => {
-    if (confirm('Are you sure you want to approve this renewal request?')) {
-      const formData = new FormData();
+const approve = () => {
+  const form = document.querySelector('form');
 
-      // Add all form fields to FormData
-      Object.keys(data).forEach(key => {
-        if (["photoPreview", "signaturePreview"].includes(key)) return;
-        
-        const value = data[key];
-        
-        if (value instanceof File) {
-          formData.append(key, value);
-        } 
-        else if (value !== null && value !== undefined) {
-          formData.append(key, value);
-        }
-      });
+  if (!form.checkValidity()) {
+    form.reportValidity(); // triggers browser validation UI
+    return;
+  }
 
-      // Send form data directly to approve route
-      router.post(route('admin.pwd.renewals.approve', renewal.id), formData, {
-        forceFormData: true
-      });
-    }
-  };
+  if (confirm('Are you sure you want to approve this renewal request?')) {
+    const formData = new FormData();
+
+    Object.keys(data).forEach(key => {
+      if (["photoPreview", "signaturePreview"].includes(key)) return;
+      
+      const value = data[key];
+      
+      if (value instanceof File) {
+        formData.append(key, value);
+      } else if (value !== null && value !== undefined) {
+        formData.append(key, value);
+      }
+    });
+
+    router.post(route('admin.pwd.renewals.approve', renewal.id), formData, {
+      forceFormData: true
+    });
+  }
+};
+
 
   return (
     <AdminLayout header={<h2 className="text-xl font-semibold leading-tight">PWD Renewal Request Details</h2>}>
@@ -215,6 +220,15 @@ export default function PWDRenewalApprovalDetail({ renewal, disabilityTypes, dis
             <div className="p-6">
               <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-8">
                 <PersonalInfoForm values={data} handleChange={handleChange} />
+                <style>
+                  {`
+                    input[name="pwdNumber"] {
+                      pointer-events: none;
+                      background-color: #f3f4f6;
+                      color: #6b7280;
+                    }
+                  `}
+                </style>
                 <DisabilityInfoForm values={data} handleChange={handleChange} disabilityTypes={disabilityTypes} disabilityCauses={disabilityCauses} />
                 <ResidenceAddressForm 
                   values={data} 
@@ -249,7 +263,7 @@ export default function PWDRenewalApprovalDetail({ renewal, disabilityTypes, dis
                   <button
                     type="button"
                     onClick={approve}
-                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-700 hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                   >
                     Approve
                   </button>
@@ -261,4 +275,4 @@ export default function PWDRenewalApprovalDetail({ renewal, disabilityTypes, dis
       </div>
     </AdminLayout>
   );
-} 
+}

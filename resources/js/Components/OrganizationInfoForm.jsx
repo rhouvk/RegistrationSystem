@@ -3,11 +3,10 @@
 import React from 'react';
 
 export default function OrganizationInfoForm({ values, handleChange }) {
-  // Formatter for Telephone/Landline (digits only, max 7 digits)
-  const formatTel = (val) => 
+  // Formatter for Telephone/Landline (digits only, max 9 digits)
+  const formatTel = (val) =>
     val.replace(/\D/g, '')
-    .slice(0, 9)          // Max 7 digits (e.g., 221-5678)
-  .replace(/^(\d{2})(\d{7})?/, (_, a, b) => [a, b].filter(Boolean).join('-'));
+    .slice(0, 9)     ;
 
   const handleFormattedChange = (e) => {
     const { name, value } = e.target;
@@ -29,6 +28,14 @@ export default function OrganizationInfoForm({ values, handleChange }) {
     organizationTel: 'Telephone/Landline',
   };
 
+  // Placeholder mapping
+  const placeholderMap = {
+    organizationAffiliated: 'Enter Affiliated Organization',
+    organizationContact: 'Enter Contact Person Name',
+    organizationAddress: 'Enter Office Address',
+    organizationTel: '825123457',
+  };
+
   return (
     <div>
       <h3 className="text-lg font-medium text-gray-900 mb-4">Organization Information</h3>
@@ -43,7 +50,7 @@ export default function OrganizationInfoForm({ values, handleChange }) {
               name={field}
               value={values[field]}
               onChange={handleFormattedChange}
-              placeholder={field === 'organizationTel' ? '21-3456789' : ''}
+              placeholder={placeholderMap[field] || ''}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             />
           </div>

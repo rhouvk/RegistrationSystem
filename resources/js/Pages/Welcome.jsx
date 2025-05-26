@@ -90,14 +90,14 @@ export default function Welcome({ auth }) {
                                     {auth.user ? (
                                         <Link
                                             href={route(getDashboardRoute(auth.user.role))}
-                                            className="bg-white text-teal-700 font-semibold px-3 py-1.5 lg:px-5 lg:py-2.5 rounded-lg shadow hover:bg-teal-100 transition flex-shrink-0 text-sm lg:text-lg"
+                                            className="bg-white text-teal-700 font-semibold px-3 py-1.5 lg:px-5 lg:py-1.5 rounded-lg shadow hover:bg-teal-100 transition flex-shrink-0 text-sm lg:text-lg"
                                         >
                                             Dashboard
                                         </Link>
                                     ) : (
                                         <Link
                                             href={route('login')}
-                                            className="bg-white text-teal-700 font-semibold px-3 py-1.5 lg:px-5 lg:py-2.5 rounded-lg shadow hover:bg-teal-100 transition 2xl:relative 2xl:left-24 flex-shrink-0 text-sm lg:text-lg"
+                                            className="bg-white text-teal-700 font-semibold px-3 py-1.5 lg:px-5 lg:py-1.5 rounded-lg shadow hover:bg-teal-100 transition 2xl:relative 2xl:left-24 flex-shrink-0 text-sm lg:text-lg"
                                         >
                                             Log in
                                         </Link>

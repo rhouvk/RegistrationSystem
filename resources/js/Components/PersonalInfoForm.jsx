@@ -41,7 +41,7 @@ export default function PersonalInfoForm({ values, handleChange, duplicateErrors
       <input
         type="text"
         name="pwdNumber"
-        placeholder="01-0001-001-0000001"
+        placeholder="11-2402-001-0000001"
         value={values.pwdNumber}
         onChange={handlePWDNumberChange}
         required
@@ -86,6 +86,7 @@ export default function PersonalInfoForm({ values, handleChange, duplicateErrors
               value={values[field]}
               onChange={handleNameChange}
               required={field !== 'middle_name' && field !== 'suffix'}
+              placeholder={`Enter ${label.toLowerCase()}`}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
             />
           </div>

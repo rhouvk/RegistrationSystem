@@ -22,7 +22,7 @@ export default function AccomplishedByForm({ values, handleChange }) {
 
   return (
     <div className="mt-8">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">Accomplished By</h3>
+      <h3 className="text-lg font-medium text-gray-900 mb-4">Accomplished By <span className="text-red-500">*</span></h3>
       <div className="flex flex-wrap gap-4">
         {['applicant', 'guardian', 'representative'].map((option) => (
           <label key={option} className="inline-flex items-center">
@@ -33,6 +33,7 @@ export default function AccomplishedByForm({ values, handleChange }) {
               checked={values.accomplishedBy === option}
               onChange={handleChange}
               className="form-radio"
+              required // Make the radio group required
             />
             <span className="ml-2 capitalize">{option}</span>
           </label>
@@ -47,9 +48,10 @@ export default function AccomplishedByForm({ values, handleChange }) {
               <input
                 type="text"
                 name={`accomplished_by_${part}`}
-                value={values[`accomplished_by_${part}`]}
+                value={values[`accomplished_by_${part}`] || ''} // Ensure a default empty string
                 onChange={handleChange}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                required={part !== 'middle_name'} // Make first and last name required
               />
             </div>
           ))}

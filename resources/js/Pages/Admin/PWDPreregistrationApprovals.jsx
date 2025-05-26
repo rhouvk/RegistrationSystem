@@ -74,14 +74,17 @@ export default function PWDPreregistrationApprovals({ preregistrations, filters 
                         Pending
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-center space-x-2">
-                      <button 
-                        onClick={() => router.get(route('admin.pwd.preregistrations.show', preregistration.id))}
-                        className="text-teal-700"
-                      >
-                        <FaEye size={18} />
-                      </button>
-                    </td>
+                <td className="px-6 py-4 text-center">
+                  <div className="flex justify-center items-center space-x-2">
+                    <button
+                      onClick={() => router.get(route('admin.pwd.preregistrations.show', preregistration.id))}
+                      className="text-teal-700 flex items-center space-x-1"
+                    >
+                      <span>View Form</span>
+                      <FaEye size={18} />
+                    </button>
+                  </div>
+                </td>
                   </tr>
                 )) : (
                   <tr><td colSpan={5} className="py-4 text-center text-gray-500">No pre-registration requests found.</td></tr>

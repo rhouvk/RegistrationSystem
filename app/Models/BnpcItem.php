@@ -12,6 +12,7 @@ class BnpcItem extends Model
     protected $fillable = [
         'name',
         'type',
+        'tag',
     ];
 
     

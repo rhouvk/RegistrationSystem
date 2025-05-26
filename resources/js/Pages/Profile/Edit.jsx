@@ -6,6 +6,7 @@ import PharmacyLayout from '@/Layouts/PharmacyLayout';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import DeleteUserForm from './Partials/DeleteUserForm';
+import GuestLayout from '@/Layouts/GuestLayout'; // Import GuestLayout
 
 export default function Edit({ mustVerifyEmail, status }) {
   const { auth } = usePage().props;
@@ -41,21 +42,26 @@ export default function Edit({ mustVerifyEmail, status }) {
           <div className="bg-white p-4 shadow rounded-lg sm:p-8">
             <UpdatePasswordForm className="max-w-xl" />
           </div>
-          {/* ✅ Logout Section Left-Aligned */}
-          <div className="bg-white p-4 shadow rounded-lg sm:p-6">
-  <div className="flex flex-col items-start space-y-2">
-    <span className="text-sm text-gray-600">Click below to end your session:</span>
-    <Link
-      href={route('logout')}
-      method="post"
-      as="button"
-      className="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-    >
-      Log Out
-    </Link>
-  </div>
-</div>
-
+          {/* ✅ Back to Welcome Page and Logout Section - Responsive Arrangement */}
+          <div className="bg-white p-4 shadow rounded-lg sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+            <Link
+              href={route('welcome')}
+              className="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-gray-700 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 w-full sm:w-auto justify-center sm:justify-start"
+            >
+              Back to Welcome Page
+            </Link>
+            <div className="flex flex-col items-center sm:items-end w-full sm:w-auto">
+              <span className="text-sm text-gray-600">Click below to end your session:</span>
+              <Link
+                href={route('logout')}
+                method="post"
+                as="button"
+                className="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 mt-2 w-full sm:w-auto justify-center"
+              >
+                Log Out
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </Layout>

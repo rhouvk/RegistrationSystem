@@ -55,8 +55,8 @@ class BusinessPharmacyRegisterController extends Controller
                 // Create a simple filename with timestamp and user ID
                 $fileName = date('YmdHis') . $user->id . '.pdf';
                 
-                // Store in private disk for sensitive documents
-                $path = $file->storeAs('documents', $fileName, 'private');
+                // Store in public disk for documents
+                $path = $file->storeAs('documents', $fileName, 'public');
             }
 
             // Create establishment record with document path

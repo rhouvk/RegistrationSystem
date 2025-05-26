@@ -10,6 +10,7 @@ export default function AdminControls({ control, bnpcItems = [], disabilityItems
   const { data, setData, put, processing, errors } = useForm({
     password: '',
     purchaseLimit: control?.purchaseLimit || '',
+    BNPCdiscount: control?.BNPCdiscount || '',
     cardExpiration: control?.cardExpiration || '',
   });
 
@@ -56,6 +57,16 @@ export default function AdminControls({ control, bnpcItems = [], disabilityItems
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:border-blue-300"
                 />
                 {errors.purchaseLimit && <div className="text-red-500 mt-1">{errors.purchaseLimit}</div>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">BNPC Discount (%)</label>
+                <input
+                  type="number"
+                  value={data.BNPCdiscount}
+                  onChange={(e) => setData('BNPCdiscount', e.target.value)}
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:border-blue-300"
+                />
+                {errors.BNPCdiscount && <div className="text-red-500 mt-1">{errors.BNPCdiscount}</div>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Card Expiration (Years)</label>

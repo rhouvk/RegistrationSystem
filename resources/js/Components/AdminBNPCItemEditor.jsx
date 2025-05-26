@@ -7,6 +7,7 @@ export default function AdminBNPCItemEditor({ items: initialItems }) {
   const { data, setData, post, put, delete: del, processing, errors } = useForm({
     id: null,
     name: '',
+    tag: '',
     type: 'Basic Necessities',
   });
 
@@ -21,7 +22,7 @@ export default function AdminBNPCItemEditor({ items: initialItems }) {
   }, [initialItems]);
 
   function openCreate() {
-    setData({ id: null, name: '', type: 'Basic Necessities' });
+    setData({ id: null, name: '', tag: '', type: 'Basic Necessities' });
     setShowModal(true);
   }
 
@@ -99,6 +100,7 @@ export default function AdminBNPCItemEditor({ items: initialItems }) {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-4 py-2 text-left">Name</th>
+              <th className="px-4 py-2 text-left">Tag</th>
               <th className="px-4 py-2 text-left">Type</th>
               <th className="px-4 py-2 text-center">Actions</th>
             </tr>
@@ -107,6 +109,7 @@ export default function AdminBNPCItemEditor({ items: initialItems }) {
             {currentItems.map(item => (
               <tr key={item.id} className="hover:bg-gray-50">
                 <td className="px-4 py-2">{item.name}</td>
+                <td className="px-4 py-2">{item.tag}</td>
                 <td className="px-4 py-2">{item.type}</td>
                 <td className="px-4 py-2 text-center space-x-2">
                   <button onClick={() => openEdit(item)} className="p-2 bg-teal-400 text-white rounded hover:bg-teal-500">
@@ -171,6 +174,17 @@ export default function AdminBNPCItemEditor({ items: initialItems }) {
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:border-cyan-300"
                 />
                 {errors.name && <div className="text-red-500 mt-1">{errors.name}</div>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Tag</label>
+                <input
+                  type="text"
+                  value={data.tag}
+                  onChange={e => setData('tag', e.target.value)}
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:border-cyan-300"
+                  placeholder="Enter a short identifier"
+                />
+                {errors.tag && <div className="text-red-500 mt-1">{errors.tag}</div>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Type</label>

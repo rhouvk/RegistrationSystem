@@ -76,6 +76,7 @@ export default function ResidenceAddressForm({ values, handleChange, regions, pr
           value={values.house}
           onChange={handleChange}
           required
+          placeholder="123 Main Street"
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500"
         />
       </div>

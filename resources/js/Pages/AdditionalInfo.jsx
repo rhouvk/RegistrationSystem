@@ -52,6 +52,9 @@ export default function AdditionalInfo({ initialData, disabilityTypes = [], disa
         signaturePreview: null,
     });
 
+    const [localErrors, setLocalErrors] = useState({});
+    const [formTouched, setFormTouched] = useState(false);
+
     const handleChangeFile = (e) => {
         const { name, files } = e.target;
         const file = files[0];
@@ -64,7 +67,22 @@ export default function AdditionalInfo({ initialData, disabilityTypes = [], disa
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        
+        setFormTouched(true); // Mark form as touched
+
+        let newErrors = {};
+        if (!data.photo) newErrors.photo = 'Photo is required.';
+        if (!data.signature) newErrors.signature = 'Signature is required.';
+
+        setLocalErrors(newErrors);
+
+        if (Object.keys(newErrors).length > 0) {
+            // Scroll to the first missing field
+            const firstErrorField = Object.keys(newErrors)[0];
+            const el = document.querySelector(`[name="${firstErrorField}"]`);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+
         const formData = new FormData();
         for (const key in data) {
             if (!['photo', 'signature', 'photoPreview', 'signaturePreview'].includes(key)) {
@@ -164,14 +182,14 @@ export default function AdditionalInfo({ initialData, disabilityTypes = [], disa
                                     <PhotoSignatureUpload
                                         values={data}
                                         handleChangeFile={handleChangeFile}
-                                        errors={errors}
+                                        errors={formTouched ? { ...errors, ...localErrors } : errors}
                                     />
 
                                     <div className="flex justify-end">
                                         <button
                                             type="submit"
                                             disabled={processing}
-                                            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50"
+                                            className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50"
                                         >
                                             Submit Registration
                                         </button>
@@ -184,4 +202,4 @@ export default function AdditionalInfo({ initialData, disabilityTypes = [], disa
             </div>
         </>
     );
-} 
+}

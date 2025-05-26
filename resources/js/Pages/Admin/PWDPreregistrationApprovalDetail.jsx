@@ -155,30 +155,33 @@ export default function PWDPreregistrationApprovalDetail({ preregistration, disa
     }
   };
 
-  const approve = () => {
-    if (confirm('Are you sure you want to approve this pre-registration request?')) {
-      const formData = new FormData();
+const approve = () => {
+  const form = document.querySelector('form');
 
-      // Add all form fields to FormData
-      Object.keys(data).forEach(key => {
-        if (["photoPreview", "signaturePreview"].includes(key)) return;
-        
-        const value = data[key];
-        
-        if (value instanceof File) {
-          formData.append(key, value);
-        } 
-        else if (value !== null && value !== undefined) {
-          formData.append(key, value);
-        }
-      });
+  if (!form.checkValidity()) {
+    form.reportValidity(); // shows browser's built-in validation messages
+    return;
+  }
 
-      // Send form data directly to approve route
-      router.post(route('admin.pwd.preregistrations.approve', preregistration.id), formData, {
-        forceFormData: true
-      });
-    }
-  };
+  if (confirm('Are you sure you want to approve this pre-registration request?')) {
+    const formData = new FormData();
+
+    Object.keys(data).forEach(key => {
+      if (["photoPreview", "signaturePreview"].includes(key)) return;
+      const value = data[key];
+      if (value instanceof File) {
+        formData.append(key, value);
+      } else if (value !== null && value !== undefined) {
+        formData.append(key, value);
+      }
+    });
+
+    router.post(route('admin.pwd.preregistrations.approve', preregistration.id), formData, {
+      forceFormData: true
+    });
+  }
+};
+
 
   return (
     <AdminLayout header={<h2 className="text-xl font-semibold leading-tight">PWD Pre-registration Request Details</h2>}>
@@ -223,7 +226,7 @@ export default function PWDPreregistrationApprovalDetail({ preregistration, disa
                   <button
                     type="button"
                     onClick={approve}
-                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-700 hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                   >
                     Approve
                   </button>

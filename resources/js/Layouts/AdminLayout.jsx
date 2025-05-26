@@ -4,6 +4,7 @@ import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import { FaHome, FaUsers, FaUserPlus, FaHistory, FaClipboardList, FaStore, FaCheckCircle } from 'react-icons/fa';
 
 export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
@@ -26,112 +27,119 @@ export default function AuthenticatedLayout({ header, children }) {
                                     href={route('admin.dashboard')}
                                     active={route().current('admin.dashboard')}
                                 >
+                                    <FaHome className="inline-block mr-2" />
                                     Dashboard
                                 </NavLink>
                                 {user && (
                                     <>
+                                        <div className="hidden sm:ms-6 sm:flex sm:items-center">
+                                            <div className="relative ms-3">
+                                                <Dropdown>
+                                                    <Dropdown.Trigger>
+                                                        <span className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-700">
+                                                            <FaUsers className="inline-block mr-2" />
+                                                            PWD Management
+                                                            <svg
+                                                                className="ms-1 h-4 w-4"
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                fill="none"
+                                                                viewBox="0 0 24 24"
+                                                                stroke="currentColor"
+                                                            >
+                                                                <path
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                    strokeWidth="2"
+                                                                    d="M19 9l-7 7-7-7"
+                                                                />
+                                                            </svg>
+                                                        </span>
+                                                    </Dropdown.Trigger>
 
+                                                    <Dropdown.Content align="left" width="48">
+                                                        <Dropdown.Link
+                                                            href={route('pwd.pwd-users.index')}
+                                                            active={route().current('pwd.pwd-users.index')}
+                                                        >
+                                                            <FaUsers className="inline-block mr-2" />
+                                                            Users
+                                                        </Dropdown.Link>
+                                                        <Dropdown.Link
+                                                            href={route('pwd.register')}
+                                                            active={route().current('pwd.register')}
+                                                        >
+                                                            <FaUserPlus className="inline-block mr-2" />
+                                                            Registration
+                                                        </Dropdown.Link>
+                                                        <Dropdown.Link
+                                                            href={route('admin.pwd.renewals.index')}
+                                                            active={route().current('admin.pwd.renewals.index')}
+                                                        >
+                                                            <FaHistory className="inline-block mr-2" />
+                                                            Renewals
+                                                        </Dropdown.Link>
+                                                        <Dropdown.Link
+                                                            href={route('admin.pwd.preregistrations.index')}
+                                                            active={route().current('admin.pwd.preregistrations.index')}
+                                                        >
+                                                            <FaClipboardList className="inline-block mr-2" />
+                                                            Pre-registrations
+                                                        </Dropdown.Link>
+                                                    </Dropdown.Content>
+                                                </Dropdown>
+                                            </div>
+                                        </div>
 
-                        <div className="hidden sm:ms-6 sm:flex sm:items-center">
-                            <div className="relative ms-3">
-                                    <Dropdown>
-                                <Dropdown.Trigger>
-                                    <span className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-700">
-                                        PWD Management
-                                        <svg
-                                            className="ms-1 h-4 w-4"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth="2"
-                                                d="M19 9l-7 7-7-7"
-                                            />
-                                        </svg>
-                                    </span>
-                                </Dropdown.Trigger>
+                                        <div className="hidden sm:ms-6 sm:flex sm:items-center">
+                                            <div className="relative ms-3">
+                                                <Dropdown>
+                                                    <Dropdown.Trigger>
+                                                        <span className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-700">
+                                                            <FaStore className="inline-block mr-2" />
+                                                            Pharmacy/Business
+                                                            <svg
+                                                                className="ms-1 h-4 w-4"
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                fill="none"
+                                                                viewBox="0 0 24 24"
+                                                                stroke="currentColor"
+                                                            >
+                                                                <path
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                    strokeWidth="2"
+                                                                    d="M19 9l-7 7-7-7"
+                                                                />
+                                                            </svg>
+                                                        </span>
+                                                    </Dropdown.Trigger>
 
-                                <Dropdown.Content align="left" width="48">
-                                    <Dropdown.Link
-                                        href={route('pwd.pwd-users.index')}
-                                        active={route().current('pwd.pwd-users.index')}
-                                    >
-                                        Users
-                                    </Dropdown.Link>
-                                    <Dropdown.Link
-                                        href={route('pwd.register')}
-                                        active={route().current('pwd.register')}
-                                    >
-                                        Registration
-                                    </Dropdown.Link>
-                                    <Dropdown.Link
-                                        href={route('admin.pwd.renewals.index')}
-                                        active={route().current('admin.pwd.renewals.index')}
-                                    >
-                                        Renewals
-                                    </Dropdown.Link>
-                                    <Dropdown.Link
-                                        href={route('admin.pwd.preregistrations.index')}
-                                        active={route().current('admin.pwd.preregistrations.index')}
-                                    >
-                                        Pre-registrations
-                                    </Dropdown.Link>
-                                </Dropdown.Content>
-                            </Dropdown>
-                            </div>
-                        </div>
-
-                                                <div className="hidden sm:ms-6 sm:flex sm:items-center">
-                            <div className="relative ms-3">
-                                    <Dropdown>
-                                <Dropdown.Trigger>
-                                    <span className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-700">
-                                        Pharmacy/Business
-                                        <svg
-                                            className="ms-1 h-4 w-4"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth="2"
-                                                d="M19 9l-7 7-7-7"
-                                            />
-                                        </svg>
-                                    </span>
-                                </Dropdown.Trigger>
-
-                                <Dropdown.Content align="left" width="48">
-                                    <Dropdown.Link
-                                        href={route('admin.business-pharmacy.index')}
-                                        active={route().current('admin.business-pharmacy.index')}
-                                    >
-                                        Users
-                                    </Dropdown.Link>
-                                    <Dropdown.Link
-                                            href={route('register.bp.view')}
-                                            active={route().current('register.bp.view')}
-                                    >
-                                        Register
-                                    </Dropdown.Link>
-                                    <Dropdown.Link
-                                            href={route('admin.validations.index')}
-                                            active={route().current('admin.validations.index')}
-                                    >
-                                        Approval
-                                    </Dropdown.Link>
-                                </Dropdown.Content>
-                            </Dropdown>
-                            </div>
-                        </div>
-
+                                                    <Dropdown.Content align="left" width="48">
+                                                        <Dropdown.Link
+                                                            href={route('admin.business-pharmacy.index')}
+                                                            active={route().current('admin.business-pharmacy.index')}
+                                                        >
+                                                            <FaUsers className="inline-block mr-2" />
+                                                            Users
+                                                        </Dropdown.Link>
+                                                        <Dropdown.Link
+                                                                href={route('register.bp.view')}
+                                                                active={route().current('register.bp.view')}
+                                                        >
+                                                            <FaStore className="inline-block mr-2" />
+                                                            Register
+                                                        </Dropdown.Link>
+                                                        <Dropdown.Link
+                                                                href={route('admin.validations.index')}
+                                                                active={route().current('admin.validations.index')}
+                                                        >
+                                                            <FaCheckCircle className="inline-block mr-2" />
+                                                            Approval
+                                                        </Dropdown.Link>
+                                                    </Dropdown.Content>
+                                                </Dropdown>
+                                            </div>
+                                        </div>
                                     </>
                                 )}
                             </div>
@@ -210,33 +218,68 @@ export default function AuthenticatedLayout({ header, children }) {
                             href={route('admin.dashboard')}
                             active={route().current('admin.dashboard')}
                         >
+                            <FaHome className="inline-block mr-2" />
                             Dashboard
                         </ResponsiveNavLink>
                         {user && (
                             <>
+                                <div className="px-4 py-2 text-sm font-medium text-gray-500 flex items-center">
+                                    <FaUsers className="inline-block mr-2" />
+                                    PWD Management
+                                </div>
                                 <ResponsiveNavLink
                                     href={route('pwd.pwd-users.index')}
                                     active={route().current('pwd.pwd-users.index')}
                                 >
-                                    PWD Users
+                                    <FaUsers className="inline-block mr-2" />
+                                    Users
                                 </ResponsiveNavLink>
                                 <ResponsiveNavLink
                                     href={route('pwd.register')}
                                     active={route().current('pwd.register')}
                                 >
-                                    Register
-                                </ResponsiveNavLink>
-                                <ResponsiveNavLink
-                                    href={route('register.bp.view')}
-                                    active={route().current('register.bp.view')}
-                                >
-                                    Register B/P
+                                    <FaUserPlus className="inline-block mr-2" />
+                                    Registration
                                 </ResponsiveNavLink>
                                 <ResponsiveNavLink
                                     href={route('admin.pwd.renewals.index')}
                                     active={route().current('admin.pwd.renewals.index')}
                                 >
-                                    PWD Renewals
+                                    <FaHistory className="inline-block mr-2" />
+                                    Renewals
+                                </ResponsiveNavLink>
+                                <ResponsiveNavLink
+                                    href={route('admin.pwd.preregistrations.index')}
+                                    active={route().current('admin.pwd.preregistrations.index')}
+                                >
+                                    <FaClipboardList className="inline-block mr-2" />
+                                    Pre-registrations
+                                </ResponsiveNavLink>
+
+                                <div className="px-4 py-2 text-sm font-medium text-gray-500 flex items-center">
+                                    <FaStore className="inline-block mr-2" />
+                                    Pharmacy/Business
+                                </div>
+                                <ResponsiveNavLink
+                                    href={route('admin.business-pharmacy.index')}
+                                    active={route().current('admin.business-pharmacy.index')}
+                                >
+                                    <FaUsers className="inline-block mr-2" />
+                                    Users
+                                </ResponsiveNavLink>
+                                <ResponsiveNavLink
+                                    href={route('register.bp.view')}
+                                    active={route().current('register.bp.view')}
+                                >
+                                    <FaStore className="inline-block mr-2" />
+                                    Register
+                                </ResponsiveNavLink>
+                                <ResponsiveNavLink
+                                    href={route('admin.validations.index')}
+                                    active={route().current('admin.validations.index')}
+                                >
+                                    <FaCheckCircle className="inline-block mr-2" />
+                                    Approval
                                 </ResponsiveNavLink>
                             </>
                         )}

@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 
-export default function PhotoSignatureUpload({ values, handleChangeFile: handleParentChangeFile }) {
+export default function PhotoSignatureUpload({ values, handleChangeFile: handleParentChangeFile, errors = {} }) {
   const signatureCanvasRef = useRef(null);
   const [signatureDataUrl, setSignatureDataUrl] = useState(values.signaturePreview || null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -213,8 +213,10 @@ export default function PhotoSignatureUpload({ values, handleChangeFile: handleP
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
         {/* Photo Upload */}
-        <div className="flex flex-col items-start space-y-2">
-          <label className="block text-sm font-medium text-gray-700">Photo</label>
+        <div className="flex flex-col items-start space-y-2 w-full">
+          <label className="block text-sm font-medium text-gray-700">
+            Photo <span className="text-red-500">*</span>
+          </label>
           <label className="cursor-pointer inline-flex items-center px-3 py-2 bg-sky-600 text-white text-xs font-medium rounded hover:bg-sky-700">
             Choose Photo
             <input
@@ -225,18 +227,25 @@ export default function PhotoSignatureUpload({ values, handleChangeFile: handleP
               className="hidden"
             />
           </label>
+          {errors.photo && (
+            <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-2 rounded text-xs w-full" role="alert">
+              {errors.photo}
+            </div>
+          )}
           {values.photo && (
             <img
               src={getPhotoUrl()}
               alt="Photo Preview"
-              className="mt-2 w-[250px] h-[250px] rounded object-cover border"
+              className={`mt-2 w-[250px] h-[250px] rounded object-cover border ${errors.photo ? 'border-red-500' : 'border'}`}
             />
           )}
         </div>
 
         {/* Signature Upload */}
-        <div className="flex flex-col items-start space-y-2">
-          <label className="block text-sm font-medium text-gray-700">Signature</label>
+        <div className="flex flex-col items-start space-y-2 w-full">
+          <label className="block text-sm font-medium text-gray-700">
+            Signature <span className="text-red-500">*</span>
+          </label>
           <button
             type="button"
             onClick={() => setShowModal(true)}
@@ -244,16 +253,24 @@ export default function PhotoSignatureUpload({ values, handleChangeFile: handleP
           >
             {signatureDataUrl ? 'Edit Signature' : 'Draw Signature'}
           </button>
+          {errors.signature && (
+            <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-2 rounded text-xs w-full" role="alert">
+              {errors.signature}
+            </div>
+          )}
           {signatureDataUrl && (
             <img
               src={signatureDataUrl}
               alt="Signature Preview"
-              className="mt-2 h-[40px] w-auto rounded border bg-white"
+              className={`mt-2 h-[40px] w-auto rounded border bg-white ${errors.signature ? 'border-red-500' : 'border'}`}
             />
           )}
         </div>
 
       </div>
+
+      {/* Hidden input for signature to allow scroll-to-error */}
+      <input type="hidden" name="signature" value={signatureDataUrl ? '1' : ''} />
 
       {/* Modal for Drawing Signature */}
       {showModal && (

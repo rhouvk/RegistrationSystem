@@ -38,6 +38,7 @@ class AdminControlController extends Controller
     {
         $validatedData = $request->validate([
             'purchaseLimit'  => 'required|integer',
+            'BNPCdiscount'   => 'required|integer|min:0|max:100',
             'cardExpiration' => 'required|integer',
         ]);
 

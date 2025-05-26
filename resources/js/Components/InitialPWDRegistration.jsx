@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useForm, Link } from '@inertiajs/react';
+import RequiredDocumentsModal from './RequiredDocumentsModal';
 
 export default function InitialPWDRegistration() {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -16,6 +17,15 @@ export default function InitialPWDRegistration() {
         password: '',
         password_confirmation: '',
     });
+
+    const capitalizeFirstLetter = (value) => {
+        if (!value) return value;
+        return value.charAt(0).toUpperCase() + value.slice(1);
+    };
+
+    const handleNameChange = (field, value) => {
+        setData(field, capitalizeFirstLetter(value));
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -55,6 +65,7 @@ export default function InitialPWDRegistration() {
                                             name="email"
                                             type="email"
                                             value={data.email}
+                                            placeholder="juandelacruz@email.com"
                                             onChange={e => setData('email', e.target.value)}
                                             className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
                                         />
@@ -72,6 +83,7 @@ export default function InitialPWDRegistration() {
                                         name="phone"
                                         type="tel"
                                         required
+                                        placeholder="09XXXXXXXXX"
                                         maxLength="11"  // This limits the input to 11 digits
                                         value={data.phone}
                                         onChange={e => setData('phone', e.target.value.replace(/\D/g, '').slice(0, 11))}  // Removes non-digit characters and limits to 11 digits
@@ -94,6 +106,7 @@ export default function InitialPWDRegistration() {
                                             required
                                             value={data.password}
                                             onChange={e => setData('password', e.target.value)}
+                                            placeholder="Enter your password"
                                             className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
                                         />
                                         {errors.password && <div className="text-red-500 text-sm mt-1">{errors.password}</div>}
@@ -112,6 +125,7 @@ export default function InitialPWDRegistration() {
                                             required
                                             value={data.password_confirmation}
                                             onChange={e => setData('password_confirmation', e.target.value)}
+                                            placeholder="Confirm your password"
                                             className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
                                         />
                                         {errors.password_confirmation && <div className="text-red-500 text-sm mt-1">{errors.password_confirmation}</div>}
@@ -134,7 +148,8 @@ export default function InitialPWDRegistration() {
                                             type="text"
                                             required
                                             value={data.first_name}
-                                            onChange={e => setData('first_name', e.target.value)}
+                                            onChange={e => handleNameChange('first_name', e.target.value)}
+                                            placeholder="Juan"
                                             className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
                                         />
                                         {errors.first_name && <div className="text-red-500 text-sm mt-1">{errors.first_name}</div>}
@@ -151,7 +166,8 @@ export default function InitialPWDRegistration() {
                                             name="middle_name"
                                             type="text"
                                             value={data.middle_name}
-                                            onChange={e => setData('middle_name', e.target.value)}
+                                            onChange={e => handleNameChange('middle_name', e.target.value)}
+                                            placeholder="Santos"
                                             className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
                                         />
                                         {errors.middle_name && <div className="text-red-500 text-sm mt-1">{errors.middle_name}</div>}
@@ -169,7 +185,8 @@ export default function InitialPWDRegistration() {
                                             type="text"
                                             required
                                             value={data.last_name}
-                                            onChange={e => setData('last_name', e.target.value)}
+                                            onChange={e => handleNameChange('last_name', e.target.value)}
+                                            placeholder="Dela Cruz"
                                             className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
                                         />
                                         {errors.last_name && <div className="text-red-500 text-sm mt-1">{errors.last_name}</div>}
@@ -187,6 +204,7 @@ export default function InitialPWDRegistration() {
                                             type="text"
                                             value={data.suffix}
                                             onChange={e => setData('suffix', e.target.value)}
+                                            placeholder="e.g. Jr, II, III, IV"
                                             className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
                                         />
                                         {errors.suffix && <div className="text-red-500 text-sm mt-1">{errors.suffix}</div>}
@@ -289,67 +307,10 @@ export default function InitialPWDRegistration() {
                 </div>
             </div>
 
-            {/* What to Bring Modal */}
-            {isModalOpen && (
-                <div className="fixed inset-0 z-50 overflow-y-auto">
-                    <div className="flex items-center justify-center min-h-screen px-4">
-                        {/* Modal Backdrop */}
-                        <div 
-                            className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
-                            onClick={() => setIsModalOpen(false)}
-                        ></div>
-
-                        {/* Modal Content */}
-                        <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 my-8">
-                            <div className="bg-gradient-to-r from-teal-600 to-cyan-600 rounded-t-lg px-6 py-4">
-                                <h3 className="text-xl font-semibold text-white">Required Documents</h3>
-                            </div>
-
-                            <div className="p-6 space-y-6">
-                                <div className="space-y-4">
-                                    {/* Basic Requirements */}
-                                    <div>
-                                        <h4 className="text-lg font-medium text-gray-900 mb-2">Basic Requirements</h4>
-                                        <ul className="list-disc pl-5 space-y-2 text-gray-700">
-                                            <li>Barangay Certificate</li>
-                                            <li>Birth Certificate or Any Valid ID</li>
-                                        </ul>
-                                    </div>
-
-                                    {/* Apparent Disabilities */}
-                                    <div>
-                                        <h4 className="text-lg font-medium text-gray-900 mb-2">For Apparent Disabilities</h4>
-                                        <p className="text-sm text-gray-600 italic mb-2">(Disabilities that are visible or easily noticeable)</p>
-                                        <ul className="list-disc pl-5 space-y-2 text-gray-700">
-                                            <li>Certificate of Disability (Duly signed by a Registered Social Worker with License Number)</li>
-                                        </ul>
-                                    </div>
-
-                                    {/* Non-Apparent Disabilities */}
-                                    <div>
-                                        <h4 className="text-lg font-medium text-gray-900 mb-2">For Non-Apparent Disabilities</h4>
-                                        <p className="text-sm text-gray-600 italic mb-2">(Disabilities that are not immediately visible and require medical diagnosis)</p>
-                                        <ul className="list-disc pl-5 space-y-2 text-gray-700">
-                                            <li>Medical Certificate (Duly signed by a Medical Doctor with License Number)</li>
-                                            <li>Certificate of Disability (Duly signed by a Medical Doctor with License Number)</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="bg-gray-50 px-6 py-4 rounded-b-lg flex justify-end">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsModalOpen(false)}
-                                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors duration-200"
-                                >
-                                    Close
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <RequiredDocumentsModal 
+                isOpen={isModalOpen} 
+                onClose={() => setIsModalOpen(false)} 
+            />
         </div>
     );
 } 

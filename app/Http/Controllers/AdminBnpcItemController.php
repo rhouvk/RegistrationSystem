@@ -14,6 +14,7 @@ class AdminBnpcItemController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'tag'  => 'required|string|max:50|unique:bnpc_items',
             'type' => 'required|in:Basic Necessities,Prime Commodities',
         ]);
 
@@ -32,6 +33,7 @@ class AdminBnpcItemController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'tag'  => 'required|string|max:50|unique:bnpc_items,tag,' . $id,
             'type' => 'required|in:Basic Necessities,Prime Commodities',
         ]);
 
