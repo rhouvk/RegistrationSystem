@@ -95,6 +95,34 @@ class PWDUserController extends Controller
             $pwdUser = PWDRegistration::with('user')->findOrFail($id);
             $user = $pwdUser->user;
 
+            // Check for duplicates (excluding current user)
+            if ($request->pwdNumber !== $pwdUser->pwdNumber) {
+                $duplicatePWD = PWDRegistration::where('pwdNumber', $request->pwdNumber)
+                    ->where('id', '!=', $id)
+                    ->exists();
+                if ($duplicatePWD) {
+                    return back()->withErrors(['pwdNumber' => 'This PWD number is already in use.']);
+                }
+            }
+
+            if ($request->email !== $user->email) {
+                $duplicateEmail = User::where('email', $request->email)
+                    ->where('id', '!=', $user->id)
+                    ->exists();
+                if ($duplicateEmail) {
+                    return back()->withErrors(['email' => 'This email is already in use.']);
+                }
+            }
+
+            if ($request->phone !== $user->phone) {
+                $duplicatePhone = User::where('phone', $request->phone)
+                    ->where('id', '!=', $user->id)
+                    ->exists();
+                if ($duplicatePhone) {
+                    return back()->withErrors(['phone' => 'This phone number is already in use.']);
+                }
+            }
+
             // Create validation rules array
             $rules = [
                 'pwdNumber' => 'required|string|unique:pwd_users,pwdNumber,' . $id,

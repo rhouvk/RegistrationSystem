@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Head, useForm } from '@inertiajs/react';
 import { Inertia } from '@inertiajs/inertia';
 import AdminLayout from '@/Layouts/AdminLayout';
+import axios from 'axios';
 
 // Import the form components
 import PersonalInfoForm from '@/Components/PersonalInfoForm';
@@ -22,6 +23,8 @@ export default function EditPWDUser({ user, disabilityTypes, disabilityCauses, r
     const [provinces, setProvinces] = useState(initialProvinces);
     const [municipalities, setMunicipalities] = useState(initialMunicipalities);
     const [barangays, setBarangays] = useState(initialBarangays);
+    const [duplicateErrors, setDuplicateErrors] = useState({});
+    const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
 
     // Format dates for input fields
     const formatDate = (dateString) => {
@@ -151,9 +154,41 @@ export default function EditPWDUser({ user, disabilityTypes, disabilityCauses, r
         }
     };
 
-    const handleChange = (e) => {
-        const { name, value, type, checked } = e.target;
+    const checkDuplicates = async (field, value) => {
+        try {
+            const response = await axios.post(route('pwd.check-duplicates'), {
+                [field]: value,
+                currentId: user.id // Send current user ID to exclude from duplicate check
+            });
+
+            const data = response.data;
+            if (data[field]) {
+                setDuplicateErrors(prev => ({ ...prev, [field]: data[field] }));
+                if (field === 'pwdNumber') {
+                    setShowDuplicateWarning(true);
+                }
+                return true; // Duplicate found
+            } else {
+                setDuplicateErrors(prev => ({ ...prev, [field]: null }));
+                if (field === 'pwdNumber') {
+                    setShowDuplicateWarning(false);
+                }
+                return false; // No duplicate
+            }
+        } catch (err) {
+            console.error('Error checking duplicates:', err);
+            return false;
+        }
+    };
+
+    const handleChange = async (e) => {
+        const { name, value } = e.target;
         setData(name, value);
+
+        // Check for duplicates when these fields change
+        if (['pwdNumber', 'email', 'phone'].includes(name) && value !== user[name]) {
+            await checkDuplicates(name, value);
+        }
     };
 
     const handleChangeFile = (e) => {
@@ -166,8 +201,28 @@ export default function EditPWDUser({ user, disabilityTypes, disabilityCauses, r
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Check for duplicates before submitting
+        let hasDuplicates = false;
+        
+        // Only check if the values have changed from the original
+        if (data.pwdNumber !== user.pwdNumber) {
+            hasDuplicates = await checkDuplicates('pwdNumber', data.pwdNumber) || hasDuplicates;
+        }
+        if (data.email !== user.email) {
+            hasDuplicates = await checkDuplicates('email', data.email) || hasDuplicates;
+        }
+        if (data.phone !== user.phone) {
+            hasDuplicates = await checkDuplicates('phone', data.phone) || hasDuplicates;
+        }
+
+        if (hasDuplicates) {
+            alert('Please fix the duplicate entries before submitting.');
+            return;
+        }
+
         const formData = new FormData();
 
         // Log the data before processing
@@ -223,13 +278,28 @@ export default function EditPWDUser({ user, disabilityTypes, disabilityCauses, r
             <Head title="Edit PWD User" />
             <div className="py-12">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                    {showDuplicateWarning && (
+                        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded relative" role="alert">
+                            <strong className="font-bold">Warning! </strong>
+                            <span className="block sm:inline">This PWD number already exists in the system.</span>
+                        </div>
+                    )}
+
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <div className="p-6">
                             <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-8">
-                                <PersonalInfoForm values={data} handleChange={handleChange} />
+                                <PersonalInfoForm 
+                                    values={data} 
+                                    handleChange={handleChange} 
+                                    duplicateErrors={duplicateErrors}
+                                />
                                 <DisabilityInfoForm values={data} handleChange={handleChange} disabilityTypes={disabilityTypes} disabilityCauses={disabilityCauses} />
                                 <ResidenceAddressForm values={data} handleChange={handleChange} regions={regions} provinces={provinces} municipalities={municipalities} barangays={barangays} />
-                                <ContactDetailsForm values={data} handleChange={handleChange} />
+                                <ContactDetailsForm 
+                                    values={data} 
+                                    handleChange={handleChange}
+                                    duplicateErrors={duplicateErrors}
+                                />
                                 <EducationEmploymentForm values={data} handleChange={handleChange} />
                                 <OrganizationInfoForm values={data} handleChange={handleChange} />
                                 <IdReferenceForm values={data} handleChange={handleChange} />

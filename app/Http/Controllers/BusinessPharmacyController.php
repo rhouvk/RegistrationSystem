@@ -16,12 +16,20 @@ class BusinessPharmacyController extends Controller
         $search = $request->input('search');
         $roleFilter = $request->input('role');
 
-        $query = User::with('establishment')
-            ->whereIn('role', [2, 3]) // 2 for Business, 3 for Pharmacy
+        // Base query for counts and main data, respecting the is_validated condition
+        $baseQuery = User::whereIn('role', [2, 3]) // 2 for Business, 3 for Pharmacy
             ->where(function($q) {
                 $q->whereNull('is_validated')
                   ->orWhere('is_validated', '!=', 3);
             });
+
+        // Calculate totals
+        $totalBusinesses = (clone $baseQuery)->where('role', 2)->count();
+        $totalPharmacies = (clone $baseQuery)->where('role', 3)->count();
+        $totalCombined = $totalBusinesses + $totalPharmacies;
+
+        // Main query for paginated data
+        $query = (clone $baseQuery)->with('establishment');
 
         if ($roleFilter) {
             $query->where('role', $roleFilter);
@@ -41,11 +49,14 @@ class BusinessPharmacyController extends Controller
 
         $businesses = $query->orderBy('id', 'desc')
             ->paginate($perPage)
-            ->appends(['search' => $search, 'role' => $roleFilter]);
+            ->appends(['search' => $search, 'role' => $roleFilter, 'perPage' => $perPage]);
 
         return Inertia::render('Admin/BusinessPharmacyUsers', [
             'businesses' => $businesses,
             'filters' => $request->only(['search', 'perPage', 'role']),
+            'totalBusinesses' => $totalBusinesses,
+            'totalPharmacies' => $totalPharmacies,
+            'totalCombined' => $totalCombined,
         ]);
     }
 

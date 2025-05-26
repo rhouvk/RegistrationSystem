@@ -15,6 +15,8 @@ use App\Models\Region;
 use App\Models\Province;
 use App\Models\Municipality;
 use App\Models\Barangay;
+use Illuminate\Validation\Rule;
+use App\Models\User;
 
 class PWDPreregistrationApprovalController extends Controller
 {
@@ -48,6 +50,32 @@ class PWDPreregistrationApprovalController extends Controller
     public function approve(Request $request, PWDRenewalAndPreregistration $preregistration)
     {
         try {
+            // Validate unique fields
+            $request->validate([
+                'pwdNumber' => [
+                    'required',
+                    Rule::unique('pwd_users', 'pwdNumber'),
+                ],
+                'email' => [
+                    'required',
+                    'email',
+                    Rule::unique('users', 'email')->whereNot('id', $preregistration->user_id),
+                ],
+                'phone' => [
+                    'required',
+                    'regex:/^(09|\+639)\d{9}$/',  // Validates PH mobile number format
+                    Rule::unique('users', 'phone')->whereNot('id', $preregistration->user_id),
+                ],
+            ], [
+                'pwdNumber.unique' => 'This PWD number is already registered in the system.',
+                'email.unique' => 'This email address is already registered.',
+                'phone.unique' => 'This phone number is already registered.',
+                'phone.required' => 'Mobile number is required.',
+                'phone.regex' => 'Please enter a valid Philippine mobile number (e.g., 09XXXXXXXXX or +639XXXXXXXXX).',
+                'email.required' => 'Email address is required.',
+                'email.email' => 'Please enter a valid email address.',
+            ]);
+
             DB::beginTransaction();
 
             // Create new PWD registration
@@ -128,6 +156,7 @@ class PWDPreregistrationApprovalController extends Controller
             $preregistration->user->update([
                 'name' => $request->first_name . ' ' . $request->middle_name . ' ' . $request->last_name . ' ' . $request->suffix,
                 'email' => $request->email,
+                'phone' => $request->phone,
                 'is_validated' => 1,
             ]);
 
@@ -136,6 +165,9 @@ class PWDPreregistrationApprovalController extends Controller
             return redirect()->route('admin.pwd.preregistrations.index')
                 ->with('success', 'Pre-registration request approved successfully.');
 
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Failed to approve pre-registration request', [
@@ -172,5 +204,39 @@ class PWDPreregistrationApprovalController extends Controller
 
             return back()->withErrors(['error' => 'Failed to reject pre-registration request. Please try again.']);
         }
+    }
+
+    // Add a new method to check for duplicates
+    public function checkDuplicates(Request $request)
+    {
+        $field = array_key_first($request->except('currentId'));
+        $value = $request->get($field);
+        $currentId = $request->get('currentId');
+
+        $errors = [];
+
+        switch ($field) {
+            case 'pwdNumber':
+                if (PWDRegistration::where('pwdNumber', $value)->exists()) {
+                    $errors[$field] = 'This PWD number already exists in the system.';
+                }
+                break;
+
+            case 'email':
+            case 'phone':
+                // Check in users table, excluding the current user
+                if (User::where($field, $value)
+                    ->whereNot('id', function($query) use ($currentId) {
+                        $query->select('user_id')
+                            ->from('pwd_renewals_and_preregistrations')
+                            ->where('id', $currentId);
+                    })
+                    ->exists()) {
+                    $errors[$field] = "This {$field} is already registered.";
+                }
+                break;
+        }
+
+        return response()->json($errors);
     }
 } 

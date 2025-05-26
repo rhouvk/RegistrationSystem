@@ -3,6 +3,7 @@ import { Head, usePage, Link, router } from '@inertiajs/react';
 import PWDCardModal from '@/Components/PWDCardModal';
 import PWDInfoModal from '@/Components/PWDInfoModal';
 import RenewalRequirementsModal from '@/Components/RenewalRequirementsModal';
+import KnowYourRightsModal from '@/Components/KnowYourRightsModal';
 import PWDLayout from '@/Layouts/PWDLayout';
 import {
     FaPiggyBank,
@@ -11,6 +12,7 @@ import {
     FaInfoCircle,
     FaSpinner,
     FaCrown,
+    FaBookOpen,
 } from 'react-icons/fa';
 
 export default function PWDDashboard() {
@@ -37,6 +39,7 @@ export default function PWDDashboard() {
     const [cardLoading, setCardLoading] = useState(false);
     const [cardUrl, setCardUrl] = useState(null);
     const [isRequirementsOpen, setRequirementsOpen] = useState(false);
+    const [isKnowYourRightsOpen, setKnowYourRightsOpen] = useState(false);
 
     const appliedDate = new Date(registration.dateApplied);
     const expiryDate = new Date(registration.dateApplied);
@@ -319,7 +322,7 @@ export default function PWDDashboard() {
                             className="flex-1 inline-flex items-center justify-center gap-2 bg-sky-600 hover:bg-sky-700 text-white py-2 rounded-md transition" 
                         >
                             {cardLoading ? <FaSpinner className="animate-spin" /> : <FaIdCard />}
-                            View / Download My PWD Card
+                            Download My PWD Card
                         </button>
                         <button
                             onClick={() => setInfoOpen(true)}
@@ -327,6 +330,13 @@ export default function PWDDashboard() {
                         >
                             <FaInfoCircle className="text-lg" />
                             More Info
+                        </button>
+                        <button
+                            onClick={() => setKnowYourRightsOpen(true)}
+                            className="flex-1 inline-flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white py-2 rounded-md transition"
+                        >
+                            <FaBookOpen className="text-lg" />
+                            Know Your Rights
                         </button>
                     </div>
 
@@ -348,6 +358,10 @@ export default function PWDDashboard() {
                     <RenewalRequirementsModal
                         isOpen={isRequirementsOpen}
                         onClose={() => setRequirementsOpen(false)}
+                    />
+                    <KnowYourRightsModal
+                        isOpen={isKnowYourRightsOpen}
+                        onClose={() => setKnowYourRightsOpen(false)}
                     />
                 </div>
             </div>

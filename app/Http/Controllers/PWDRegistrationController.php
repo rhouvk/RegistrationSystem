@@ -226,17 +226,23 @@ class PWDRegistrationController extends Controller
     
 
     public function checkDuplicates(Request $request)
-{
-    $pwdExists = \App\Models\PWDRegistration::where('pwdNumber', $request->pwdNumber)->exists();
-    $emailExists = \App\Models\User::where('email', $request->email)->exists();
-    $phoneExists = \App\Models\User::where('phone', $request->phone)->exists();
+    {
+        $pwdRegistration = null;
+        if ($request->pwdNumber) {
+            $pwdRegistration = PWDRegistration::where('pwdNumber', $request->pwdNumber)->first();
+        }
 
-    return response()->json([
-        'pwdNumber' => PWDRegistration::where('pwdNumber', $request->pwdNumber)->exists() ? 'PWD number already exists.' : null,
-        'email'     => User::where('email', $request->email)->exists() ? 'Email already exists.' : null,
-        'phone'     => User::where('phone', $request->phone)->exists() ? 'Phone number already exists.' : null,
-    ]);
-}
+        return response()->json([
+            'pwdNumber' => $pwdRegistration ? 'PWD number already exists.' : null,
+            'email'     => $request->email && User::where('email', $request->email)->exists() ? 'Email already exists.' : null,
+            'phone'     => $request->phone && User::where('phone', $request->phone)->exists() ? 'Phone number already exists.' : null,
+            'pwdDetails' => $pwdRegistration ? [
+                'name' => $pwdRegistration->first_name . ' ' . $pwdRegistration->last_name,
+                'dateApplied' => $pwdRegistration->dateApplied,
+                'pwdNumber' => $pwdRegistration->pwdNumber
+            ] : null
+        ]);
+    }
 
     
     

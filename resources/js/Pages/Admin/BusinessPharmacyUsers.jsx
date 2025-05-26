@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Head, usePage, router } from '@inertiajs/react';
-import { FaEdit } from 'react-icons/fa';
+import { FaEdit, FaBuilding, FaStore, FaUsers } from 'react-icons/fa';
 import AdminLayout from '@/Layouts/AdminLayout';
 
-export default function BusinessPharmacyUsers({ businesses, filters }) {
+export default function BusinessPharmacyUsers({ businesses, filters, totalBusinesses, totalPharmacies, totalCombined }) {
     const [search, setSearch] = useState(filters.search || '');
     const [entriesPerPage, setEntriesPerPage] = useState(filters.perPage || 10);
     const [roleFilter, setRoleFilter] = useState(filters.role || '');
@@ -47,6 +47,37 @@ export default function BusinessPharmacyUsers({ businesses, filters }) {
             <Head title="Business & Pharmacy Users" />
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
+                    {/* Stats Panels */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div className="bg-gradient-to-br from-sky-500 to-sky-700 p-6 rounded-lg shadow-lg text-white">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-medium uppercase tracking-wider">Total Businesses</p>
+                                    <p className="text-3xl font-semibold">{totalBusinesses}</p>
+                                </div>
+                                <FaBuilding size={40} className="opacity-75" />
+                            </div>
+                        </div>
+                        <div className="bg-gradient-to-br from-teal-500 to-teal-700 p-6 rounded-lg shadow-lg text-white">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-medium uppercase tracking-wider">Total Pharmacies</p>
+                                    <p className="text-3xl font-semibold">{totalPharmacies}</p>
+                                </div>
+                                <FaStore size={40} className="opacity-75" />
+                            </div>
+                        </div>
+                        <div className="bg-gradient-to-br from-cyan-500 to-cyan-700 p-6 rounded-lg shadow-lg text-white">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-medium uppercase tracking-wider">Combined Total</p>
+                                    <p className="text-3xl font-semibold">{totalCombined}</p>
+                                </div>
+                                <FaUsers size={40} className="opacity-75" />
+                            </div>
+                        </div>
+                    </div>
+
                     {/* Filters */}
                     <div className="mb-4 flex flex-col sm:flex-row justify-between items-center gap-4">
                         <input

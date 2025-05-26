@@ -290,4 +290,8 @@ Route::get('/register/pharmacy', function () {
     return Inertia::render('RegisterPharmacy');
 })->name('register.pharmacy');
 
+// Add route for checking duplicates
+Route::post('/check-duplicates', [PWDPreregistrationApprovalController::class, 'checkDuplicates'])
+    ->name('pwd.check-duplicates');
+
 require __DIR__ . '/auth.php';

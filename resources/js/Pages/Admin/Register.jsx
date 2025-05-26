@@ -30,31 +30,8 @@ export default function Register(props) {
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   const [duplicateErrors, setDuplicateErrors] = useState({});
-
-  // ✅ Check duplicates before submitting
-  const checkDuplicates = async () => {
-    try {
-      const response = await axios.post(route('pwd.check-duplicates'), {
-        pwdNumber: values.pwdNumber,
-        email: values.email,
-        phone: values.phone,
-      });
-  
-      const data = response.data;
-  
-      if (data.pwdNumber || data.email || data.phone) {
-        setDuplicateErrors(data);
-        return false;
-      }
-  
-      setDuplicateErrors({});
-      return true;
-    } catch (err) {
-      console.error('Error checking duplicates:', err);
-      return false;
-    }
-  };
-
+  const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
+  const [duplicateDetails, setDuplicateDetails] = useState(null);
 
   // Safe default values even if backend not sending yet
   const regions = props.regions ?? [];
@@ -146,6 +123,28 @@ export default function Register(props) {
       }));
     } else {
       setValues((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handlePWDNumberChange = async (e) => {
+    const { name, value } = e.target;
+    setValues(prev => ({ ...prev, [name]: value }));
+    
+    // Check for duplicates when PWD number changes
+    if (name === 'pwdNumber' && value) {
+      const response = await axios.post(route('pwd.check-duplicates'), {
+        pwdNumber: value
+      });
+      
+      if (response.data.pwdNumber) {
+        setDuplicateErrors(prev => ({ ...prev, pwdNumber: response.data.pwdNumber }));
+        setShowDuplicateWarning(true);
+        setDuplicateDetails(response.data.pwdDetails);
+      } else {
+        setDuplicateErrors(prev => ({ ...prev, pwdNumber: null }));
+        setShowDuplicateWarning(false);
+        setDuplicateDetails(null);
+      }
     }
   };
 
@@ -265,6 +264,34 @@ export default function Register(props) {
     }
   };
 
+  const checkDuplicates = async () => {
+    try {
+      const response = await axios.post(route('pwd.check-duplicates'), {
+        pwdNumber: values.pwdNumber,
+        email: values.email,
+        phone: values.phone,
+      });
+  
+      const data = response.data;
+  
+      if (data.pwdNumber || data.email || data.phone) {
+        setDuplicateErrors(data);
+        if (data.pwdNumber) {
+          setShowDuplicateWarning(true);
+          setDuplicateDetails(data.pwdDetails);
+        }
+        return false;
+      }
+  
+      setDuplicateErrors({});
+      setShowDuplicateWarning(false);
+      return true;
+    } catch (err) {
+      console.error('Error checking duplicates:', err);
+      return false;
+    }
+  };
+
   return (
     <AdminLayout
       header={<h2 className="text-xl font-semibold leading-tight">PWD Registration</h2>}
@@ -273,12 +300,21 @@ export default function Register(props) {
       
       <div className="py-12">
         <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+          {showDuplicateWarning && (
+            <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded relative" role="alert">
+              <strong className="font-bold">Warning! </strong>
+              <span className="block sm:inline">This PWD number already exists in the system.</span>
+            </div>
+          )}
+
           <div className="bg-white p-6 shadow-sm sm:rounded-lg">
-          <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-8">
-
-
-              {/* Form Parts */}
-              <PersonalInfoForm values={values} handleChange={handleChange} duplicateErrors={duplicateErrors} />
+            <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-8">
+              {/* Update PersonalInfoForm to use handlePWDNumberChange */}
+              <PersonalInfoForm 
+                values={values} 
+                handleChange={handlePWDNumberChange} 
+                duplicateErrors={duplicateErrors} 
+              />
               <DisabilityInfoForm values={values} handleChange={handleChange} disabilityTypes={disabilityTypes} disabilityCauses={disabilityCauses} />
               <ResidenceAddressForm values={values} handleChange={handleChange} regions={regions} provinces={provinces} municipalities={municipalities} barangays={barangays} />
               <ContactDetailsForm values={values} handleChange={handleChange} duplicateErrors={duplicateErrors} />
@@ -292,18 +328,15 @@ export default function Register(props) {
               <ReportingInfoForm values={values} handleChange={handleChange} />
               <PhotoSignatureUpload values={values} handleChangeFile={handleChangeFile} />
 
-
               {/* Submit Button */}
               <div className="flex justify-end">
-              <button
-                type="submit"
-                className="inline-flex items-center px-6 py-2 border border-transparent rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none"
-              >
-                Submit Registration
-              </button>
-            </div>
-
-
+                <button
+                  type="submit"
+                  className="inline-flex items-center px-6 py-2 border border-transparent rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none"
+                >
+                  Submit Registration
+                </button>
+              </div>
             </form>
           </div>
         </div>

@@ -51,6 +51,7 @@ export default function DownloadDashboardPDF({
     doc.setFontSize(10);
     doc.setTextColor(100);
     doc.text(`Generated: ${dateGenerated}`, logoWidth + 20, 25);
+    doc.text("Prepared by: PDAO", pageWidth - 14, 25, { align: 'right' });
 
     // Main summary table - adjust starting Y position to accommodate logo
     autoTable(doc, {
