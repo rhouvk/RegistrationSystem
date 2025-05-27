@@ -46,8 +46,12 @@ class PWDDashboardController extends Controller
         $expiryDate = Carbon::parse($baseDate)->addYears($cardExpiration);
         $isExpired = now()->greaterThan($expiryDate);
 
-        // If card is expired and no pending renewal exists, allow new renewal
-        $canRenew = $isExpired && !$hasPendingRenewal;
+        // Check if it's within 3 months of expiry
+        $threeMonthsBeforeExpiryDate = $expiryDate->copy()->subMonths(3);
+        $isWithinThreeMonthsOfExpiry = now()->greaterThanOrEqualTo($threeMonthsBeforeExpiryDate) && now()->lessThan($expiryDate);
+
+        // Allow renewal if (expired OR within 3 months of expiry) AND no pending renewal exists
+        $canRenew = ($isExpired || $isWithinThreeMonthsOfExpiry) && !$hasPendingRenewal;
 
         $startOfWeek = Carbon::now()->startOfWeek(Carbon::MONDAY);
         $endOfWeek = Carbon::now()->endOfWeek(Carbon::SUNDAY);

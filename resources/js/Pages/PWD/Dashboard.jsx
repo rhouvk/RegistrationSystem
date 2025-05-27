@@ -29,6 +29,9 @@ export default function PWDDashboard() {
         registrations = [],
         hasPendingRenewal,
         lastApprovedRenewal,
+        expiryDate: expiryDateString,
+        isExpired: isExpiredBackend,
+        canRenew: canRenewBackend,
     } = usePage().props;
 
     const user = auth?.user || {};
@@ -42,9 +45,9 @@ export default function PWDDashboard() {
     const [isKnowYourRightsOpen, setKnowYourRightsOpen] = useState(false);
 
     const appliedDate = new Date(registration.dateApplied);
-    const expiryDate = new Date(registration.dateApplied);
-    expiryDate.setFullYear(expiryDate.getFullYear() + parseInt(cardExpiration, 10));
-    const isExpired = new Date() > expiryDate;
+    const expiryDate = new Date(expiryDateString);
+    const isExpired = isExpiredBackend;
+    const canRenew = canRenewBackend;
 
     const isPremium = !!subscription;
     const subscriptionExpiry = subscription?.ends_at;
@@ -217,6 +220,11 @@ export default function PWDDashboard() {
                                 ⚠️ This PWD card has <strong>expired</strong>. Please request a renewal below.
                             </div>
                         )}
+                        {!isExpired && canRenew && (
+                            <div className="mb-4 p-3 bg-yellow-100 text-yellow-800 border border-yellow-300 rounded">
+                                ⚠️ Your PWD card is expiring soon. You can request a renewal now.
+                            </div>
+                        )}
 
                         <table className="w-full text-sm text-gray-700">
                             <tbody>
@@ -234,8 +242,8 @@ export default function PWDDashboard() {
                         </table>
                     </div>
 
-                    {/* Renewal Panel - Only shows when card is expired or has pending renewals */}
-                    {(isExpired || (registration.renewals && registration.renewals.some(renewal => renewal.registration_type === 2))) && (
+                    {/* Renewal Panel - Shows if user can renew or has pending renewals */}
+                    {(canRenew || hasPendingRenewal) && (
                         <div className="bg-white shadow rounded-md p-6">
                             <div className="flex justify-between items-center mb-4">
                                 <h4 className="text-lg text-cyan-950 font-semibold">Renewal of PWD Card</h4>
@@ -248,10 +256,12 @@ export default function PWDDashboard() {
                                 </button>
                             </div>
 
-                            {isExpired && !hasPendingRenewal && (
+                            {canRenew && !hasPendingRenewal && (
                                 <div className="mt-4 text-center py-4">
                                     <p className="text-gray-600 mb-4">
-                                        Your PWD card has expired. You can request a renewal by clicking the button below.
+                                        {isExpired
+                                            ? "Your PWD card has expired. You can request a renewal by clicking the button below."
+                                            : "Your PWD card is expiring soon. You can request a renewal by clicking the button below."}
                                         We'll use your existing information to process your renewal request.
                                     </p>
                                     <a

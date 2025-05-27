@@ -10,7 +10,7 @@ export default function FamilyInfoModal({ show, onClose, pwdUser }) {
   const guardianName = [pwdUser.guardian_first_name, pwdUser.guardian_middle_name, pwdUser.guardian_last_name].filter(Boolean).join(' ');
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-gradient-to-t from-cyan-950/80 to-transparent overflow-y-auto h-full w-full flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md mx-auto">
         <div className="flex justify-between items-center pb-3">
           <h3 className="text-xl font-semibold text-gray-900">Additional PWD Information</h3>
